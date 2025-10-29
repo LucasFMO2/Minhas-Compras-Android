@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Minha Lista de Compras</string>
+    <string name="home_title">Lista de Compras</string>
+    <string name="add_item">Adicionar Item</string>
+    <string name="item_name_hint">Nome do item</string>
+    <string name="quantity_hint">Quantidade</string>
+    <string name="category_hint">Categoria</string>
+    <string name="add">Adicionar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="delete">Excluir</string>
+    <string name="edit">Editar</string>
+    <string name="item_comprado">Comprado</string>
+    <string name="item_pendente">Pendente</string>
+    <string name="empty_list">Sua lista está vazia!\nToque no + para adicionar itens.</string>
+    <string name="total_items">Total: %d itens</string>
+    <string name="comprados_count">Comprados: %d</string>
+    <string name="pendentes_count">Pendentes: %d</string>
+</resources>

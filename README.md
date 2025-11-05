@@ -1,87 +1,77 @@
-# 📱 Minha Lista de Compras
+# 🛒 Minhas Compras
 
-Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, desenvolvido com Jetpack Compose e Material Design 3.
+Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, desenvolvido com Kotlin e Jetpack Compose.
 
 ## ✨ Funcionalidades
 
-- ✅ **Gerenciamento completo de itens**
-  - Adicionar novos itens
-  - Editar itens existentes
-  - Remover itens
-  - Marcar como comprado/pendente
+- ✅ **Adicionar itens** - Crie itens com nome e quantidade
+- 🎯 **Marcar como comprado** - Marque itens como comprados com um simples toque
+- 📊 **Estatísticas** - Visualize total de itens, pendentes e comprados
+- 📈 **Barra de progresso** - Acompanhe seu progresso de compras
+- 🗑️ **Deletar itens** - Remova itens individuais ou limpe todos os comprados
+- 💾 **Persistência local** - Seus dados são salvos localmente no dispositivo
+- 🎨 **Interface moderna** - Design Material 3 com animações suaves
 
-- 📊 **Estatísticas em tempo real**
-  - Total de itens
-  - Itens comprados
-  - Itens pendentes
+## 🛠️ Tecnologias
 
-- 🎨 **Interface moderna**
-  - Material Design 3
-  - Interface responsiva
-  - Animações suaves
-  - Tema adaptativo
+- **Kotlin** - Linguagem de programação
+- **Jetpack Compose** - Framework de UI declarativa
+- **Room Database** - Persistência de dados local
+- **ViewModel** - Gerenciamento de estado
+- **Material Design 3** - Design system moderno
+- **Coroutines** - Programação assíncrona
 
-- 📝 **Informações detalhadas**
-  - Nome do item
-  - Quantidade
-  - Categoria
-  - Status de compra
+## 📱 Requisitos
 
-## 🚀 Tecnologias
+- Android 7.0 (API 24) ou superior
+- Android Studio Hedgehog ou superior
 
-- **Kotlin** - Linguagem principal
-- **Jetpack Compose** - Framework de UI
-- **Material Design 3** - Sistema de design
-- **Android SDK 24+** - Compatibilidade
+## 🚀 Como usar
 
-## 📱 Compatibilidade
+1. Clone o repositório:
+```bash
+git clone https://github.com/nerddescoladofmo-cmyk/minhalistadecompras.git
+```
 
-- **Android 7.0+** (API 24+)
-- **Target SDK 36** (Android 14)
+2. Abra o projeto no Android Studio
 
-## 🏗️ Estrutura do Projeto
+3. Sincronize o Gradle e aguarde o download das dependências
+
+4. Execute o app em um emulador ou dispositivo físico
+
+## 📦 Estrutura do Projeto
 
 ```
 app/
-├── src/main/java/com/example/minhalistadecompras/
-│   ├── data/
-│   │   └── ItemCompra.kt          # Modelo de dados
-│   ├── ui/theme/                  # Tema e cores
-│   └── MainActivity.kt            # Activity principal
-├── src/main/res/
-│   └── values/
-│       └── strings.xml            # Strings em português
-└── build.gradle.kts               # Configurações do módulo
+├── src/
+│   ├── main/
+│   │   ├── java/com/example/minhascompras/
+│   │   │   ├── data/           # Modelos, DAO e Database
+│   │   │   ├── ui/
+│   │   │   │   ├── components/ # Componentes reutilizáveis
+│   │   │   │   ├── screens/    # Telas da aplicação
+│   │   │   │   ├── theme/      # Temas e cores
+│   │   │   │   └── viewmodel/  # ViewModels
+│   │   │   └── MainActivity.kt
+│   │   └── res/                # Recursos (strings, imagens, etc)
 ```
 
-## 🎯 Como Usar
+## 🎨 Componentes Principais
 
-1. **Adicionar item**: Toque no botão + (flutuante)
-2. **Editar item**: Toque no ícone de edição no item
-3. **Remover item**: Toque no ícone de lixeira no item
-4. **Marcar como comprado**: Toque no checkbox do item
-
-## 📋 Dados de Exemplo
-
-O aplicativo inclui itens de exemplo para demonstração:
-- Leite, Pão, Ovos, Arroz, Feijão, Banana, Maçã, Frango
-
-## 🔮 Próximas Funcionalidades
-
-- [ ] Persistência de dados com Room Database
-- [ ] Categorias personalizáveis
-- [ ] Filtros e busca
-- [ ] Ordenação de itens
-- [ ] Compartilhamento de listas
-- [ ] Notificações e lembretes
-- [ ] Backup e sincronização
-- [ ] Temas personalizáveis
+- **ListaComprasScreen** - Tela principal com lista de itens
+- **ItemCompraCard** - Card individual para cada item
+- **AdicionarItemDialog** - Diálogo para adicionar novos itens
+- **EstadoVazioScreen** - Tela exibida quando não há itens
+- **StatisticCard** - Card de estatísticas
 
 ## 📄 Licença
 
-Este projeto é privado e proprietário.
+Este projeto está disponível para uso pessoal e educacional.
+
+## 👨‍💻 Desenvolvido por
+
+Projeto desenvolvido como exemplo de aplicativo Android moderno com as melhores práticas.
 
 ---
 
-**Versão**: 1.0.0  
-**Última atualização**: Dezembro 2024
+⭐ Se este projeto foi útil para você, considere dar uma estrela!

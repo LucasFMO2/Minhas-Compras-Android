@@ -9,6 +9,7 @@ data class ItemCompra(
     val id: Long = 0,
     val nome: String,
     val quantidade: Int = 1,
+    val preco: Double? = null,
     val comprado: Boolean = false,
     val dataCriacao: Long = System.currentTimeMillis()
 )

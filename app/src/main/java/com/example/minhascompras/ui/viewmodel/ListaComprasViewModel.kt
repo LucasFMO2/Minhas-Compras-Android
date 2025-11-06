@@ -18,10 +18,10 @@ class ListaComprasViewModel(private val repository: ItemCompraRepository) : View
             initialValue = emptyList()
         )
 
-    fun inserirItem(nome: String, quantidade: Int = 1) {
+    fun inserirItem(nome: String, quantidade: Int = 1, preco: Double? = null) {
         if (nome.isNotBlank()) {
             viewModelScope.launch {
-                repository.insert(ItemCompra(nome = nome.trim(), quantidade = quantidade))
+                repository.insert(ItemCompra(nome = nome.trim(), quantidade = quantidade, preco = preco))
             }
         }
     }

@@ -19,11 +19,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.minhascompras.data.ItemCompra
-import com.example.minhascompras.ui.components.ItemCompraCard
 import com.example.minhascompras.ui.components.AdicionarItemDialog
 import com.example.minhascompras.ui.components.EstadoVazioScreen
+import com.example.minhascompras.ui.components.ItemCompraCard
 import com.example.minhascompras.ui.components.StatisticCard
 import com.example.minhascompras.ui.viewmodel.ListaComprasViewModel
+import java.text.NumberFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,12 +36,20 @@ fun ListaComprasScreen(
     val itens by viewModel.itens.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var itemParaEditar by remember { mutableStateOf<ItemCompra?>(null) }
 
+    val formatador = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
     val totalItens = itens.size
     val itensComprados = itens.count { it.comprado }
     val itensPendentes = totalItens - itensComprados
     val temItensComprados = itensComprados > 0
     val progresso = if (totalItens > 0) itensComprados.toFloat() / totalItens else 0f
+    
+    // Calcular totais de preços
+    val totalGeral = itens.sumOf { (it.preco ?: 0.0) * it.quantidade }
+    val totalComprados = itens.filter { it.comprado }.sumOf { (it.preco ?: 0.0) * it.quantidade }
+    val totalPendentes = itens.filter { !it.comprado }.sumOf { (it.preco ?: 0.0) * it.quantidade }
+    val temPrecos = itens.any { it.preco != null && it.preco > 0 }
 
     Scaffold(
         topBar = {
@@ -122,6 +132,34 @@ fun ListaComprasScreen(
                             color = MaterialTheme.colorScheme.primary
                         )
                     }
+                    
+                    // Estatísticas de preços (se houver preços)
+                    if (temPrecos) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            StatisticCard(
+                                label = "Total Geral",
+                                value = formatador.format(totalGeral),
+                                modifier = Modifier.weight(1f),
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                            StatisticCard(
+                                label = "Pendentes",
+                                value = formatador.format(totalPendentes),
+                                modifier = Modifier.weight(1f),
+                                color = MaterialTheme.colorScheme.tertiary
+                            )
+                            StatisticCard(
+                                label = "Comprados",
+                                value = formatador.format(totalComprados),
+                                modifier = Modifier.weight(1f),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
 
                     // Barra de progresso
                     if (totalItens > 0) {
@@ -201,7 +239,8 @@ fun ListaComprasScreen(
                             ItemCompraCard(
                                 item = item,
                                 onToggleComprado = { viewModel.toggleComprado(item) },
-                                onDelete = { viewModel.deletarItem(item) }
+                                onDelete = { viewModel.deletarItem(item) },
+                                onEdit = { itemParaEditar = item }
                             )
                         }
                     }
@@ -210,13 +249,30 @@ fun ListaComprasScreen(
         }
     }
 
-    if (showDialog) {
+    if (showDialog || itemParaEditar != null) {
         AdicionarItemDialog(
-            onDismiss = { showDialog = false },
-            onConfirm = { nome, quantidade ->
-                viewModel.inserirItem(nome, quantidade)
+            onDismiss = { 
                 showDialog = false
-            }
+                itemParaEditar = null
+            },
+            onConfirm = { nome, quantidade, preco ->
+                if (itemParaEditar != null) {
+                    // Editar item existente
+                    viewModel.atualizarItem(
+                        itemParaEditar!!.copy(
+                            nome = nome,
+                            quantidade = quantidade,
+                            preco = preco
+                        )
+                    )
+                    itemParaEditar = null
+                } else {
+                    // Adicionar novo item
+                    viewModel.inserirItem(nome, quantidade, preco)
+                    showDialog = false
+                }
+            },
+            itemEdicao = itemParaEditar
         )
     }
 

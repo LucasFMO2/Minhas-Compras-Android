@@ -8,15 +8,24 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.minhascompras.data.ItemCompra
 
 @Composable
 fun AdicionarItemDialog(
     onDismiss: () -> Unit,
-    onConfirm: (String, Int) -> Unit,
+    onConfirm: (String, Int, Double?) -> Unit,
+    itemEdicao: ItemCompra? = null,
     modifier: Modifier = Modifier
 ) {
-    var nomeItem by remember { mutableStateOf("") }
-    var quantidade by remember { mutableStateOf("1") }
+    var nomeItem by remember { mutableStateOf(itemEdicao?.nome ?: "") }
+    var quantidade by remember { mutableStateOf(itemEdicao?.quantidade?.toString() ?: "1") }
+    var preco by remember { mutableStateOf(itemEdicao?.preco?.toString() ?: "") }
+    
+    LaunchedEffect(itemEdicao) {
+        nomeItem = itemEdicao?.nome ?: ""
+        quantidade = itemEdicao?.quantidade?.toString() ?: "1"
+        preco = itemEdicao?.preco?.toString() ?: ""
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -30,7 +39,7 @@ fun AdicionarItemDialog(
         },
         title = { 
             Text(
-                "Adicionar Item",
+                if (itemEdicao != null) "Editar Item" else "Adicionar Item",
                 fontWeight = FontWeight.Bold
             ) 
         },
@@ -58,39 +67,69 @@ fun AdicionarItemDialog(
                         focusedLabelColor = MaterialTheme.colorScheme.primary
                     )
                 )
-                OutlinedTextField(
-                    value = quantidade,
-                    onValueChange = { if (it.all { char -> char.isDigit() && it.length <= 3 }) quantidade = it },
-                    label = { Text("Quantidade") },
-                    placeholder = { Text("1") },
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        focusedLabelColor = MaterialTheme.colorScheme.primary
-                    ),
-                    supportingText = {
-                        Text(
-                            "Digite a quantidade desejada",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                )
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedTextField(
+                        value = quantidade,
+                        onValueChange = { if (it.all { char -> char.isDigit() && it.length <= 3 }) quantidade = it },
+                        label = { Text("Quantidade") },
+                        placeholder = { Text("1") },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary
+                        ),
+                        supportingText = {
+                            Text(
+                                "Digite a quantidade",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    )
+                    OutlinedTextField(
+                        value = preco,
+                        onValueChange = { 
+                            val filtered = it.filter { char -> char.isDigit() || char == '.' || char == ',' }
+                            preco = filtered.replace(',', '.')
+                        },
+                        label = { Text("Preço (R$)") },
+                        placeholder = { Text("0.00") },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary
+                        ),
+                        supportingText = {
+                            Text(
+                                "Opcional",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    )
+                }
             }
         },
         confirmButton = {
             Button(
                 onClick = {
                     val qty = quantidade.toIntOrNull()?.takeIf { it > 0 } ?: 1
+                    val precoValue = preco.toDoubleOrNull()?.takeIf { it >= 0 }
                     if (nomeItem.isNotBlank()) {
-                        onConfirm(nomeItem.trim(), qty)
-                        nomeItem = ""
-                        quantidade = "1"
+                        onConfirm(nomeItem.trim(), qty, precoValue)
+                        if (itemEdicao == null) {
+                            nomeItem = ""
+                            quantidade = "1"
+                            preco = ""
+                        }
                     }
                 },
                 enabled = nomeItem.isNotBlank()
             ) {
-                Text("Adicionar")
+                Text(if (itemEdicao != null) "Salvar" else "Adicionar")
             }
         },
         dismissButton = {

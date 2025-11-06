@@ -2,6 +2,14 @@
 
 Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, desenvolvido com Kotlin e Jetpack Compose.
 
+## 📥 Download
+
+**[⬇️ Baixar APK v1.0](https://github.com/nerddescoladofmo-cmyk/Minhas-Compras-Android/releases/download/v1.0/MinhasCompras-v1.0-release.apk)**
+
+📱 **Instalação:** Baixe o APK e instale no seu dispositivo Android. Certifique-se de permitir instalação de fontes desconhecidas nas configurações de segurança.
+
+🔗 **[Ver todas as releases](https://github.com/nerddescoladofmo-cmyk/Minhas-Compras-Android/releases)**
+
 ## ✨ Funcionalidades
 
 - ✅ **Adicionar itens** - Crie itens com nome e quantidade
@@ -30,7 +38,7 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 
 1. Clone o repositório:
 ```bash
-git clone https://github.com/nerddescoladofmo-cmyk/minhalistadecompras.git
+git clone https://github.com/nerddescoladofmo-cmyk/Minhas-Compras-Android.git
 ```
 
 2. Abra o projeto no Android Studio

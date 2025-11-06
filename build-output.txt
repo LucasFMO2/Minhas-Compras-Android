@@ -1,0 +1,14 @@
+﻿.\gradlew : Warning: SDK processing. This version only understands SDK XML versions up to 3 but an 
+SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio 
+and the command-line tools that were released at different times.
+No linha:1 caractere:1
++ .\gradlew assembleDebug 2>&1 | Out-File -FilePath build-output.txt -E ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Warning: SDK pr...ifferent times.:String) [], RemoteE 
+   xception
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:checkKotlinGradlePluginConfigurationErrors

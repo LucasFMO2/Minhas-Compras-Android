@@ -230,6 +230,7 @@ fun ListaComprasScreen(
                     // Lista de itens
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(bottom = 120.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(

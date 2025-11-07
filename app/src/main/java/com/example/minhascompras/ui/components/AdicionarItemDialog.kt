@@ -2,29 +2,35 @@ package com.example.minhascompras.ui.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.minhascompras.data.ItemCategory
 import com.example.minhascompras.data.ItemCompra
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdicionarItemDialog(
     onDismiss: () -> Unit,
-    onConfirm: (String, Int, Double?) -> Unit,
+    onConfirm: (String, Int, Double?, String) -> Unit,
     itemEdicao: ItemCompra? = null,
     modifier: Modifier = Modifier
 ) {
     var nomeItem by remember { mutableStateOf(itemEdicao?.nome ?: "") }
     var quantidade by remember { mutableStateOf(itemEdicao?.quantidade?.toString() ?: "1") }
     var preco by remember { mutableStateOf(itemEdicao?.preco?.toString() ?: "") }
+    var categoriaSelecionada by remember { mutableStateOf(itemEdicao?.categoria ?: ItemCategory.OUTROS.displayName) }
+    var expanded by remember { mutableStateOf(false) }
     
     LaunchedEffect(itemEdicao) {
         nomeItem = itemEdicao?.nome ?: ""
         quantidade = itemEdicao?.quantidade?.toString() ?: "1"
         preco = itemEdicao?.preco?.toString() ?: ""
+        categoriaSelecionada = itemEdicao?.categoria ?: ItemCategory.OUTROS.displayName
     }
 
     AlertDialog(
@@ -67,6 +73,50 @@ fun AdicionarItemDialog(
                         focusedLabelColor = MaterialTheme.colorScheme.primary
                     )
                 )
+                // Dropdown de Categoria
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    OutlinedTextField(
+                        value = categoriaSelecionada,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Categoria *") },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary
+                        ),
+                        supportingText = {
+                            Text(
+                                "Selecione uma categoria",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        ItemCategory.values().forEach { category ->
+                            DropdownMenuItem(
+                                text = { Text(category.displayName) },
+                                onClick = {
+                                    categoriaSelecionada = category.displayName
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -118,16 +168,17 @@ fun AdicionarItemDialog(
                 onClick = {
                     val qty = quantidade.toIntOrNull()?.takeIf { it > 0 } ?: 1
                     val precoValue = preco.toDoubleOrNull()?.takeIf { it >= 0 }
-                    if (nomeItem.isNotBlank()) {
-                        onConfirm(nomeItem.trim(), qty, precoValue)
+                    if (nomeItem.isNotBlank() && categoriaSelecionada.isNotBlank()) {
+                        onConfirm(nomeItem.trim(), qty, precoValue, categoriaSelecionada)
                         if (itemEdicao == null) {
                             nomeItem = ""
                             quantidade = "1"
                             preco = ""
+                            categoriaSelecionada = ItemCategory.OUTROS.displayName
                         }
                     }
                 },
-                enabled = nomeItem.isNotBlank()
+                enabled = nomeItem.isNotBlank() && categoriaSelecionada.isNotBlank()
             ) {
                 Text(if (itemEdicao != null) "Salvar" else "Adicionar")
             }

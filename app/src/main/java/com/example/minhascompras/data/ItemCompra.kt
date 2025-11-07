@@ -11,6 +11,7 @@ data class ItemCompra(
     val quantidade: Int = 1,
     val preco: Double? = null,
     val comprado: Boolean = false,
+    val categoria: String = ItemCategory.OUTROS.displayName,
     val dataCriacao: Long = System.currentTimeMillis()
 )
 

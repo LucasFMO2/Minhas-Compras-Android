@@ -23,9 +23,12 @@ import com.example.minhascompras.data.ItemCompraRepository
 import com.example.minhascompras.data.ThemeMode
 import com.example.minhascompras.data.ThemePreferencesManager
 import com.example.minhascompras.data.UserPreferencesManager
+import com.example.minhascompras.ui.screens.HistoryScreen
 import com.example.minhascompras.ui.screens.ListaComprasScreen
 import com.example.minhascompras.ui.screens.SettingsScreen
 import com.example.minhascompras.ui.theme.MinhasComprasTheme
+import com.example.minhascompras.ui.viewmodel.HistoryViewModel
+import com.example.minhascompras.ui.viewmodel.HistoryViewModelFactory
 import com.example.minhascompras.ui.viewmodel.ListaComprasViewModel
 import com.example.minhascompras.ui.viewmodel.ListaComprasViewModelFactory
 import com.example.minhascompras.ui.viewmodel.ThemeViewModel
@@ -40,6 +43,7 @@ import kotlinx.coroutines.launch
 sealed class Screen(val route: String) {
     object ListaCompras : Screen("lista_compras")
     object Settings : Screen("settings")
+    object History : Screen("history")
 }
 
 class MainActivity : ComponentActivity() {
@@ -48,13 +52,14 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         
         val database = AppDatabase.getDatabase(applicationContext)
-        val repository = ItemCompraRepository(database.itemCompraDao())
+        val repository = ItemCompraRepository(database.itemCompraDao(), database.historyDao())
         
         val themePreferencesManager = ThemePreferencesManager(applicationContext)
         val themeViewModelFactory = ThemeViewModelFactory(themePreferencesManager)
         
         val userPreferencesManager = UserPreferencesManager(applicationContext)
         val viewModelFactory = ListaComprasViewModelFactory(repository, userPreferencesManager)
+        val historyViewModelFactory = HistoryViewModelFactory(repository)
         
         // Verificar atualizações automaticamente após um delay
         lifecycleScope.launch {
@@ -99,6 +104,9 @@ class MainActivity : ComponentActivity() {
                                 viewModel = viewModel,
                                 onNavigateToSettings = {
                                     navController.navigate(Screen.Settings.route)
+                                },
+                                onNavigateToHistory = {
+                                    navController.navigate(Screen.History.route)
                                 }
                             )
                         }
@@ -111,6 +119,20 @@ class MainActivity : ComponentActivity() {
                                 themeViewModel = themeViewModel,
                                 updateViewModel = updateViewModel,
                                 onNavigateBack = {
+                                    navController.popBackStack()
+                                }
+                            )
+                        }
+                        composable(Screen.History.route) {
+                            val historyViewModel: HistoryViewModel = viewModel(
+                                factory = historyViewModelFactory
+                            )
+                            HistoryScreen(
+                                viewModel = historyViewModel,
+                                onNavigateBack = {
+                                    navController.popBackStack()
+                                },
+                                onReuseList = {
                                     navController.popBackStack()
                                 }
                             )

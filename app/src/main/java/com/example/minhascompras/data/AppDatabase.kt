@@ -7,9 +7,18 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [ItemCompra::class], version = 3, exportSchema = false)
+@Database(
+    entities = [
+        ItemCompra::class,
+        ShoppingListHistory::class,
+        HistoryItem::class
+    ],
+    version = 4,
+    exportSchema = false
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun itemCompraDao(): ItemCompraDao
+    abstract fun historyDao(): HistoryDao
 
     companion object {
         @Volatile
@@ -23,6 +32,39 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Criar tabela de histórico de listas
+                database.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS shopping_list_history (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        completionDate INTEGER NOT NULL,
+                        listName TEXT NOT NULL
+                    )
+                    """.trimIndent()
+                )
+                // Criar tabela de itens do histórico
+                database.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS history_items (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        parentListId INTEGER NOT NULL,
+                        nome TEXT NOT NULL,
+                        quantidade INTEGER NOT NULL,
+                        preco REAL,
+                        categoria TEXT NOT NULL,
+                        FOREIGN KEY(parentListId) REFERENCES shopping_list_history(id) ON DELETE CASCADE
+                    )
+                    """.trimIndent()
+                )
+                // Criar índice para melhor performance
+                database.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_history_items_parentListId ON history_items(parentListId)"
+                )
+            }
+        }
+
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -30,7 +72,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "compras_database"
                 )
-                .addMigrations(MIGRATION_2_3)
+                .addMigrations(MIGRATION_2_3, MIGRATION_3_4)
                 .build()
                 INSTANCE = instance
                 instance

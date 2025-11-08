@@ -74,7 +74,7 @@ fun ItemCompraCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.ShoppingCart,
-                        contentDescription = null,
+                        contentDescription = "Ícone de item de compra",
                         modifier = Modifier.size(24.dp),
                         tint = if (item.comprado) {
                             MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f)

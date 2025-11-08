@@ -29,6 +29,10 @@ class ListaComprasViewModel(
     private val _filterStatus = MutableStateFlow(FilterStatus.ALL)
     val filterStatus: StateFlow<FilterStatus> = _filterStatus.asStateFlow()
 
+    // Estado para undo de exclusão
+    private val _lastDeletedItem = MutableStateFlow<ItemCompra?>(null)
+    val lastDeletedItem: StateFlow<ItemCompra?> = _lastDeletedItem.asStateFlow()
+
     // SortOrder do DataStore
     val sortOrder: StateFlow<SortOrder> = userPreferencesManager.sortOrder
         .stateIn(
@@ -51,6 +55,18 @@ class ListaComprasViewModel(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
+
+    // Observar quando todos os itens estão comprados para arquivar automaticamente
+    init {
+        viewModelScope.launch {
+            itens.collect { items ->
+                if (items.isNotEmpty() && items.all { it.comprado }) {
+                    // Todos os itens estão comprados, arquivar a lista
+                    repository.archiveCurrentList(items)
+                }
+            }
+        }
+    }
 
     fun onSearchQueryChanged(query: String) {
         _searchQuery.value = query
@@ -82,7 +98,18 @@ class ListaComprasViewModel(
 
     fun deletarItem(item: ItemCompra) {
         viewModelScope.launch {
+            _lastDeletedItem.value = item
             repository.delete(item)
+        }
+    }
+
+    fun undoDeleteItem() {
+        val item = _lastDeletedItem.value
+        if (item != null) {
+            viewModelScope.launch {
+                repository.insert(item)
+                _lastDeletedItem.value = null
+            }
         }
     }
 

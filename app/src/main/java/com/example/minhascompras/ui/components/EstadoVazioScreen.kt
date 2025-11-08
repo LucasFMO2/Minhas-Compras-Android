@@ -28,7 +28,7 @@ fun EstadoVazioScreen(
         ) {
             Icon(
                 imageVector = Icons.Default.ShoppingCart,
-                contentDescription = null,
+                contentDescription = "Ícone de carrinho de compras vazio",
                 modifier = Modifier.size(120.dp),
                 tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
             )

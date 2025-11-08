@@ -578,7 +578,7 @@
         "dependencies": [
           "1"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -586,7 +586,7 @@
             "description": "Add functions to the `ListViewModel` to handle item deletion, toggling the 'purchased' state, and a mechanism to undo a recent deletion. This provides the backend logic for the UI gestures.",
             "dependencies": [],
             "details": "In `ListViewModel.kt`, create a private `MutableStateFlow` to temporarily hold the last deleted `ItemCompra`. Create public functions `deleteItem(item: ItemCompra)`, which will move the item to the temporary holder and then delete it from the repository, and `toggleItemChecked(item: ItemCompra)`. Also, create an `undoDeleteItem()` function that re-inserts the item from the temporary holder back into the repository.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Write unit tests for the ViewModel using Turbine to verify that `deleteItem` removes an item from the main list state and `undoDeleteItem` restores it. Verify `toggleItemChecked` correctly updates the item's `isChecked` property.",
             "parentId": "undefined"
           },
@@ -596,7 +596,7 @@
             "description": "In `ListScreen.kt`, wrap the existing composable that displays a single shopping list item with the `SwipeToDismissBox` composable to enable the basic swipe gesture functionality.",
             "dependencies": [],
             "details": "Locate the `LazyColumn` within `ListScreen.kt`. Wrap the item composable (e.g., `ItemCard`) inside a `SwipeToDismissBox`. You will need to create and remember a `DismissState` using `rememberDismissState()` for each item, passing it to the `SwipeToDismissBox`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Manually test by swiping an item. At this stage, the item should just animate away without any action or background being visible. The goal is to confirm the basic swipe gesture is captured.",
             "parentId": "undefined"
           },
@@ -608,7 +608,7 @@
               2
             ],
             "details": "Implement the `backgroundContent` lambda of `SwipeToDismissBox`. Use a `Box` composable. Inside, check the `state.dismissDirection`. If it is `DismissDirection.EndToStart` (swipe left), show a red background with `Icons.Default.Delete`. If it is `DismissDirection.StartToEnd` (swipe right), show a green background with `Icons.Default.Check`. Align the icons appropriately (e.g., `Alignment.CenterEnd` and `Alignment.CenterStart`).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Manually swipe items left and right to verify that the correct background color and icon are displayed corresponding to the swipe direction and that they are correctly aligned.",
             "parentId": "undefined"
           },
@@ -621,7 +621,7 @@
               2
             ],
             "details": "In the `rememberDismissState` call, provide the `confirmValueChange` lambda. Inside, check the `it` value. If it's `DismissValue.DismissedToEnd`, call `viewModel.toggleItemChecked(item)`. If it's `DismissValue.DismissedToStart`, call `viewModel.deleteItem(item)`. For deletion, use a `SnackbarHostState` and a `LaunchedEffect` keyed on the deleted item state to call `snackbarHostState.showSnackbar` with a message and an `actionLabel` of 'Desfazer'. Return `false` to let the composable handle the animation.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Manually swipe an item right and verify it gets marked as purchased. Swipe an item left and verify it is removed from the list and a Snackbar appears with an 'Undo' button. The undo button will not be functional yet.",
             "parentId": "undefined"
           },
@@ -634,7 +634,7 @@
               4
             ],
             "details": "In the `LaunchedEffect` where `snackbarHostState.showSnackbar` is called, check the `SnackbarResult`. If the result is `SnackbarResult.ActionPerformed`, call the `viewModel.undoDeleteItem()` function that was created in the first subtask. This will re-insert the temporarily stored item back into the database, and the UI will update automatically via the StateFlow.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Perform a full swipe-to-delete action. When the Snackbar appears, tap the 'Desfazer' button. Verify that the deleted item reappears in the list in its original position. Test this multiple times to ensure state is handled correctly.",
             "parentId": "undefined"
           }
@@ -805,7 +805,7 @@
         "dependencies": [
           "1"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -813,7 +813,7 @@
             "description": "Define the data model for storing historical shopping lists. This includes creating ShoppingListHistory and HistoryItem entities, a data class for their relationship, and a HistoryDao for database access.",
             "dependencies": [],
             "details": "Create `ShoppingListHistory.kt` (@Entity with id, completionDate, listName). Create `HistoryItem.kt` (@Entity mirroring `ItemCompra` but with a foreign key to `ShoppingListHistory`). Create `ShoppingListHistoryWithItems.kt` with @Embedded and @Relation. Create `HistoryDao.kt` with queries to insert a full history list (in a transaction), get all history summaries, get a single history list with items, and delete a history list.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Write Room unit tests to verify that the DAO can successfully insert, query, and delete history records. Test the transaction logic for inserting a list with its items.",
             "parentId": "undefined"
           },
@@ -825,7 +825,7 @@
               1
             ],
             "details": "In `AppDatabase.kt`, add `ShoppingListHistory` and `HistoryItem` to the `entities` array and declare the new `HistoryDao`. Increment the database version and add an empty migration since we are just adding new tables. In `ItemRepository.kt` (or a new `HistoryRepository`), add functions like `archiveCurrentList(items: List<ItemCompra>)`, `getHistoryLists(): Flow<List<ShoppingListHistory>>`, `deleteHistory(historyId: Long)`, and `reuseHistoryList(historyId: Long)`. The `archiveCurrentList` function should use the DAO to insert the new history and then clear the `ItemCompra` table.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "After updating the app version, manually verify that the app launches without crashing and that existing data is preserved. Write unit tests for the new repository functions using a mock DAO to ensure correct logic.",
             "parentId": "undefined"
           },
@@ -837,7 +837,7 @@
               2
             ],
             "details": "In `MainViewModel.kt`, create a derived state or use a `snapshotFlow` to monitor the list of items. When the list is not empty and all items have `isChecked = true`, call the `repository.archiveCurrentList()` function. This should also clear the current list from the UI by deleting from the `ItemCompra` table. Ensure this logic is efficient and does not trigger on an empty list.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Write a JUnit test for the `MainViewModel` using Turbine. Simulate a list of items, update them to be all checked, and verify that the repository's `archiveCurrentList` method is called exactly once.",
             "parentId": "undefined"
           },
@@ -849,7 +849,7 @@
               2
             ],
             "details": "Create a `HistoryViewModel.kt` to fetch data from the repository using `getHistoryLists()`. Create a `HistoryScreen.kt` Composable that collects the `StateFlow` from the ViewModel. Use a `LazyColumn` to display each `ShoppingListHistory` record in a Material Design `Card`, showing the list's completion date and item count. Add a new route to the app's `NavHost` and a menu item in `MainScreen`'s `TopAppBar` to navigate to the history screen.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Use `createComposeRule` to test the `HistoryScreen`. Provide a mock `HistoryViewModel` with sample data and verify that the `LazyColumn` displays the correct number of items. Manually test navigation to and from the screen.",
             "parentId": "undefined"
           },
@@ -861,7 +861,7 @@
               4
             ],
             "details": "On the `HistoryScreen`, for each list item card: 1. Add a delete `IconButton` that calls `viewModel.deleteHistory(historyId)`. 2. Add a 'Reuse' `Button` that calls `viewModel.reuseHistoryList(historyId)` and then navigates back to the main list screen. 3. Make the card clickable to expand and show its items. The 'Reuse' logic in the ViewModel will call the repository, which copies the `HistoryItem`s back to the main `ItemCompra` table.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Manually test all actions on the History Screen. Verify that deleting a list removes it. Verify that reusing a list populates the main shopping list correctly and navigates back. Use Compose UI tests to click the 'Delete' and 'Reuse' buttons and verify the corresponding ViewModel functions are invoked.",
             "parentId": "undefined"
           }
@@ -881,7 +881,7 @@
           "7",
           "8"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -889,7 +889,7 @@
             "description": "Configure the project by adding all necessary testing libraries to the `build.gradle.kts` files. This includes JUnit 5, MockK for mocking, Turbine for testing flows, and the Compose Test Rule for UI testing.",
             "dependencies": [],
             "details": "In the app-level `build.gradle.kts`, add dependencies for `org.junit.jupiter:junit-jupiter-api`, `io.mockk:mockk`, `app.cash.turbine:turbine` for unit tests. For instrumentation tests, add `androidx.compose.ui:ui-test-junit4` and `androidx.compose.ui:ui-test-manifest`. Ensure correct test runner configuration.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "After adding the dependencies, sync Gradle and create a single placeholder test file in both `test` and `androidTest` source sets. Run these empty tests to confirm the project builds and the test runners execute successfully.",
             "parentId": "undefined"
           },
@@ -901,7 +901,7 @@
               1
             ],
             "details": "Using JUnit 5 and MockK, create a test class for `MainViewModel`. Mock the `ItemsRepository` dependency. Write individual tests using Turbine to verify that updating `searchQuery`, `filterState`, and `sortOrder` correctly combines and triggers the repository call. Test the `deleteItem` and `undoDelete` methods to ensure the state is managed correctly.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run all JUnit tests and ensure they pass. Use code coverage tools to verify that the core logic within the ViewModel is being tested, aiming for high coverage on the state combination and action-handling logic.",
             "parentId": "undefined"
           },
@@ -913,7 +913,7 @@
               1
             ],
             "details": "Using `createComposeRule`, write at least three separate UI tests. 1) Test adding a new item with a category and verify it appears in the list. 2) Test the search functionality by typing in a query and asserting that the list filters correctly. 3) Test the swipe-to-delete gesture on an item and then click the 'Undo' action on the Snackbar, verifying the item is restored. Add `testTag` modifiers to relevant Composables to facilitate these tests.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Execute the instrumentation tests on an emulator or physical device. Ensure all assertions pass and there are no crashes. These tests should serve as a regression suite for core functionality.",
             "parentId": "undefined"
           },
@@ -923,7 +923,7 @@
             "description": "Review the entire application for accessibility compliance. This involves adding descriptive text for non-text UI elements to ensure the app is usable with screen readers like TalkBack.",
             "dependencies": [],
             "details": "Manually navigate through all screens of the app with TalkBack enabled to identify issues. Systematically go through all Composable files and add a `contentDescription` parameter to every `IconButton`, `Icon`, and `Image`. Use descriptive text, for example, 'Sort list' instead of just 'Sort'. Use the Layout Inspector's accessibility checker to find any remaining issues.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "After implementing changes, perform a full manual test with TalkBack on a physical device. Confirm that every interactive element is focusable and clearly announced. Verify that there are no unlabeled buttons or icons.",
             "parentId": "undefined"
           },
@@ -937,7 +937,7 @@
               4
             ],
             "details": "Use the Android Studio Profiler's ' recomposition' feature to analyze the main list screen during scrolling and data updates. Optimize any Composables that are recomposing unnecessarily. Populate the database with over 100 items to test `LazyColumn` scroll performance. Verify that all database calls are running on a background thread. Fix any remaining visual glitches or bugs found during testing.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run the app on a low-to-mid-range physical device. Profile scrolling and interaction performance to ensure it meets an acceptable standard (e.g., minimal jank). Conduct a final, full regression test of all features to ensure no new bugs were introduced during the polish phase.",
             "parentId": "undefined"
           }
@@ -954,7 +954,7 @@
       ],
       "created": "2025-11-08T12:02:47.263Z",
       "description": "Tasks for master context",
-      "updated": "2025-11-08T12:05:11.629Z"
+      "updated": "2025-11-08T13:12:24.348Z"
     }
   }
 }

@@ -38,7 +38,7 @@ fun AdicionarItemDialog(
         icon = {
             Icon(
                 imageVector = Icons.Default.ShoppingCart,
-                contentDescription = null,
+                contentDescription = "Ícone de carrinho de compras",
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(32.dp)
             )
@@ -64,7 +64,7 @@ fun AdicionarItemDialog(
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.ShoppingCart,
-                            contentDescription = null,
+                            contentDescription = "Ícone de carrinho de compras",
                             tint = MaterialTheme.colorScheme.primary
                         )
                     },

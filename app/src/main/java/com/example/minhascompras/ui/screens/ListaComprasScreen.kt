@@ -6,6 +6,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
@@ -37,6 +40,7 @@ import java.util.Locale
 fun ListaComprasScreen(
     viewModel: ListaComprasViewModel,
     onNavigateToSettings: () -> Unit = {},
+    onNavigateToHistory: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val itens by viewModel.itens.collectAsState()
@@ -59,7 +63,24 @@ fun ListaComprasScreen(
     val sortOrder by viewModel.sortOrder.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val filterStatus by viewModel.filterStatus.collectAsState()
+    val lastDeletedItem by viewModel.lastDeletedItem.collectAsState()
     var showSortMenu by remember { mutableStateOf(false) }
+    
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Mostrar Snackbar quando um item for deletado
+    LaunchedEffect(lastDeletedItem) {
+        if (lastDeletedItem != null) {
+            val result = snackbarHostState.showSnackbar(
+                message = "Item deletado",
+                actionLabel = "Desfazer",
+                duration = SnackbarDuration.Short
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                viewModel.undoDeleteItem()
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -71,7 +92,7 @@ fun ListaComprasScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.ShoppingCart,
-                            contentDescription = null,
+                            contentDescription = "Ícone de carrinho de compras",
                             modifier = Modifier.size(24.dp)
                         )
                         Text(
@@ -102,7 +123,7 @@ fun ListaComprasScreen(
                                 },
                                 leadingIcon = {
                                     if (sortOrder == SortOrder.BY_NAME_ASC) {
-                                        Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        Icon(Icons.Default.Check, contentDescription = "Selecionado", modifier = Modifier.size(16.dp))
                                     }
                                 }
                             )
@@ -114,7 +135,7 @@ fun ListaComprasScreen(
                                 },
                                 leadingIcon = {
                                     if (sortOrder == SortOrder.BY_NAME_DESC) {
-                                        Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        Icon(Icons.Default.Check, contentDescription = "Selecionado", modifier = Modifier.size(16.dp))
                                     }
                                 }
                             )
@@ -126,7 +147,7 @@ fun ListaComprasScreen(
                                 },
                                 leadingIcon = {
                                     if (sortOrder == SortOrder.BY_DATE_DESC) {
-                                        Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        Icon(Icons.Default.Check, contentDescription = "Selecionado", modifier = Modifier.size(16.dp))
                                     }
                                 }
                             )
@@ -138,7 +159,7 @@ fun ListaComprasScreen(
                                 },
                                 leadingIcon = {
                                     if (sortOrder == SortOrder.BY_DATE_ASC) {
-                                        Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        Icon(Icons.Default.Check, contentDescription = "Selecionado", modifier = Modifier.size(16.dp))
                                     }
                                 }
                             )
@@ -150,7 +171,7 @@ fun ListaComprasScreen(
                                 },
                                 leadingIcon = {
                                     if (sortOrder == SortOrder.BY_PRICE_ASC) {
-                                        Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        Icon(Icons.Default.Check, contentDescription = "Selecionado", modifier = Modifier.size(16.dp))
                                     }
                                 }
                             )
@@ -162,11 +183,17 @@ fun ListaComprasScreen(
                                 },
                                 leadingIcon = {
                                     if (sortOrder == SortOrder.BY_PRICE_DESC) {
-                                        Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        Icon(Icons.Default.Check, contentDescription = "Selecionado", modifier = Modifier.size(16.dp))
                                     }
                                 }
                             )
                         }
+                    }
+                    IconButton(onClick = onNavigateToHistory) {
+                        Icon(
+                            imageVector = Icons.Default.ShoppingCart,
+                            contentDescription = "Histórico"
+                        )
                     }
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(
@@ -188,11 +215,14 @@ fun ListaComprasScreen(
                 icon = {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = null
+                        contentDescription = "Adicionar item"
                     )
                 },
                 text = { Text("Adicionar") }
             )
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
         },
         modifier = modifier
     ) { paddingValues ->
@@ -363,7 +393,7 @@ fun ListaComprasScreen(
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Delete,
-                                        contentDescription = null,
+                                        contentDescription = "Deletar itens comprados",
                                         modifier = Modifier.size(18.dp)
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
@@ -385,12 +415,78 @@ fun ListaComprasScreen(
                             items = itens,
                             key = { it.id }
                         ) { item ->
-                            ItemCompraCard(
-                                item = item,
-                                onToggleComprado = { viewModel.toggleComprado(item) },
-                                onDelete = { viewModel.deletarItem(item) },
-                                onEdit = { itemParaEditar = item }
+                            val dismissState = rememberSwipeToDismissBoxState(
+                                confirmValueChange = { dismissValue ->
+                                    when (dismissValue) {
+                                        SwipeToDismissBoxValue.EndToStart -> {
+                                            // Swipe left - deletar
+                                            viewModel.deletarItem(item)
+                                            false // Deixa o composable animar
+                                        }
+                                        SwipeToDismissBoxValue.StartToEnd -> {
+                                            // Swipe right - marcar como comprado
+                                            viewModel.toggleComprado(item)
+                                            false // Deixa o composable animar
+                                        }
+                                        else -> false
+                                    }
+                                }
                             )
+                            
+                            SwipeToDismissBox(
+                                state = dismissState,
+                                backgroundContent = {
+                                    val currentValue = dismissState.currentValue
+                                    val color = when (currentValue) {
+                                        SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.primary
+                                        SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.error
+                                        SwipeToDismissBoxValue.Settled -> MaterialTheme.colorScheme.surface
+                                    }
+                                    val icon = when (currentValue) {
+                                        SwipeToDismissBoxValue.StartToEnd -> Icons.Default.Check
+                                        SwipeToDismissBoxValue.EndToStart -> Icons.Default.Delete
+                                        SwipeToDismissBoxValue.Settled -> null
+                                    }
+                                    val alignment = when (currentValue) {
+                                        SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
+                                        SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
+                                        SwipeToDismissBoxValue.Settled -> Alignment.Center
+                                    }
+                                    
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(color),
+                                        contentAlignment = alignment
+                                    ) {
+                                        if (icon != null) {
+                                            val iconTint = when (currentValue) {
+                                                SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.onPrimary
+                                                SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.onError
+                                                SwipeToDismissBoxValue.Settled -> MaterialTheme.colorScheme.onSurface
+                                            }
+                                            Icon(
+                                                imageVector = icon,
+                                                contentDescription = when (currentValue) {
+                                                    SwipeToDismissBoxValue.StartToEnd -> "Marcar como comprado"
+                                                    SwipeToDismissBoxValue.EndToStart -> "Deletar item"
+                                                    SwipeToDismissBoxValue.Settled -> null
+                                                },
+                                                tint = iconTint,
+                                                modifier = Modifier.padding(16.dp)
+                                            )
+                                        }
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                ItemCompraCard(
+                                    item = item,
+                                    onToggleComprado = { viewModel.toggleComprado(item) },
+                                    onDelete = { viewModel.deletarItem(item) },
+                                    onEdit = { itemParaEditar = item }
+                                )
+                            }
                         }
                     }
                 }

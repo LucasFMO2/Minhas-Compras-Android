@@ -4,7 +4,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
-class ItemCompraRepository(private val itemCompraDao: ItemCompraDao) {
+class ItemCompraRepository(
+    private val itemCompraDao: ItemCompraDao,
+    private val historyDao: HistoryDao
+) {
     val allItens: Flow<List<ItemCompra>> = itemCompraDao.getAllItens()
 
     suspend fun getAllItensList(): List<ItemCompra> {
@@ -91,6 +94,60 @@ class ItemCompraRepository(private val itemCompraDao: ItemCompraDao) {
 
     suspend fun replaceAllItems(items: List<ItemCompra>) {
         itemCompraDao.replaceAllItems(items)
+    }
+
+    // Funções de histórico
+    suspend fun archiveCurrentList(items: List<ItemCompra>) {
+        if (items.isEmpty()) return
+        
+        val history = ShoppingListHistory(
+            completionDate = System.currentTimeMillis(),
+            listName = "Lista de Compras"
+        )
+        
+        val historyItems = items.map { item ->
+            HistoryItem(
+                parentListId = 0, // Será atualizado na transação
+                nome = item.nome,
+                quantidade = item.quantidade,
+                preco = item.preco,
+                categoria = item.categoria
+            )
+        }
+        
+        historyDao.insertHistoryWithItems(history, historyItems)
+        
+        // Limpar a lista atual
+        itemCompraDao.deleteAll()
+    }
+
+    fun getHistoryLists(): Flow<List<ShoppingListHistory>> {
+        return historyDao.getAllHistoryLists()
+    }
+
+    fun getHistoryListWithItems(historyId: Long): Flow<ShoppingListHistoryWithItems?> {
+        return historyDao.getHistoryListWithItems(historyId)
+    }
+
+    suspend fun deleteHistory(historyId: Long) {
+        historyDao.deleteHistoryById(historyId)
+    }
+
+    suspend fun reuseHistoryList(historyId: Long) {
+        val historyWithItems = historyDao.getHistoryListWithItems(historyId).first()
+        if (historyWithItems != null) {
+            val items = historyWithItems.items.map { historyItem ->
+                ItemCompra(
+                    nome = historyItem.nome,
+                    quantidade = historyItem.quantidade,
+                    preco = historyItem.preco,
+                    categoria = historyItem.categoria,
+                    comprado = false, // Resetar para não comprado
+                    dataCriacao = System.currentTimeMillis()
+                )
+            }
+            itemCompraDao.insertAll(items)
+        }
     }
 }
 

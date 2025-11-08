@@ -43,23 +43,25 @@ fun ListaComprasScreen(
     onNavigateToHistory: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    val itens by viewModel.itens.collectAsState()
+    val itens by viewModel.itens.collectAsState() // Lista filtrada para exibição
+    val allItens by viewModel.allItens.collectAsState() // Lista completa para estatísticas
     var showDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var itemParaEditar by remember { mutableStateOf<ItemCompra?>(null) }
 
     val formatador = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
-    val totalItens = itens.size
-    val itensComprados = itens.count { it.comprado }
+    // Usar allItens para estatísticas (lista completa, sem filtro)
+    val totalItens = allItens.size
+    val itensComprados = allItens.count { it.comprado }
     val itensPendentes = totalItens - itensComprados
     val temItensComprados = itensComprados > 0
     val progresso = if (totalItens > 0) itensComprados.toFloat() / totalItens else 0f
     
-    // Calcular totais de preços
-    val totalGeral = itens.sumOf { (it.preco ?: 0.0) * it.quantidade }
-    val totalComprados = itens.filter { it.comprado }.sumOf { (it.preco ?: 0.0) * it.quantidade }
-    val totalPendentes = itens.filter { !it.comprado }.sumOf { (it.preco ?: 0.0) * it.quantidade }
-    val temPrecos = itens.any { it.preco != null && it.preco > 0 }
+    // Calcular totais de preços usando allItens (lista completa)
+    val totalGeral = allItens.sumOf { (it.preco ?: 0.0) * it.quantidade }
+    val totalComprados = allItens.filter { it.comprado }.sumOf { (it.preco ?: 0.0) * it.quantidade }
+    val totalPendentes = allItens.filter { !it.comprado }.sumOf { (it.preco ?: 0.0) * it.quantidade }
+    val temPrecos = allItens.any { it.preco != null && it.preco > 0 }
     val sortOrder by viewModel.sortOrder.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val filterStatus by viewModel.filterStatus.collectAsState()
@@ -231,11 +233,62 @@ fun ListaComprasScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            if (itens.isEmpty()) {
+            // Verificar se a lista completa está vazia ou se apenas o filtro não retornou resultados
+            val listaCompletaVazia = allItens.isEmpty()
+            val filtroSemResultados = !listaCompletaVazia && itens.isEmpty()
+            
+            if (listaCompletaVazia) {
+                // Lista completamente vazia - mostrar tela de estado vazio padrão
                 EstadoVazioScreen(
                     onAddClick = { showDialog = true },
                     modifier = Modifier.fillMaxSize()
                 )
+            } else if (filtroSemResultados) {
+                // Filtro ativo mas sem resultados - mostrar mensagem específica
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.padding(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ShoppingCart,
+                            contentDescription = "Nenhum item encontrado",
+                            modifier = Modifier.size(80.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        )
+                        Text(
+                            text = when (filterStatus) {
+                                FilterStatus.PURCHASED -> "Nenhum item comprado ainda"
+                                FilterStatus.PENDING -> "Nenhum item pendente"
+                                else -> "Nenhum item encontrado"
+                            },
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = when (filterStatus) {
+                                FilterStatus.PURCHASED -> "Marque itens como comprados para vê-los aqui"
+                                FilterStatus.PENDING -> "Todos os itens foram marcados como comprados"
+                                else -> "Tente ajustar sua busca ou filtro"
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
+                        if (filterStatus != FilterStatus.ALL) {
+                            TextButton(
+                                onClick = { viewModel.onFilterStatusChanged(FilterStatus.ALL) }
+                            ) {
+                                Text("Ver todos os itens")
+                            }
+                        }
+                    }
+                }
             } else {
                 Column(
                     modifier = Modifier

@@ -1,5 +1,6 @@
 package com.example.minhascompras.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -41,6 +42,14 @@ class ListaComprasViewModel(
             initialValue = SortOrder.BY_DATE_DESC
         )
 
+    // Lista completa de itens (sem filtro) para estatísticas
+    val allItens: StateFlow<List<ItemCompra>> = repository.allItens
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
     // Combine search query (com debounce), filter status e sort order para criar um flow reativo
     val itens: StateFlow<List<ItemCompra>> = combine(
         _searchQuery.debounce(300L),
@@ -59,11 +68,17 @@ class ListaComprasViewModel(
     // Observar quando todos os itens estão comprados para arquivar automaticamente
     init {
         viewModelScope.launch {
-            repository.allItens.collect { items ->
-                if (items.isNotEmpty() && items.all { it.comprado }) {
-                    // Todos os itens estão comprados, arquivar a lista
-                    repository.archiveCurrentList(items)
+            try {
+                repository.allItens.collect { items ->
+                    // Só arquivar se houver itens e todos estiverem comprados
+                    if (items.isNotEmpty() && items.all { it.comprado }) {
+                        // Todos os itens estão comprados, arquivar a lista
+                        repository.archiveCurrentList(items)
+                    }
                 }
+            } catch (e: Exception) {
+                // Log do erro mas não crashar o app
+                Log.e("ListaComprasViewModel", "Erro ao observar itens para arquivamento", e)
             }
         }
     }

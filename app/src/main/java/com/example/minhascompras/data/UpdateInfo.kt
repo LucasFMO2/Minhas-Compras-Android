@@ -61,36 +61,42 @@ data class UpdateInfo(
             // v2.6 -> versionCode 8
             // v2.7 -> versionCode 9
             // v2.8 -> versionCode 10
-            // Padrão: versionCode = major * 2 + minor + 1 (para versões 2.x)
+            // v2.9 -> versionCode 11
+            // v2.9.1 -> versionCode 12
             val parts = tagName.removePrefix("v").split(".")
             return if (parts.size >= 2) {
                 val major = parts[0].toIntOrNull() ?: 0
                 val minor = parts[1].toIntOrNull() ?: 0
-                // Fórmula: major * 2 + minor + 1
-                // v2.3: 2*2 + 3 + 1 = 8 (mas deveria ser 5, então ajustar)
-                // v2.4: 2*2 + 4 + 1 = 9 (mas deveria ser 6)
-                // v2.5: 2*2 + 5 + 1 = 10 (mas deveria ser 7)
-                // v2.6: 2*2 + 6 + 1 = 11 (mas deveria ser 8)
-                // v2.7: 2*2 + 7 + 1 = 12 (mas deveria ser 9)
-                // v2.8: 2*2 + 8 + 1 = 13 (mas deveria ser 10)
-                // Fórmula correta: major * 2 + minor - 1
-                // v2.3: 2*2 + 3 - 1 = 6 (ainda não)
-                // Melhor usar uma tabela de mapeamento
-                when ("$major.$minor") {
-                    "2.3" -> 5
-                    "2.4" -> 6
-                    "2.5" -> 7
-                    "2.6" -> 8
-                    "2.7" -> 9
-                    "2.8" -> 10
-                    "2.9" -> 11
-                    "2.10" -> 12
-                    "3.0" -> 13
-                    else -> {
-                        // Fórmula genérica para versões futuras
-                        // Baseado no padrão: versionCode = (major - 2) * 10 + minor + 5
-                        // Mas ajustando para o padrão real observado
-                        (major - 2) * 10 + minor + 5
+                
+                // Verificar se há patch version (ex: 2.9.1)
+                if (parts.size >= 3) {
+                    val patch = parts[2].toIntOrNull() ?: 0
+                    // Obter versionCode base da versão major.minor
+                    val baseVersionCode = when ("$major.$minor") {
+                        "2.3" -> 5
+                        "2.4" -> 6
+                        "2.5" -> 7
+                        "2.6" -> 8
+                        "2.7" -> 9
+                        "2.8" -> 10
+                        "2.9" -> 11
+                        else -> (major - 2) * 10 + minor + 5
+                    }
+                    // Adicionar patch ao versionCode base
+                    baseVersionCode + patch
+                } else {
+                    // Versão sem patch (ex: 2.9)
+                    when ("$major.$minor") {
+                        "2.3" -> 5
+                        "2.4" -> 6
+                        "2.5" -> 7
+                        "2.6" -> 8
+                        "2.7" -> 9
+                        "2.8" -> 10
+                        "2.9" -> 11
+                        "2.10" -> 12
+                        "3.0" -> 13
+                        else -> (major - 2) * 10 + minor + 5
                     }
                 }
             } else {

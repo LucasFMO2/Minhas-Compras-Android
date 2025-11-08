@@ -4,9 +4,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -15,11 +19,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.minhascompras.data.AppDatabase
 import com.example.minhascompras.data.ItemCompraRepository
+import com.example.minhascompras.data.ThemeMode
+import com.example.minhascompras.data.ThemePreferencesManager
 import com.example.minhascompras.ui.screens.ListaComprasScreen
 import com.example.minhascompras.ui.screens.SettingsScreen
 import com.example.minhascompras.ui.theme.MinhasComprasTheme
 import com.example.minhascompras.ui.viewmodel.ListaComprasViewModel
 import com.example.minhascompras.ui.viewmodel.ListaComprasViewModelFactory
+import com.example.minhascompras.ui.viewmodel.ThemeViewModel
+import com.example.minhascompras.ui.viewmodel.ThemeViewModelFactory
 
 sealed class Screen(val route: String) {
     object ListaCompras : Screen("lista_compras")
@@ -35,8 +43,21 @@ class MainActivity : ComponentActivity() {
         val repository = ItemCompraRepository(database.itemCompraDao())
         val viewModelFactory = ListaComprasViewModelFactory(repository)
         
+        val themePreferencesManager = ThemePreferencesManager(applicationContext)
+        val themeViewModelFactory = ThemeViewModelFactory(themePreferencesManager)
+        
         setContent {
-            MinhasComprasTheme {
+            val themeViewModel: ThemeViewModel = viewModel(factory = themeViewModelFactory)
+            val themeMode by themeViewModel.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
+            val systemDarkTheme = isSystemInDarkTheme()
+            
+            val darkTheme = when (themeMode) {
+                ThemeMode.LIGHT -> false
+                ThemeMode.DARK -> true
+                ThemeMode.SYSTEM -> systemDarkTheme
+            }
+            
+            MinhasComprasTheme(darkTheme = darkTheme) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -59,6 +80,7 @@ class MainActivity : ComponentActivity() {
                         composable(Screen.Settings.route) {
                             SettingsScreen(
                                 viewModel = viewModel,
+                                themeViewModel = themeViewModel,
                                 onNavigateBack = {
                                     navController.popBackStack()
                                 }

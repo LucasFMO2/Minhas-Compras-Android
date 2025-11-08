@@ -642,7 +642,7 @@
         "testStrategy": "Manually switch between light, dark, and system modes and navigate through all screens of the app to check for visual consistency and identify any hardcoded colors. Relaunch the app to confirm the theme preference is correctly saved and applied. Use an accessibility scanner to verify color contrast.",
         "priority": "medium",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -650,9 +650,10 @@
             "description": "Define distinct color palettes for both light and dark themes using Material 3 standards in `Color.kt`. Ensure the color combinations meet accessibility contrast ratio guidelines.",
             "dependencies": [],
             "details": "In the `src/main/java/com/example/minhascompras2/ui/theme/Color.kt` file, define a new `private val DarkColorScheme = darkColorScheme(...)` using appropriate dark theme colors. Review and adjust the existing `LightColorScheme` for consistency. Verify that primary, secondary, surface, and background colors are well-defined for both schemes.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Manually apply each color scheme in a preview Composable to visually inspect the colors. Use an online contrast checker tool to verify that text on background colors meets WCAG AA standards.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T00:59:12.725Z"
           },
           {
             "id": 2,
@@ -660,9 +661,10 @@
             "description": "Set up Jetpack DataStore to persist the user's selected theme choice. Create a repository to abstract the read and write operations.",
             "dependencies": [],
             "details": "Create a new file, `ThemeRepository.kt`, to manage theme preferences. Use `PreferenceDataStore` to store the selected theme. Define an enum `ThemeSetting { LIGHT, DARK, SYSTEM }` and store its string representation. The repository should expose a `Flow<ThemeSetting>` to read the preference and a suspend function `saveThemeSetting(setting: ThemeSetting)` to update it.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Write a unit test for the `ThemeRepository` to verify that saving a theme setting can be correctly read back. The test can use `runTest` and a `testDataStore` instance.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T01:51:56.661Z"
           },
           {
             "id": 3,
@@ -672,9 +674,10 @@
               2
             ],
             "details": "In the relevant ViewModel (e.g., `MainViewModel`), inject the `ThemeRepository`. Create a `StateFlow` that collects the theme preference `Flow` from the repository. Expose a public function, e.g., `updateTheme(setting: ThemeSetting)`, that calls the repository's save function within the `viewModelScope`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit test the ViewModel using Turbine. Verify that the ViewModel's `StateFlow` correctly emits the initial value from the repository and that calling `updateTheme` triggers the repository's save method.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T01:15:11.638Z"
           },
           {
             "id": 4,
@@ -685,9 +688,10 @@
               3
             ],
             "details": "In `MainActivity.kt`, collect the theme `StateFlow` from the ViewModel. In `ui/theme/Theme.kt`, update the `MinhasCompras2Theme` composable to accept the `ThemeSetting` enum. Inside, use a `when` statement: for `LIGHT` force `darkTheme = false`, for `DARK` force `darkTheme = true`, and for `SYSTEM` use `isSystemInDarkTheme()`. Pass the appropriate color scheme (`LightColorScheme` or `DarkColorScheme`) to `MaterialTheme`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run the app and manually change the device's theme setting in the system UI. Verify the app theme changes accordingly when the preference is set to 'SYSTEM'. Hardcode the preference in the ViewModel to 'LIGHT' and 'DARK' to test those paths.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T01:15:32.067Z"
           },
           {
             "id": 5,
@@ -698,11 +702,13 @@
               4
             ],
             "details": "Locate the `TopAppBar` composable in the main screen file. Add an `IconButton` to its `actions`. The icon should visually represent the current theme (e.g., sun, moon, brightness-auto). On click, call the ViewModel's `updateTheme` function to cycle through the `ThemeSetting` enum values. The icon and its content description should update based on the current theme state collected from the ViewModel.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Manually tap the theme toggle icon. Verify that the theme changes instantly and cycles through the three states. Close and reopen the app to ensure the last selected theme is correctly applied on startup, confirming persistence.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T01:15:55.976Z"
           }
-        ]
+        ],
+        "updatedAt": "2025-11-08T01:51:56.661Z"
       },
       {
         "id": "7",
@@ -934,9 +940,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-07T23:56:43.124Z",
+      "lastModified": "2025-11-08T01:51:56.701Z",
       "taskCount": 9,
-      "completedCount": 3,
+      "completedCount": 4,
       "tags": [
         "master"
       ]

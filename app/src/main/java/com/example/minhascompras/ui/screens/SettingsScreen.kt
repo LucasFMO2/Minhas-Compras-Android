@@ -10,13 +10,16 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.minhascompras.data.ThemeMode
 import com.example.minhascompras.ui.viewmodel.ListaComprasViewModel
+import com.example.minhascompras.ui.viewmodel.ThemeViewModel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -32,6 +35,7 @@ import java.util.*
 @Composable
 fun SettingsScreen(
     viewModel: ListaComprasViewModel,
+    themeViewModel: ThemeViewModel,
     onNavigateBack: () -> Unit
 ) {
     val context = LocalContext.current
@@ -261,6 +265,57 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Seção de Tema
+            Text(
+                "Aparência",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            val themeMode by themeViewModel.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
+            
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = { themeViewModel.toggleThemeMode() }
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            "Modo de Tema",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            when (themeMode) {
+                                ThemeMode.LIGHT -> "Tema Claro"
+                                ThemeMode.DARK -> "Tema Escuro"
+                                ThemeMode.SYSTEM -> "Seguir Sistema"
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Icon(
+                        imageVector = when (themeMode) {
+                            ThemeMode.LIGHT -> Icons.Default.ShoppingCart
+                            ThemeMode.DARK -> Icons.Default.Settings
+                            ThemeMode.SYSTEM -> Icons.Default.Add
+                        },
+                        contentDescription = "Modo de Tema",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             Text(
                 "Backup e Restauração",
                 style = MaterialTheme.typography.titleMedium,

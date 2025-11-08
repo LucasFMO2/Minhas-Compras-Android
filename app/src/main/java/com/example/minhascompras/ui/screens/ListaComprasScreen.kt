@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.minhascompras.data.FilterStatus
 import com.example.minhascompras.data.ItemCompra
@@ -334,7 +335,13 @@ fun ListaComprasScreen(
                         FilterChip(
                             selected = filterStatus == FilterStatus.PURCHASED,
                             onClick = { viewModel.onFilterStatusChanged(FilterStatus.PURCHASED) },
-                            label = { Text(FilterStatus.PURCHASED.displayName) }
+                            label = { 
+                                Text(
+                                    FilterStatus.PURCHASED.displayName,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                ) 
+                            }
                         )
                     }
                     
@@ -343,7 +350,7 @@ fun ListaComprasScreen(
                     // Estatísticas
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         StatisticCard(
                             label = "Total",
@@ -369,7 +376,7 @@ fun ListaComprasScreen(
                         Spacer(modifier = Modifier.height(12.dp))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             StatisticCard(
                                 label = "Total Geral",

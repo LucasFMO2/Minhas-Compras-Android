@@ -4,8 +4,27 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 
 ## 📥 Download
 
-### 🆕 Versão 2.9.3 (Mais Recente)
+### 🆕 Versão 2.10.0 (Mais Recente)
 
+**[⬇️ Baixar APK v2.10.0](https://github.com/nerddescoladofmo-cmyk/Minhas-Compras-Android/releases/download/v2.10.0/app-release-v2.10.0.apk)**
+
+✨ **Novidades da v2.10.0:**
+- 🔍 **Sistema de busca** - Pesquise itens rapidamente na sua lista
+- 🎯 **Filtros inteligentes** - Filtre por Todos, Pendentes ou Comprados
+- 📊 **Ordenação avançada** - Ordene por Nome, Data ou Preço (crescente/decrescente)
+- 👆 **Gestos de deslizar** - Deslize para marcar como comprado ou deletar
+- ↩️ **Desfazer ação** - Desfaça a exclusão de itens com um toque
+- 📜 **Histórico de compras** - Visualize e gerencie listas arquivadas
+- 🔄 **Arquivamento automático** - Listas são arquivadas automaticamente quando todos os itens são comprados
+- ♻️ **Reutilizar listas** - Reutilize listas históricas com um clique
+- ♿ **Melhorias de acessibilidade** - Suporte completo para leitores de tela
+
+### 📦 Versões Anteriores
+
+**Versão 2.9.4:**
+**[⬇️ Baixar APK v2.9.4](https://github.com/nerddescoladofmo-cmyk/Minhas-Compras-Android/releases/download/v2.9.4/app-release-v2.9.4.apk)**
+
+**Versão 2.9.3:**
 **[⬇️ Baixar APK v2.9.3](https://github.com/nerddescoladofmo-cmyk/Minhas-Compras-Android/releases/download/v2.9.3/MinhasCompras-v2.9.3-release.apk)**
 
 ✨ **Novidades da v2.9.3:**
@@ -121,13 +140,22 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 
 ## ✨ Funcionalidades
 
-- ✅ **Adicionar itens** - Crie itens com nome e quantidade
-- 🎯 **Marcar como comprado** - Marque itens como comprados com um simples toque
+- ✅ **Adicionar itens** - Crie itens com nome, quantidade, preço e categoria
+- 🎯 **Marcar como comprado** - Marque itens como comprados com um simples toque ou gesto de deslizar
 - 📊 **Estatísticas** - Visualize total de itens, pendentes e comprados
 - 📈 **Barra de progresso** - Acompanhe seu progresso de compras
 - 🗑️ **Deletar itens** - Remova itens individuais ou limpe todos os comprados
+- 🔍 **Busca** - Pesquise itens rapidamente na sua lista
+- 🎯 **Filtros** - Filtre por Todos, Pendentes ou Comprados
+- 📊 **Ordenação** - Ordene por Nome, Data ou Preço (crescente/decrescente)
+- 👆 **Gestos de deslizar** - Deslize para marcar como comprado ou deletar
+- ↩️ **Desfazer** - Desfaça a exclusão de itens com um toque
+- 📜 **Histórico** - Visualize e gerencie listas arquivadas
+- 🔄 **Arquivamento automático** - Listas são arquivadas automaticamente quando todos os itens são comprados
+- ♻️ **Reutilizar listas** - Reutilize listas históricas com um clique
 - 💾 **Persistência local** - Seus dados são salvos localmente no dispositivo
 - 🎨 **Interface moderna** - Design Material 3 com animações suaves
+- ♿ **Acessibilidade** - Suporte completo para leitores de tela
 
 ## 🛠️ Tecnologias
 

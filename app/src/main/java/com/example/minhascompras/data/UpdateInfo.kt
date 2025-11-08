@@ -27,21 +27,30 @@ data class UpdateInfo(
     companion object {
         fun fromGitHubRelease(release: GitHubRelease, currentVersionCode: Int): UpdateInfo? {
             // Extrair versionCode do tag_name
-            // Como o versionCode no build.gradle é incremental (8 para v2.6),
-            // vamos comparar diretamente com o versionCode atual
             val versionCode = extractVersionCode(release.tag_name)
             
+            android.util.Log.d("UpdateInfo", "Release tag: ${release.tag_name}")
+            android.util.Log.d("UpdateInfo", "Extracted versionCode: $versionCode")
+            android.util.Log.d("UpdateInfo", "Current versionCode: $currentVersionCode")
+            android.util.Log.d("UpdateInfo", "Is update available: ${versionCode > currentVersionCode}")
+            
             // Comparação: se o versionCode extraído for maior que o atual, há atualização
-            // Mas como estamos usando versionCode incremental no build.gradle,
-            // vamos comparar diretamente
             if (versionCode <= currentVersionCode) {
+                android.util.Log.d("UpdateInfo", "No update available - versionCode $versionCode <= current $currentVersionCode")
                 return null
             }
             
             // Encontrar o asset do APK
             val apkAsset = release.assets.firstOrNull { 
                 it.name.endsWith(".apk", ignoreCase = true) 
-            } ?: return null
+            }
+            
+            if (apkAsset == null) {
+                android.util.Log.e("UpdateInfo", "No APK asset found in release")
+                return null
+            }
+            
+            android.util.Log.d("UpdateInfo", "APK asset found: ${apkAsset.name}")
             
             return UpdateInfo(
                 versionName = release.tag_name.removePrefix("v"),
@@ -63,12 +72,13 @@ data class UpdateInfo(
             // v2.8 -> versionCode 10
             // v2.9 -> versionCode 11
             // v2.9.1 -> versionCode 12
+            // v2.9.2 -> versionCode 13
             val parts = tagName.removePrefix("v").split(".")
             return if (parts.size >= 2) {
                 val major = parts[0].toIntOrNull() ?: 0
                 val minor = parts[1].toIntOrNull() ?: 0
                 
-                // Verificar se há patch version (ex: 2.9.1)
+                // Verificar se há patch version (ex: 2.9.1, 2.9.2)
                 if (parts.size >= 3) {
                     val patch = parts[2].toIntOrNull() ?: 0
                     // Obter versionCode base da versão major.minor
@@ -83,6 +93,8 @@ data class UpdateInfo(
                         else -> (major - 2) * 10 + minor + 5
                     }
                     // Adicionar patch ao versionCode base
+                    // v2.9.1: 11 + 1 = 12
+                    // v2.9.2: 11 + 2 = 13
                     baseVersionCode + patch
                 } else {
                     // Versão sem patch (ex: 2.9)

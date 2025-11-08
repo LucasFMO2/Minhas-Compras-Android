@@ -33,10 +33,21 @@ class UpdateManager(private val context: Context) {
             if (connection.responseCode == HttpURLConnection.HTTP_OK) {
                 val response = connection.inputStream.bufferedReader().use { it.readText() }
                 val release = json.decodeFromString<GitHubRelease>(response)
-                return@withContext UpdateInfo.fromGitHubRelease(release, currentVersionCode)
+                val updateInfo = UpdateInfo.fromGitHubRelease(release, currentVersionCode)
+                
+                // Log para debug
+                android.util.Log.d("UpdateManager", "Current versionCode: $currentVersionCode")
+                android.util.Log.d("UpdateManager", "Release tag: ${release.tag_name}")
+                android.util.Log.d("UpdateManager", "Extracted versionCode: ${updateInfo?.versionCode}")
+                android.util.Log.d("UpdateManager", "Update available: ${updateInfo != null}")
+                
+                return@withContext updateInfo
+            } else {
+                android.util.Log.e("UpdateManager", "HTTP Error: ${connection.responseCode}")
             }
             null
         } catch (e: Exception) {
+            android.util.Log.e("UpdateManager", "Error checking for update", e)
             e.printStackTrace()
             null
         }

@@ -4,8 +4,23 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 
 ## 📥 Download
 
-### 🆕 Versão 2.10.4 (Mais Recente)
+### 🆕 Versão 2.10.5 (Mais Recente)
 
+**[⬇️ Baixar APK v2.10.5](https://github.com/nerddescoladofmo-cmyk/Minhas-Compras-Android/releases/download/v2.10.5/app-release-v2.10.5.apk)**
+
+📱 **Responsividade Completa:**
+- ✅ **Sistema de responsividade completo** - App agora se adapta perfeitamente a todos os tamanhos de tela
+- 🎯 **Utilitário ResponsiveUtils** - Novo sistema de breakpoints para detectar tamanhos de tela
+- 📐 **Layout adaptativo** - FilterChips em layout vertical para telas pequenas, horizontal para maiores
+- 📏 **Padding e espaçamento responsivos** - Valores ajustados automaticamente baseados no tamanho da tela
+- 🎨 **Tamanhos de ícones adaptativos** - Ícones maiores em tablets, menores em smartphones pequenos
+- 📊 **Cards de estatísticas otimizados** - Melhor uso do espaço em diferentes tamanhos de tela
+- 💡 **ItemCompraCard responsivo** - Padding e tamanhos ajustados para cada tamanho de tela
+- 🔧 **Breakpoints implementados** - Suporte para telas muito pequenas (< 360dp), pequenas/médias (360-600dp), médias/grandes (600-840dp) e tablets (>= 840dp)
+
+### 📦 Versões Anteriores
+
+**Versão 2.10.4:**
 **[⬇️ Baixar APK v2.10.4](https://github.com/nerddescoladofmo-cmyk/Minhas-Compras-Android/releases/download/v2.10.4/app-release-v2.10.4.apk)**
 
 🎨 **Correção de UI:**
@@ -14,8 +29,6 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 - 📏 **Ajustes de espaçamento** - Reduzido espaçamento entre cards de 12.dp para 8.dp para dar mais espaço
 - 🔧 **Padding otimizado** - Aumentado padding horizontal nos cards de estatísticas de 6.dp para 8.dp
 - 💡 **Melhorias de UX** - Interface mais limpa e organizada
-
-### 📦 Versões Anteriores
 
 **Versão 2.10.3:**
 **[⬇️ Baixar APK v2.10.3](https://github.com/nerddescoladofmo-cmyk/Minhas-Compras-Android/releases/download/v2.10.3/app-release-v2.10.3.apk)**

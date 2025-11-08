@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.minhascompras.data.ItemCompra
+import com.example.minhascompras.data.SortOrder
 import com.example.minhascompras.ui.components.AdicionarItemDialog
 import com.example.minhascompras.ui.components.EstadoVazioScreen
 import com.example.minhascompras.ui.components.ItemCompraCard
@@ -52,6 +53,8 @@ fun ListaComprasScreen(
     val totalComprados = itens.filter { it.comprado }.sumOf { (it.preco ?: 0.0) * it.quantidade }
     val totalPendentes = itens.filter { !it.comprado }.sumOf { (it.preco ?: 0.0) * it.quantidade }
     val temPrecos = itens.any { it.preco != null && it.preco > 0 }
+    val sortOrder by viewModel.sortOrder.collectAsState()
+    var showSortMenu by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -74,6 +77,92 @@ fun ListaComprasScreen(
                     }
                 },
                 actions = {
+                    // Menu de Ordenação
+                    Box {
+                        IconButton(onClick = { showSortMenu = true }) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Ordenar"
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = showSortMenu,
+                            onDismissRequest = { showSortMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Nome (A-Z)") },
+                                onClick = {
+                                    viewModel.setSortOrder(SortOrder.BY_NAME_ASC)
+                                    showSortMenu = false
+                                },
+                                leadingIcon = {
+                                    if (sortOrder == SortOrder.BY_NAME_ASC) {
+                                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    }
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Nome (Z-A)") },
+                                onClick = {
+                                    viewModel.setSortOrder(SortOrder.BY_NAME_DESC)
+                                    showSortMenu = false
+                                },
+                                leadingIcon = {
+                                    if (sortOrder == SortOrder.BY_NAME_DESC) {
+                                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    }
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Data (Mais Recente)") },
+                                onClick = {
+                                    viewModel.setSortOrder(SortOrder.BY_DATE_DESC)
+                                    showSortMenu = false
+                                },
+                                leadingIcon = {
+                                    if (sortOrder == SortOrder.BY_DATE_DESC) {
+                                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    }
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Data (Mais Antiga)") },
+                                onClick = {
+                                    viewModel.setSortOrder(SortOrder.BY_DATE_ASC)
+                                    showSortMenu = false
+                                },
+                                leadingIcon = {
+                                    if (sortOrder == SortOrder.BY_DATE_ASC) {
+                                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    }
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Preço (Menor)") },
+                                onClick = {
+                                    viewModel.setSortOrder(SortOrder.BY_PRICE_ASC)
+                                    showSortMenu = false
+                                },
+                                leadingIcon = {
+                                    if (sortOrder == SortOrder.BY_PRICE_ASC) {
+                                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    }
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Preço (Maior)") },
+                                onClick = {
+                                    viewModel.setSortOrder(SortOrder.BY_PRICE_DESC)
+                                    showSortMenu = false
+                                },
+                                leadingIcon = {
+                                    if (sortOrder == SortOrder.BY_PRICE_DESC) {
+                                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    }
+                                }
+                            )
+                        }
+                    }
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(
                             imageVector = Icons.Default.Settings,

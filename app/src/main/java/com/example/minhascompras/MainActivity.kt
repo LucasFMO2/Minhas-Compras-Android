@@ -21,6 +21,7 @@ import com.example.minhascompras.data.AppDatabase
 import com.example.minhascompras.data.ItemCompraRepository
 import com.example.minhascompras.data.ThemeMode
 import com.example.minhascompras.data.ThemePreferencesManager
+import com.example.minhascompras.data.UserPreferencesManager
 import com.example.minhascompras.ui.screens.ListaComprasScreen
 import com.example.minhascompras.ui.screens.SettingsScreen
 import com.example.minhascompras.ui.theme.MinhasComprasTheme
@@ -44,10 +45,12 @@ class MainActivity : ComponentActivity() {
         
         val database = AppDatabase.getDatabase(applicationContext)
         val repository = ItemCompraRepository(database.itemCompraDao())
-        val viewModelFactory = ListaComprasViewModelFactory(repository)
         
         val themePreferencesManager = ThemePreferencesManager(applicationContext)
         val themeViewModelFactory = ThemeViewModelFactory(themePreferencesManager)
+        
+        val userPreferencesManager = UserPreferencesManager(applicationContext)
+        val viewModelFactory = ListaComprasViewModelFactory(repository, userPreferencesManager)
         
         setContent {
             val themeViewModel: ThemeViewModel = viewModel(factory = themeViewModelFactory)

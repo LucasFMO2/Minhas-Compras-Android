@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.minhascompras.data.FilterStatus
 import com.example.minhascompras.data.ItemCompra
 import com.example.minhascompras.data.ItemCompraRepository
+import com.example.minhascompras.data.SortOrder
+import com.example.minhascompras.data.UserPreferencesManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +18,10 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class ListaComprasViewModel(private val repository: ItemCompraRepository) : ViewModel() {
+class ListaComprasViewModel(
+    private val repository: ItemCompraRepository,
+    private val userPreferencesManager: UserPreferencesManager
+) : ViewModel() {
     // StateFlows para busca e filtro
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -24,14 +29,23 @@ class ListaComprasViewModel(private val repository: ItemCompraRepository) : View
     private val _filterStatus = MutableStateFlow(FilterStatus.ALL)
     val filterStatus: StateFlow<FilterStatus> = _filterStatus.asStateFlow()
 
-    // Combine search query (com debounce) e filter status para criar um flow reativo
+    // SortOrder do DataStore
+    val sortOrder: StateFlow<SortOrder> = userPreferencesManager.sortOrder
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = SortOrder.BY_DATE_DESC
+        )
+
+    // Combine search query (com debounce), filter status e sort order para criar um flow reativo
     val itens: StateFlow<List<ItemCompra>> = combine(
         _searchQuery.debounce(300L),
-        _filterStatus
-    ) { query, filter ->
-        Pair(query, filter)
-    }.flatMapLatest { (query, filter) ->
-        repository.getFilteredItens(query, filter)
+        _filterStatus,
+        sortOrder
+    ) { query, filter, sort ->
+        Triple(query, filter, sort)
+    }.flatMapLatest { (query, filter, sort) ->
+        repository.getFilteredItens(query, filter, sort)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -44,6 +58,12 @@ class ListaComprasViewModel(private val repository: ItemCompraRepository) : View
 
     fun onFilterStatusChanged(filter: FilterStatus) {
         _filterStatus.value = filter
+    }
+
+    fun setSortOrder(sortOrder: SortOrder) {
+        viewModelScope.launch {
+            userPreferencesManager.setSortOrder(sortOrder)
+        }
     }
 
     fun inserirItem(nome: String, quantidade: Int = 1, preco: Double? = null, categoria: String = "Outros") {
@@ -155,12 +175,14 @@ class ListaComprasViewModel(private val repository: ItemCompraRepository) : View
     }
 }
 
-class ListaComprasViewModelFactory(private val repository: ItemCompraRepository) :
-    ViewModelProvider.Factory {
+class ListaComprasViewModelFactory(
+    private val repository: ItemCompraRepository,
+    private val userPreferencesManager: UserPreferencesManager
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ListaComprasViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return ListaComprasViewModel(repository) as T
+            return ListaComprasViewModel(repository, userPreferencesManager) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

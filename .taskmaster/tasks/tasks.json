@@ -426,7 +426,7 @@
         "dependencies": [
           "1"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -434,9 +434,10 @@
             "description": "Establish the foundation for sorting by creating a `SortOrder` enum and a repository to persist the user's choice using Jetpack DataStore.",
             "dependencies": [],
             "details": "Create a `SortOrder` enum with values `BY_NAME`, `BY_DATE`, `BY_PRICE`. Implement a `UserPreferencesRepository` class that takes a `DataStore<Preferences>` as a dependency. This repository will expose a `Flow<SortOrder>` to read the saved preference and a `suspend fun updateSortOrder(sortOrder: SortOrder)` to write it. Provide the DataStore instance via Hilt/Dagger.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit test the repository to confirm that writing a `SortOrder` value can be correctly read back from the flow.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T02:25:31.620Z"
           },
           {
             "id": 2,
@@ -446,9 +447,10 @@
               1
             ],
             "details": "In `ItemDao`, update the main query that fetches items (`getItems`). Add a `sortOrder: String` parameter. Modify the query to include a dynamic `ORDER BY` clause, such as `ORDER BY CASE WHEN :sortOrder = 'BY_NAME' THEN name END ASC, CASE WHEN :sortOrder = 'BY_DATE' THEN id END DESC, CASE WHEN :sortOrder = 'BY_PRICE' THEN price END ASC`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Manually verify with the Database Inspector that executing the query with different sort order strings returns the items in the expected order.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T02:26:07.425Z"
           },
           {
             "id": 3,
@@ -459,9 +461,10 @@
               2
             ],
             "details": "Inject `UserPreferencesRepository` into the `ItemsViewModel`. Expose the repository's `sortOrder` flow. Update the `combine` operator that is already merging `searchQuery` and `filterState` to also include this new `sortOrder` flow. The combined flow will trigger a call to the updated `ItemDao` method with all three parameters.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Write a ViewModel unit test using Turbine to assert that when a new value is emitted from the mocked `sortOrder` flow, the repository's `getItems` method is called with the correct sorting parameter.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T02:27:07.933Z"
           },
           {
             "id": 4,
@@ -471,9 +474,10 @@
               3
             ],
             "details": "In the `MainScreen` or relevant Composable, add an `IconButton` (e.g., with `Icons.Default.Sort`) to the `TopAppBar` actions. On click, display a `DropdownMenu`. Populate the menu with `DropdownMenuItem` for each `SortOrder` option (Name, Date, Price). The currently active sort option should be visually distinct.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run the app and verify the sort icon and dropdown menu appear correctly. Manually check that the menu displays all options as designed.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T02:29:56.620Z"
           },
           {
             "id": 5,
@@ -484,11 +488,13 @@
               4
             ],
             "details": "In the `MainScreen` Composable, add a new function to the ViewModel, `fun updateSortOrder(sortOrder: SortOrder)`. Inside this function, call the corresponding method in the `UserPreferencesRepository`. The `onClick` lambda for each `DropdownMenuItem` from the previous task should call this new ViewModel function with the appropriate `SortOrder` value.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Manually test the full flow: tap the sort icon, select a new sort option (e.g., Price), and verify the list re-sorts correctly. Close and reopen the app to confirm the sorting preference is persisted and correctly applied on launch.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T02:30:11.302Z"
           }
-        ]
+        ],
+        "updatedAt": "2025-11-08T02:30:11.302Z"
       },
       {
         "id": "4",
@@ -940,9 +946,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-08T01:51:56.701Z",
+      "lastModified": "2025-11-08T02:30:11.307Z",
       "taskCount": 9,
-      "completedCount": 4,
+      "completedCount": 5,
       "tags": [
         "master"
       ]

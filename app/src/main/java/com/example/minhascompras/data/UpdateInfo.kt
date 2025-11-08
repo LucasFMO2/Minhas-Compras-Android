@@ -29,10 +29,17 @@ data class UpdateInfo(
             // Extrair versionCode do tag_name
             val versionCode = extractVersionCode(release.tag_name)
             
+            android.util.Log.d("UpdateInfo", "=== Update Check ===")
             android.util.Log.d("UpdateInfo", "Release tag: ${release.tag_name}")
             android.util.Log.d("UpdateInfo", "Extracted versionCode: $versionCode")
             android.util.Log.d("UpdateInfo", "Current versionCode: $currentVersionCode")
-            android.util.Log.d("UpdateInfo", "Is update available: ${versionCode > currentVersionCode}")
+            android.util.Log.d("UpdateInfo", "Comparison: $versionCode > $currentVersionCode = ${versionCode > currentVersionCode}")
+            
+            // Validação: versionCode deve ser maior que 0
+            if (versionCode <= 0) {
+                android.util.Log.e("UpdateInfo", "Invalid versionCode extracted: $versionCode")
+                return null
+            }
             
             // Comparação: se o versionCode extraído for maior que o atual, há atualização
             if (versionCode <= currentVersionCode) {
@@ -40,17 +47,20 @@ data class UpdateInfo(
                 return null
             }
             
+            android.util.Log.d("UpdateInfo", "Update available! New versionCode: $versionCode")
+            
             // Encontrar o asset do APK
             val apkAsset = release.assets.firstOrNull { 
                 it.name.endsWith(".apk", ignoreCase = true) 
             }
             
             if (apkAsset == null) {
-                android.util.Log.e("UpdateInfo", "No APK asset found in release")
+                android.util.Log.e("UpdateInfo", "No APK asset found in release. Assets: ${release.assets.map { it.name }}")
                 return null
             }
             
             android.util.Log.d("UpdateInfo", "APK asset found: ${apkAsset.name}")
+            android.util.Log.d("UpdateInfo", "Download URL: ${apkAsset.browser_download_url}")
             
             return UpdateInfo(
                 versionName = release.tag_name.removePrefix("v"),
@@ -73,46 +83,67 @@ data class UpdateInfo(
             // v2.9 -> versionCode 11
             // v2.9.1 -> versionCode 12
             // v2.9.2 -> versionCode 13
-            val parts = tagName.removePrefix("v").split(".")
-            return if (parts.size >= 2) {
-                val major = parts[0].toIntOrNull() ?: 0
-                val minor = parts[1].toIntOrNull() ?: 0
+            // v2.9.3 -> versionCode 14
+            try {
+                val cleanTag = tagName.removePrefix("v").removePrefix("V")
+                val parts = cleanTag.split(".")
                 
-                // Verificar se há patch version (ex: 2.9.1, 2.9.2)
-                if (parts.size >= 3) {
-                    val patch = parts[2].toIntOrNull() ?: 0
-                    // Obter versionCode base da versão major.minor
-                    val baseVersionCode = when ("$major.$minor") {
-                        "2.3" -> 5
-                        "2.4" -> 6
-                        "2.5" -> 7
-                        "2.6" -> 8
-                        "2.7" -> 9
-                        "2.8" -> 10
-                        "2.9" -> 11
-                        else -> (major - 2) * 10 + minor + 5
+                android.util.Log.d("UpdateInfo", "Extracting versionCode from tag: $tagName -> $cleanTag")
+                android.util.Log.d("UpdateInfo", "Parts: ${parts.joinToString(", ")}")
+                
+                if (parts.size >= 2) {
+                    val major = parts[0].toIntOrNull() ?: 0
+                    val minor = parts[1].toIntOrNull() ?: 0
+                    
+                    // Verificar se há patch version (ex: 2.9.1, 2.9.2, 2.9.3)
+                    if (parts.size >= 3) {
+                        val patch = parts[2].toIntOrNull() ?: 0
+                        // Obter versionCode base da versão major.minor
+                        val baseVersionCode = when ("$major.$minor") {
+                            "2.3" -> 5
+                            "2.4" -> 6
+                            "2.5" -> 7
+                            "2.6" -> 8
+                            "2.7" -> 9
+                            "2.8" -> 10
+                            "2.9" -> 11
+                            else -> (major - 2) * 10 + minor + 5
+                        }
+                        // Adicionar patch ao versionCode base
+                        // v2.9.1: 11 + 1 = 12
+                        // v2.9.2: 11 + 2 = 13
+                        // v2.9.3: 11 + 3 = 14
+                        val result = baseVersionCode + patch
+                        android.util.Log.d("UpdateInfo", "Extracted versionCode (with patch): $result (base: $baseVersionCode + patch: $patch)")
+                        return result
+                    } else {
+                        // Versão sem patch (ex: 2.9)
+                        val result = when ("$major.$minor") {
+                            "2.3" -> 5
+                            "2.4" -> 6
+                            "2.5" -> 7
+                            "2.6" -> 8
+                            "2.7" -> 9
+                            "2.8" -> 10
+                            "2.9" -> 11
+                            "2.10" -> 12
+                            "3.0" -> 13
+                            else -> (major - 2) * 10 + minor + 5
+                        }
+                        android.util.Log.d("UpdateInfo", "Extracted versionCode (no patch): $result")
+                        return result
                     }
-                    // Adicionar patch ao versionCode base
-                    // v2.9.1: 11 + 1 = 12
-                    // v2.9.2: 11 + 2 = 13
-                    baseVersionCode + patch
+                } else if (parts.size == 1) {
+                    val result = parts[0].toIntOrNull() ?: 0
+                    android.util.Log.d("UpdateInfo", "Extracted versionCode (single part): $result")
+                    return result
                 } else {
-                    // Versão sem patch (ex: 2.9)
-                    when ("$major.$minor") {
-                        "2.3" -> 5
-                        "2.4" -> 6
-                        "2.5" -> 7
-                        "2.6" -> 8
-                        "2.7" -> 9
-                        "2.8" -> 10
-                        "2.9" -> 11
-                        "2.10" -> 12
-                        "3.0" -> 13
-                        else -> (major - 2) * 10 + minor + 5
-                    }
+                    android.util.Log.e("UpdateInfo", "Invalid tag format: $tagName")
+                    return 0
                 }
-            } else {
-                parts[0].toIntOrNull() ?: 0
+            } catch (e: Exception) {
+                android.util.Log.e("UpdateInfo", "Error extracting versionCode from tag: $tagName", e)
+                return 0
             }
         }
     }

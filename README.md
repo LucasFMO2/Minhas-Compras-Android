@@ -4,19 +4,28 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 
 ## 📥 Download
 
-### 🆕 Versão 2.9.2 (Mais Recente)
+### 🆕 Versão 2.9.3 (Mais Recente)
 
+**[⬇️ Baixar APK v2.9.3](https://github.com/nerddescoladofmo-cmyk/Minhas-Compras-Android/releases/download/v2.9.3/MinhasCompras-v2.9.3-release.apk)**
+
+✨ **Novidades da v2.9.3:**
+- 🔧 **Correção definitiva do sistema de atualizações**
+- ✅ Detecção de atualizações agora funciona corretamente
+- 📊 Logs de debug melhorados e mais detalhados
+- 🎯 Validação adicional na extração do versionCode
+- 🔍 Melhor tratamento de erros e validações
+- ✅ Suporte completo para versões com patch (ex: 2.9.1, 2.9.2, 2.9.3)
+
+### 📦 Versões Anteriores
+
+**Versão 2.9.2:**
 **[⬇️ Baixar APK v2.9.2](https://github.com/nerddescoladofmo-cmyk/Minhas-Compras-Android/releases/download/v2.9.2/MinhasCompras-v2.9.2-release.apk)**
-
-✨ **Novidades da v2.9.2:**
 - 🔧 **Correção do sistema de atualizações**
 - 🔔 Notificações automáticas agora funcionam corretamente
 - 🔍 Verificação manual de atualizações corrigida
 - 📊 Logs de debug adicionados para diagnóstico
 - 🎯 Melhor tratamento de erros na verificação de atualizações
 - ✅ Suporte para versões com patch (ex: 2.9.1, 2.9.2)
-
-### 📦 Versões Anteriores
 
 **Versão 2.9.1:**
 **[⬇️ Baixar APK v2.9.1](https://github.com/nerddescoladofmo-cmyk/Minhas-Compras-Android/releases/download/v2.9.1/MinhasCompras-v2.9.1-release.apk)**

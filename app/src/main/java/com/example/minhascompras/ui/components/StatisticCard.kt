@@ -42,20 +42,21 @@ fun StatisticCard(
         ) {
             Text(
                 text = value,
-                style = MaterialTheme.typography.titleMedium,
+                fontSize = ResponsiveUtils.getStatisticValueFontSize(),
                 fontWeight = FontWeight.Bold,
                 color = color,
                 textAlign = TextAlign.Center,
-                maxLines = 2,
-                overflow = TextOverflow.Visible
+                maxLines = 1,
+                overflow = TextOverflow.Clip,
+                modifier = Modifier.fillMaxWidth()
             )
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelSmall,
+                fontSize = ResponsiveUtils.getStatisticLabelFontSize(),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
-                maxLines = 2,
-                overflow = TextOverflow.Visible,
+                maxLines = 1,
+                overflow = TextOverflow.Clip,
                 modifier = Modifier.fillMaxWidth()
             )
         }

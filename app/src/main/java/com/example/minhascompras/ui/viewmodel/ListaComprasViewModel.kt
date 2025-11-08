@@ -3,20 +3,48 @@ package com.example.minhascompras.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.minhascompras.data.FilterStatus
 import com.example.minhascompras.data.ItemCompra
 import com.example.minhascompras.data.ItemCompraRepository
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class ListaComprasViewModel(private val repository: ItemCompraRepository) : ViewModel() {
-    val itens: StateFlow<List<ItemCompra>> = repository.allItens
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+    // StateFlows para busca e filtro
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    private val _filterStatus = MutableStateFlow(FilterStatus.ALL)
+    val filterStatus: StateFlow<FilterStatus> = _filterStatus.asStateFlow()
+
+    // Combine search query (com debounce) e filter status para criar um flow reativo
+    val itens: StateFlow<List<ItemCompra>> = combine(
+        _searchQuery.debounce(300L),
+        _filterStatus
+    ) { query, filter ->
+        Pair(query, filter)
+    }.flatMapLatest { (query, filter) ->
+        repository.getFilteredItens(query, filter)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
+
+    fun onSearchQueryChanged(query: String) {
+        _searchQuery.value = query
+    }
+
+    fun onFilterStatusChanged(filter: FilterStatus) {
+        _filterStatus.value = filter
+    }
 
     fun inserirItem(nome: String, quantidade: Int = 1, preco: Double? = null, categoria: String = "Outros") {
         if (nome.isNotBlank()) {
@@ -48,6 +76,82 @@ class ListaComprasViewModel(private val repository: ItemCompraRepository) : View
         viewModelScope.launch {
             repository.deleteComprados()
         }
+    }
+
+    suspend fun getAllItensForExport(): List<ItemCompra> {
+        return repository.getAllItensList()
+    }
+
+    suspend fun importItens(items: List<ItemCompra>) {
+        repository.replaceAllItems(items)
+    }
+
+    suspend fun getShareableText(): String {
+        val itens = repository.getAllItensList()
+        if (itens.isEmpty()) {
+            return "Lista de Compras vazia"
+        }
+
+        val formatador = java.text.NumberFormat.getCurrencyInstance(java.util.Locale("pt", "BR"))
+        val builder = StringBuilder()
+        builder.append("🛒 Minhas Compras\n")
+        builder.append("=".repeat(30)).append("\n\n")
+
+        val pendentes = itens.filter { !it.comprado }
+        val comprados = itens.filter { it.comprado }
+
+        if (pendentes.isNotEmpty()) {
+            builder.append("📋 PENDENTES:\n")
+            pendentes.forEach { item ->
+                builder.append("  □ ${item.nome}")
+                if (item.quantidade > 1) {
+                    builder.append(" (${item.quantidade}x)")
+                }
+                if (item.preco != null && item.preco > 0) {
+                    builder.append(" - ${formatador.format(item.preco * item.quantidade)}")
+                }
+                if (item.categoria.isNotEmpty() && item.categoria != "Outros") {
+                    builder.append(" [${item.categoria}]")
+                }
+                builder.append("\n")
+            }
+            builder.append("\n")
+        }
+
+        if (comprados.isNotEmpty()) {
+            builder.append("✅ COMPRADOS:\n")
+            comprados.forEach { item ->
+                builder.append("  ☑ ${item.nome}")
+                if (item.quantidade > 1) {
+                    builder.append(" (${item.quantidade}x)")
+                }
+                if (item.preco != null && item.preco > 0) {
+                    builder.append(" - ${formatador.format(item.preco * item.quantidade)}")
+                }
+                if (item.categoria.isNotEmpty() && item.categoria != "Outros") {
+                    builder.append(" [${item.categoria}]")
+                }
+                builder.append("\n")
+            }
+            builder.append("\n")
+        }
+
+        val totalGeral = itens.sumOf { (it.preco ?: 0.0) * it.quantidade }
+        val totalPendentes = pendentes.sumOf { (it.preco ?: 0.0) * it.quantidade }
+        
+        builder.append("=".repeat(30)).append("\n")
+        builder.append("Total de itens: ${itens.size}\n")
+        builder.append("Pendentes: ${pendentes.size}\n")
+        builder.append("Comprados: ${comprados.size}\n")
+        
+        if (totalGeral > 0) {
+            builder.append("\n💰 Total Geral: ${formatador.format(totalGeral)}\n")
+            if (totalPendentes > 0) {
+                builder.append("💰 Total Pendente: ${formatador.format(totalPendentes)}\n")
+            }
+        }
+
+        return builder.toString()
     }
 }
 

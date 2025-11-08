@@ -4,8 +4,22 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 
 ## 📥 Download
 
-### 🆕 Versão 2.10.5 (Mais Recente)
+### 🆕 Versão 2.10.6 (Mais Recente)
 
+**[⬇️ Baixar APK v2.10.6](https://github.com/nerddescoladofmo-cmyk/Minhas-Compras-Android/releases/download/v2.10.6/app-release-v2.10.6.apk)**
+
+🔤 **Ajuste de Tamanhos de Fonte:**
+- ✅ **Fontes responsivas** - Tamanhos de fonte ajustados automaticamente para todos os tamanhos de tela
+- 📝 **Nomes de itens em uma linha** - Nomes de itens agora sempre cabem em uma linha sem quebra
+- 💰 **Valores monetários em uma linha** - Preços sempre exibidos em uma linha completa
+- 🚫 **Sem cortes com '...'** - Textos não são mais cortados com ellipsis, usando TextOverflow.Clip
+- 📐 **Sistema de fontes adaptativo** - Fontes menores em telas pequenas (13sp), maiores em tablets (16sp)
+- 🎯 **Funções de fonte responsivas** - getItemNameFontSize(), getPriceFontSize(), getStatisticValueFontSize(), etc.
+- 💡 **Melhorias de UX** - Textos sempre legíveis e completos, sem quebra de linha
+
+### 📦 Versões Anteriores
+
+**Versão 2.10.5:**
 **[⬇️ Baixar APK v2.10.5](https://github.com/nerddescoladofmo-cmyk/Minhas-Compras-Android/releases/download/v2.10.5/app-release-v2.10.5.apk)**
 
 📱 **Responsividade Completa:**
@@ -17,8 +31,6 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 - 📊 **Cards de estatísticas otimizados** - Melhor uso do espaço em diferentes tamanhos de tela
 - 💡 **ItemCompraCard responsivo** - Padding e tamanhos ajustados para cada tamanho de tela
 - 🔧 **Breakpoints implementados** - Suporte para telas muito pequenas (< 360dp), pequenas/médias (360-600dp), médias/grandes (600-840dp) e tablets (>= 840dp)
-
-### 📦 Versões Anteriores
 
 **Versão 2.10.4:**
 **[⬇️ Baixar APK v2.10.4](https://github.com/nerddescoladofmo-cmyk/Minhas-Compras-Android/releases/download/v2.10.4/app-release-v2.10.4.apk)**

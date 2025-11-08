@@ -8,7 +8,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
@@ -19,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.minhascompras.data.FilterStatus
 import com.example.minhascompras.data.ItemCompra
 import com.example.minhascompras.data.SortOrder
 import com.example.minhascompras.ui.components.AdicionarItemDialog
@@ -54,6 +57,8 @@ fun ListaComprasScreen(
     val totalPendentes = itens.filter { !it.comprado }.sumOf { (it.preco ?: 0.0) * it.quantidade }
     val temPrecos = itens.any { it.preco != null && it.preco > 0 }
     val sortOrder by viewModel.sortOrder.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
+    val filterStatus by viewModel.filterStatus.collectAsState()
     var showSortMenu by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -81,7 +86,7 @@ fun ListaComprasScreen(
                     Box {
                         IconButton(onClick = { showSortMenu = true }) {
                             Icon(
-                                imageVector = Icons.Default.Add,
+                                imageVector = Icons.Default.Settings,
                                 contentDescription = "Ordenar"
                             )
                         }
@@ -97,7 +102,7 @@ fun ListaComprasScreen(
                                 },
                                 leadingIcon = {
                                     if (sortOrder == SortOrder.BY_NAME_ASC) {
-                                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp))
                                     }
                                 }
                             )
@@ -109,7 +114,7 @@ fun ListaComprasScreen(
                                 },
                                 leadingIcon = {
                                     if (sortOrder == SortOrder.BY_NAME_DESC) {
-                                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp))
                                     }
                                 }
                             )
@@ -121,7 +126,7 @@ fun ListaComprasScreen(
                                 },
                                 leadingIcon = {
                                     if (sortOrder == SortOrder.BY_DATE_DESC) {
-                                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp))
                                     }
                                 }
                             )
@@ -133,7 +138,7 @@ fun ListaComprasScreen(
                                 },
                                 leadingIcon = {
                                     if (sortOrder == SortOrder.BY_DATE_ASC) {
-                                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp))
                                     }
                                 }
                             )
@@ -145,7 +150,7 @@ fun ListaComprasScreen(
                                 },
                                 leadingIcon = {
                                     if (sortOrder == SortOrder.BY_PRICE_ASC) {
-                                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp))
                                     }
                                 }
                             )
@@ -157,7 +162,7 @@ fun ListaComprasScreen(
                                 },
                                 leadingIcon = {
                                     if (sortOrder == SortOrder.BY_PRICE_DESC) {
-                                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp))
                                     }
                                 }
                             )
@@ -208,6 +213,50 @@ fun ListaComprasScreen(
                         .padding(horizontal = 16.dp)
                         .padding(top = 16.dp)
                 ) {
+                    // Barra de busca
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { viewModel.onSearchQueryChanged(it) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        placeholder = { Text("Pesquisar itens...") },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Buscar"
+                            )
+                        },
+                        singleLine = true,
+                        shape = MaterialTheme.shapes.medium
+                    )
+                    
+                    // Chips de filtro
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceAround
+                    ) {
+                        FilterChip(
+                            selected = filterStatus == FilterStatus.ALL,
+                            onClick = { viewModel.onFilterStatusChanged(FilterStatus.ALL) },
+                            label = { Text(FilterStatus.ALL.displayName) }
+                        )
+                        FilterChip(
+                            selected = filterStatus == FilterStatus.PENDING,
+                            onClick = { viewModel.onFilterStatusChanged(FilterStatus.PENDING) },
+                            label = { Text(FilterStatus.PENDING.displayName) }
+                        )
+                        FilterChip(
+                            selected = filterStatus == FilterStatus.PURCHASED,
+                            onClick = { viewModel.onFilterStatusChanged(FilterStatus.PURCHASED) },
+                            label = { Text(FilterStatus.PURCHASED.displayName) }
+                        )
+                    }
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
                     // Estatísticas
                     Row(
                         modifier = Modifier.fillMaxWidth(),

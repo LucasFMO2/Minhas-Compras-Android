@@ -71,19 +71,29 @@ data class UpdateInfo(
             )
         }
         
+        /**
+         * Extrai o versionCode de uma tag de versão usando fórmula genérica sequencial.
+         * Suporta versões com múltiplos níveis: major.minor.patch.build.revision...
+         * 
+         * Fórmula:
+         * - Para versões 2.x sem patch (x <= 9): versionCode = x + 2
+         * - Para versões 2.x sem patch (x >= 10): versionCode = 2*x - 4
+         * - Para versões 2.x.y com patch: versionCode = baseVersionCode(x) + y
+         * - Para versões com mais componentes (ex: 2.10.1.2): cada componente adicional incrementa sequencialmente
+         * 
+         * Exemplos de cálculo:
+         * - 2.3 = 3 + 2 = 5
+         * - 2.9 = 9 + 2 = 11
+         * - 2.9.1 = 11 + 1 = 12
+         * - 2.9.3 = 11 + 3 = 14
+         * - 2.10.0 = 2*10 - 4 = 16
+         * - 2.10.1 = 16 + 1 = 17
+         * - 2.10.1.2 = 16 + 1 + 2 = 19
+         * - 2.11.0 = 2*11 - 4 = 18
+         * - 2.11.0.1 = 18 + 0 + 1 = 19
+         * - 2.12.0 = 2*12 - 4 = 20
+         */
         private fun extractVersionCode(tagName: String): Int {
-            // Mapeamento direto de versão para versionCode
-            // Baseado no histórico real do projeto:
-            // v2.3 -> versionCode 5
-            // v2.4 -> versionCode 6
-            // v2.5 -> versionCode 7
-            // v2.6 -> versionCode 8
-            // v2.7 -> versionCode 9
-            // v2.8 -> versionCode 10
-            // v2.9 -> versionCode 11
-            // v2.9.1 -> versionCode 12
-            // v2.9.2 -> versionCode 13
-            // v2.9.3 -> versionCode 14
             try {
                 val cleanTag = tagName.removePrefix("v").removePrefix("V")
                 val parts = cleanTag.split(".")
@@ -91,56 +101,54 @@ data class UpdateInfo(
                 android.util.Log.d("UpdateInfo", "Extracting versionCode from tag: $tagName -> $cleanTag")
                 android.util.Log.d("UpdateInfo", "Parts: ${parts.joinToString(", ")}")
                 
-                if (parts.size >= 2) {
-                    val major = parts[0].toIntOrNull() ?: 0
-                    val minor = parts[1].toIntOrNull() ?: 0
-                    
-                    // Verificar se há patch version (ex: 2.9.1, 2.9.2, 2.9.3)
-                    if (parts.size >= 3) {
-                        val patch = parts[2].toIntOrNull() ?: 0
-                        // Obter versionCode base da versão major.minor
-                        val baseVersionCode = when ("$major.$minor") {
-                            "2.3" -> 5
-                            "2.4" -> 6
-                            "2.5" -> 7
-                            "2.6" -> 8
-                            "2.7" -> 9
-                            "2.8" -> 10
-                            "2.9" -> 11
-                            else -> (major - 2) * 10 + minor + 5
-                        }
-                        // Adicionar patch ao versionCode base
-                        // v2.9.1: 11 + 1 = 12
-                        // v2.9.2: 11 + 2 = 13
-                        // v2.9.3: 11 + 3 = 14
-                        val result = baseVersionCode + patch
-                        android.util.Log.d("UpdateInfo", "Extracted versionCode (with patch): $result (base: $baseVersionCode + patch: $patch)")
-                        return result
-                    } else {
-                        // Versão sem patch (ex: 2.9)
-                        val result = when ("$major.$minor") {
-                            "2.3" -> 5
-                            "2.4" -> 6
-                            "2.5" -> 7
-                            "2.6" -> 8
-                            "2.7" -> 9
-                            "2.8" -> 10
-                            "2.9" -> 11
-                            "2.10" -> 12
-                            "3.0" -> 13
-                            else -> (major - 2) * 10 + minor + 5
-                        }
-                        android.util.Log.d("UpdateInfo", "Extracted versionCode (no patch): $result")
-                        return result
-                    }
-                } else if (parts.size == 1) {
-                    val result = parts[0].toIntOrNull() ?: 0
-                    android.util.Log.d("UpdateInfo", "Extracted versionCode (single part): $result")
-                    return result
-                } else {
-                    android.util.Log.e("UpdateInfo", "Invalid tag format: $tagName")
+                if (parts.size < 2) {
+                    android.util.Log.e("UpdateInfo", "Invalid tag format (need at least major.minor): $tagName")
                     return 0
                 }
+                
+                val major = parts[0].toIntOrNull() ?: 0
+                val minor = parts[1].toIntOrNull() ?: 0
+                
+                // Validar major version
+                if (major != 2) {
+                    android.util.Log.w("UpdateInfo", "Unsupported major version: $major. Using generic formula.")
+                }
+                
+                // Calcular baseVersionCode para versão major.minor sem patch
+                // Fórmula genérica sequencial baseada no padrão observado:
+                // - Para 2.x (x <= 9): versionCode = x + 2
+                // - Para 2.x (x >= 10): versionCode = x + 6 + (x - 10) = 2*x - 4
+                //   Isso garante: 2.10.0 = 16, 2.11.0 = 18, 2.12.0 = 20, etc.
+                // - Para outras majors: usar fórmula genérica
+                val baseVersionCode = when {
+                    major == 2 && minor >= 3 && minor <= 9 -> minor + 2
+                    major == 2 && minor >= 10 -> 2 * minor - 4  // 2.10.0 = 16, 2.11.0 = 18, 2.12.0 = 20
+                    else -> (major - 2) * 10 + minor + 5  // Fórmula genérica para futuras majors
+                }
+                
+                // Processar componentes adicionais (patch, build, revision, etc.)
+                // Cada componente adicional incrementa o versionCode sequencialmente
+                // Ex: 2.10.1.2 = baseVersionCode(2.10) + 1 + 2 = 16 + 1 + 2 = 19
+                var result = baseVersionCode
+                if (parts.size >= 3) {
+                    // Processar todos os componentes após major.minor
+                    val additionalComponents = parts.subList(2, parts.size)
+                    val componentValues = additionalComponents.mapNotNull { it.toIntOrNull() }
+                    
+                    if (componentValues.isNotEmpty()) {
+                        val sum = componentValues.sum()
+                        result = baseVersionCode + sum
+                        android.util.Log.d("UpdateInfo", "Extracted versionCode (with ${additionalComponents.size} additional components): $result (base: $baseVersionCode + sum: $sum)")
+                        android.util.Log.d("UpdateInfo", "Component values: ${componentValues.joinToString(", ")}")
+                    } else {
+                        android.util.Log.w("UpdateInfo", "Invalid component values in tag: $tagName")
+                    }
+                } else {
+                    // Versão sem componentes adicionais (ex: 2.9, 2.10)
+                    android.util.Log.d("UpdateInfo", "Extracted versionCode (no additional components): $baseVersionCode")
+                }
+                
+                return result
             } catch (e: Exception) {
                 android.util.Log.e("UpdateInfo", "Error extracting versionCode from tag: $tagName", e)
                 return 0

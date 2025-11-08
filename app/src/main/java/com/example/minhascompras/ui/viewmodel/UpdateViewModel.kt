@@ -7,6 +7,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.minhascompras.data.UpdateInfo
 import com.example.minhascompras.data.UpdateManager
+import com.example.minhascompras.data.UpdateNotificationManager
+import com.example.minhascompras.data.UpdatePreferencesManager
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,6 +27,8 @@ sealed class UpdateState {
 
 class UpdateViewModel(private val context: Context) : ViewModel() {
     private val updateManager = UpdateManager(context)
+    private val notificationManager = UpdateNotificationManager(context)
+    private val preferencesManager = UpdatePreferencesManager(context)
     
     private val _updateState = MutableStateFlow<UpdateState>(UpdateState.Idle)
     val updateState: StateFlow<UpdateState> = _updateState.asStateFlow()
@@ -51,16 +56,47 @@ class UpdateViewModel(private val context: Context) : ViewModel() {
         }
     }
     
-    fun checkForUpdate() {
+    fun checkForUpdate(showNotification: Boolean = false) {
         viewModelScope.launch {
             _updateState.value = UpdateState.Checking
             val currentVersionCode = getCurrentVersionCode()
             val updateInfo = updateManager.checkForUpdate(currentVersionCode)
             
+            // Salvar timestamp da verificação
+            preferencesManager.setLastCheckTime()
+            
             if (updateInfo != null) {
                 _updateState.value = UpdateState.UpdateAvailable(updateInfo)
+                // Mostrar notificação se solicitado
+                if (showNotification) {
+                    notificationManager.showUpdateAvailableNotification(
+                        updateInfo.versionName,
+                        updateInfo.releaseNotes
+                    )
+                }
             } else {
                 _updateState.value = UpdateState.Error("Você já está na versão mais recente!")
+            }
+        }
+    }
+    
+    fun checkForUpdateInBackground() {
+        viewModelScope.launch {
+            // Verificar se deve fazer a verificação (evitar verificar toda vez)
+            if (preferencesManager.shouldCheckForUpdate()) {
+                val currentVersionCode = getCurrentVersionCode()
+                val updateInfo = updateManager.checkForUpdate(currentVersionCode)
+                
+                // Salvar timestamp da verificação
+                preferencesManager.setLastCheckTime()
+                
+                // Se há atualização disponível, mostrar notificação
+                if (updateInfo != null) {
+                    notificationManager.showUpdateAvailableNotification(
+                        updateInfo.versionName,
+                        updateInfo.releaseNotes
+                    )
+                }
             }
         }
     }

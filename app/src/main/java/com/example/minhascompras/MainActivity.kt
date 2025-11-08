@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -32,6 +33,9 @@ import com.example.minhascompras.ui.viewmodel.ThemeViewModelFactory
 import com.example.minhascompras.ui.viewmodel.UpdateViewModel
 import com.example.minhascompras.ui.viewmodel.UpdateViewModelFactory
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 sealed class Screen(val route: String) {
     object ListaCompras : Screen("lista_compras")
@@ -52,6 +56,13 @@ class MainActivity : ComponentActivity() {
         val userPreferencesManager = UserPreferencesManager(applicationContext)
         val viewModelFactory = ListaComprasViewModelFactory(repository, userPreferencesManager)
         
+        // Verificar atualizações automaticamente após um delay
+        lifecycleScope.launch {
+            delay(3000) // Aguardar 3 segundos após abrir o app
+            val updateViewModel = UpdateViewModel(applicationContext)
+            updateViewModel.checkForUpdateInBackground()
+        }
+        
         setContent {
             val themeViewModel: ThemeViewModel = viewModel(factory = themeViewModelFactory)
             val themeMode by themeViewModel.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
@@ -70,6 +81,14 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val navController = rememberNavController()
                     val viewModel: ListaComprasViewModel = viewModel(factory = viewModelFactory)
+                    
+                    // Verificar se deve abrir configurações (vindo da notificação)
+                    val shouldOpenSettings = intent?.getBooleanExtra("open_settings", false) ?: false
+                    LaunchedEffect(shouldOpenSettings) {
+                        if (shouldOpenSettings) {
+                            navController.navigate(Screen.Settings.route)
+                        }
+                    }
                     
                     NavHost(
                         navController = navController,

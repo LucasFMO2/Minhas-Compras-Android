@@ -53,21 +53,46 @@ data class UpdateInfo(
         }
         
         private fun extractVersionCode(tagName: String): Int {
-            // Remove "v" e calcula versionCode baseado na versão
-            // Ex: "v2.6" -> calcula um versionCode baseado na versão
-            // Como o versionCode no build.gradle é incremental (8 para v2.6),
-            // vamos usar uma fórmula simples: major * 10 + minor
-            // Mas para manter compatibilidade, vamos usar apenas o número após o ponto
-            // e adicionar um offset baseado no major
+            // Mapeamento direto de versão para versionCode
+            // Baseado no histórico real do projeto:
+            // v2.3 -> versionCode 5
+            // v2.4 -> versionCode 6
+            // v2.5 -> versionCode 7
+            // v2.6 -> versionCode 8
+            // v2.7 -> versionCode 9
+            // v2.8 -> versionCode 10
+            // Padrão: versionCode = major * 2 + minor + 1 (para versões 2.x)
             val parts = tagName.removePrefix("v").split(".")
             return if (parts.size >= 2) {
                 val major = parts[0].toIntOrNull() ?: 0
                 val minor = parts[1].toIntOrNull() ?: 0
-                // Fórmula: major * 10 + minor (ex: 2.6 -> 2*10 + 6 = 26)
-                // Mas como o versionCode atual é 8, vamos usar apenas o minor + offset
-                // Para v2.6 (versionCode 8), vamos usar: 2*4 + 0 = 8 (ajustar conforme necessário)
-                // Simplificando: usar major * 4 + minor para aproximar do versionCode real
-                major * 4 + minor
+                // Fórmula: major * 2 + minor + 1
+                // v2.3: 2*2 + 3 + 1 = 8 (mas deveria ser 5, então ajustar)
+                // v2.4: 2*2 + 4 + 1 = 9 (mas deveria ser 6)
+                // v2.5: 2*2 + 5 + 1 = 10 (mas deveria ser 7)
+                // v2.6: 2*2 + 6 + 1 = 11 (mas deveria ser 8)
+                // v2.7: 2*2 + 7 + 1 = 12 (mas deveria ser 9)
+                // v2.8: 2*2 + 8 + 1 = 13 (mas deveria ser 10)
+                // Fórmula correta: major * 2 + minor - 1
+                // v2.3: 2*2 + 3 - 1 = 6 (ainda não)
+                // Melhor usar uma tabela de mapeamento
+                when ("$major.$minor") {
+                    "2.3" -> 5
+                    "2.4" -> 6
+                    "2.5" -> 7
+                    "2.6" -> 8
+                    "2.7" -> 9
+                    "2.8" -> 10
+                    "2.9" -> 11
+                    "2.10" -> 12
+                    "3.0" -> 13
+                    else -> {
+                        // Fórmula genérica para versões futuras
+                        // Baseado no padrão: versionCode = (major - 2) * 10 + minor + 5
+                        // Mas ajustando para o padrão real observado
+                        (major - 2) * 10 + minor + 5
+                    }
+                }
             } else {
                 parts[0].toIntOrNull() ?: 0
             }

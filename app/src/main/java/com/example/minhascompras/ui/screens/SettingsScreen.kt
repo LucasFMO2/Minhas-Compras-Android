@@ -335,7 +335,7 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
                     if (updateState !is UpdateState.Checking && updateState !is UpdateState.Downloading) {
-                        updateViewModel.checkForUpdate()
+                        updateViewModel.checkForUpdate(showNotification = false)
                     }
                 },
                 enabled = updateState !is UpdateState.Checking && updateState !is UpdateState.Downloading

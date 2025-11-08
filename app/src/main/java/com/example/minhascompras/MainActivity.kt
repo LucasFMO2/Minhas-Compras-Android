@@ -28,6 +28,9 @@ import com.example.minhascompras.ui.viewmodel.ListaComprasViewModel
 import com.example.minhascompras.ui.viewmodel.ListaComprasViewModelFactory
 import com.example.minhascompras.ui.viewmodel.ThemeViewModel
 import com.example.minhascompras.ui.viewmodel.ThemeViewModelFactory
+import com.example.minhascompras.ui.viewmodel.UpdateViewModel
+import com.example.minhascompras.ui.viewmodel.UpdateViewModelFactory
+import androidx.compose.ui.platform.LocalContext
 
 sealed class Screen(val route: String) {
     object ListaCompras : Screen("lista_compras")
@@ -78,9 +81,13 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable(Screen.Settings.route) {
+                            val updateViewModel: UpdateViewModel = viewModel(
+                                factory = UpdateViewModelFactory(LocalContext.current)
+                            )
                             SettingsScreen(
                                 viewModel = viewModel,
                                 themeViewModel = themeViewModel,
+                                updateViewModel = updateViewModel,
                                 onNavigateBack = {
                                     navController.popBackStack()
                                 }

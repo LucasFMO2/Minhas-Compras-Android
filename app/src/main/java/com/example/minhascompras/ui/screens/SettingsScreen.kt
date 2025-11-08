@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -20,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import com.example.minhascompras.data.ThemeMode
 import com.example.minhascompras.ui.viewmodel.ListaComprasViewModel
 import com.example.minhascompras.ui.viewmodel.ThemeViewModel
+import com.example.minhascompras.ui.viewmodel.UpdateViewModel
+import com.example.minhascompras.ui.viewmodel.UpdateState
 import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -36,6 +39,7 @@ import java.util.*
 fun SettingsScreen(
     viewModel: ListaComprasViewModel,
     themeViewModel: ThemeViewModel,
+    updateViewModel: UpdateViewModel,
     onNavigateBack: () -> Unit
 ) {
     val context = LocalContext.current
@@ -312,6 +316,146 @@ fun SettingsScreen(
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Seção de Atualizações
+            Text(
+                "Atualizações",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            val updateState by updateViewModel.updateState.collectAsState()
+            val currentVersion = updateViewModel.getCurrentVersionName()
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    if (updateState !is UpdateState.Checking && updateState !is UpdateState.Downloading) {
+                        updateViewModel.checkForUpdate()
+                    }
+                },
+                enabled = updateState !is UpdateState.Checking && updateState !is UpdateState.Downloading
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            "Verificar Atualizações",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            when (val state = updateState) {
+                                is UpdateState.Idle -> "Versão atual: $currentVersion"
+                                is UpdateState.Checking -> "Verificando..."
+                                is UpdateState.UpdateAvailable -> "Nova versão disponível: ${state.updateInfo.versionName}"
+                                is UpdateState.Downloading -> "Baixando: ${state.progress}%"
+                                is UpdateState.DownloadComplete -> "Download concluído! Toque para instalar"
+                                is UpdateState.Error -> state.message
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Icon(
+                        imageVector = when (updateState) {
+                            is UpdateState.Checking -> Icons.Default.Refresh
+                            is UpdateState.UpdateAvailable -> Icons.Default.Add
+                            is UpdateState.DownloadComplete -> Icons.Default.Settings
+                            else -> Icons.Default.Settings
+                        },
+                        contentDescription = "Atualizações",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            // Diálogo de atualização disponível
+            when (val state = updateState) {
+                is UpdateState.UpdateAvailable -> {
+                    AlertDialog(
+                        onDismissRequest = { updateViewModel.resetState() },
+                        title = { Text("Atualização Disponível") },
+                        text = {
+                            Column {
+                                Text("Nova versão: ${state.updateInfo.versionName}")
+                                Spacer(modifier = Modifier.height(8.dp))
+                                if (state.updateInfo.releaseNotes.isNotEmpty()) {
+                                    Text(
+                                        "Novidades:",
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(state.updateInfo.releaseNotes)
+                                }
+                            }
+                        },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    updateViewModel.downloadUpdate(state.updateInfo)
+                                }
+                            ) {
+                                Text("Baixar e Instalar")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { updateViewModel.resetState() }) {
+                                Text("Depois")
+                            }
+                        }
+                    )
+                }
+                is UpdateState.DownloadComplete -> {
+                    AlertDialog(
+                        onDismissRequest = { },
+                        title = { Text("Download Concluído") },
+                        text = { Text("A atualização foi baixada. Deseja instalar agora?") },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    updateViewModel.installUpdate(state.apkFile)
+                                }
+                            ) {
+                                Text("Instalar")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { updateViewModel.resetState() }) {
+                                Text("Depois")
+                            }
+                        }
+                    )
+                }
+                is UpdateState.Error -> {
+                    AlertDialog(
+                        onDismissRequest = { updateViewModel.resetState() },
+                        title = { Text("Erro") },
+                        text = { Text(state.message) },
+                        confirmButton = {
+                            TextButton(onClick = { updateViewModel.resetState() }) {
+                                Text("OK")
+                            }
+                        }
+                    )
+                }
+                else -> {}
+            }
+
+            // Barra de progresso durante download
+            if (updateState is UpdateState.Downloading) {
+                LinearProgressIndicator(
+                    progress = { (updateState as UpdateState.Downloading).progress / 100f },
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
 
             Spacer(modifier = Modifier.height(8.dp))

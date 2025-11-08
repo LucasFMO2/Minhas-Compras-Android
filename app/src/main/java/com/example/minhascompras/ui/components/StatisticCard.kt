@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.minhascompras.ui.utils.ResponsiveUtils
 
 @Composable
 fun StatisticCard(
@@ -32,9 +33,12 @@ fun StatisticCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 12.dp),
+                .padding(
+                    horizontal = ResponsiveUtils.getStatisticCardHorizontalPadding(),
+                    vertical = ResponsiveUtils.getVerticalPadding()
+                ),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSmallSpacing())
         ) {
             Text(
                 text = value,
@@ -50,10 +54,9 @@ fun StatisticCard(
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.fillMaxWidth(),
-                softWrap = false
+                maxLines = 2,
+                overflow = TextOverflow.Visible,
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }

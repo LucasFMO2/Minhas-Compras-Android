@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.example.minhascompras.data.ItemCompra
+import com.example.minhascompras.ui.utils.ResponsiveUtils
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -49,19 +50,20 @@ fun ItemCompraCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(ResponsiveUtils.getCardPadding()),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row(
                 modifier = Modifier.weight(1f),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSpacing())
             ) {
                 // Ícone visual
+                val iconSize = if (ResponsiveUtils.isSmallScreen()) 40.dp else 48.dp
                 Box(
                     modifier = Modifier
-                        .size(48.dp)
+                        .size(iconSize)
                         .clip(CircleShape)
                         .background(
                             if (item.comprado) {
@@ -75,7 +77,7 @@ fun ItemCompraCard(
                     Icon(
                         imageVector = Icons.Default.ShoppingCart,
                         contentDescription = "Ícone de item de compra",
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier.size(ResponsiveUtils.getIconSize()),
                         tint = if (item.comprado) {
                             MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f)
                         } else {
@@ -101,9 +103,9 @@ fun ItemCompraCard(
                         }
                     )
                     
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(ResponsiveUtils.getSmallSpacing()))
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSmallSpacing()),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         if (item.quantidade > 1) {
@@ -143,7 +145,7 @@ fun ItemCompraCard(
             // Checkbox e botões de ação
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                horizontalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSmallSpacing())
             ) {
                 AnimatedContent(
                     targetState = item.comprado,
@@ -161,27 +163,29 @@ fun ItemCompraCard(
                     )
                 }
                 
+                val buttonSize = if (ResponsiveUtils.isSmallScreen()) 36.dp else 40.dp
+                val iconButtonSize = if (ResponsiveUtils.isSmallScreen()) 18.dp else 20.dp
                 IconButton(
                     onClick = onEdit,
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(buttonSize)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = "Editar",
                         tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(iconButtonSize)
                     )
                 }
                 
                 IconButton(
                     onClick = onDelete,
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(buttonSize)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Deletar",
                         tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(iconButtonSize)
                     )
                 }
             }

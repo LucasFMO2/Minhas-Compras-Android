@@ -32,6 +32,7 @@ import com.example.minhascompras.ui.components.AdicionarItemDialog
 import com.example.minhascompras.ui.components.EstadoVazioScreen
 import com.example.minhascompras.ui.components.ItemCompraCard
 import com.example.minhascompras.ui.components.StatisticCard
+import com.example.minhascompras.ui.utils.ResponsiveUtils
 import com.example.minhascompras.ui.viewmodel.ListaComprasViewModel
 import java.text.NumberFormat
 import java.util.Locale
@@ -252,13 +253,14 @@ fun ListaComprasScreen(
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier.padding(32.dp)
+                        verticalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSpacing()),
+                        modifier = Modifier.padding(ResponsiveUtils.getHorizontalPadding())
                     ) {
+                        val emptyIconSize = if (ResponsiveUtils.isSmallScreen()) 60.dp else 80.dp
                         Icon(
                             imageVector = Icons.Default.ShoppingCart,
                             contentDescription = "Nenhum item encontrado",
-                            modifier = Modifier.size(80.dp),
+                            modifier = Modifier.size(emptyIconSize),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                         )
                         Text(
@@ -294,8 +296,8 @@ fun ListaComprasScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 16.dp)
-                        .padding(top = 16.dp)
+                        .padding(horizontal = ResponsiveUtils.getHorizontalPadding())
+                        .padding(top = ResponsiveUtils.getVerticalPadding())
                 ) {
                     // Barra de busca
                     OutlinedTextField(
@@ -303,7 +305,7 @@ fun ListaComprasScreen(
                         onValueChange = { viewModel.onSearchQueryChanged(it) },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp),
+                            .padding(vertical = ResponsiveUtils.getSmallSpacing()),
                         placeholder = { Text("Pesquisar itens...") },
                         leadingIcon = {
                             Icon(
@@ -316,12 +318,47 @@ fun ListaComprasScreen(
                     )
                     
                     // Chips de filtro
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceAround
-                    ) {
+                    if (ResponsiveUtils.isSmallScreen()) {
+                        // Layout vertical para telas pequenas
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = ResponsiveUtils.getSmallSpacing()),
+                            verticalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSmallSpacing())
+                        ) {
+                            FilterChip(
+                                selected = filterStatus == FilterStatus.ALL,
+                                onClick = { viewModel.onFilterStatusChanged(FilterStatus.ALL) },
+                                label = { Text(FilterStatus.ALL.displayName) },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            FilterChip(
+                                selected = filterStatus == FilterStatus.PENDING,
+                                onClick = { viewModel.onFilterStatusChanged(FilterStatus.PENDING) },
+                                label = { Text(FilterStatus.PENDING.displayName) },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            FilterChip(
+                                selected = filterStatus == FilterStatus.PURCHASED,
+                                onClick = { viewModel.onFilterStatusChanged(FilterStatus.PURCHASED) },
+                                label = { 
+                                    Text(
+                                        FilterStatus.PURCHASED.displayName,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Visible
+                                    ) 
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    } else {
+                        // Layout horizontal para telas maiores
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = ResponsiveUtils.getSmallSpacing()),
+                            horizontalArrangement = Arrangement.SpaceAround
+                        ) {
                         FilterChip(
                             selected = filterStatus == FilterStatus.ALL,
                             onClick = { viewModel.onFilterStatusChanged(FilterStatus.ALL) },
@@ -332,25 +369,26 @@ fun ListaComprasScreen(
                             onClick = { viewModel.onFilterStatusChanged(FilterStatus.PENDING) },
                             label = { Text(FilterStatus.PENDING.displayName) }
                         )
-                        FilterChip(
-                            selected = filterStatus == FilterStatus.PURCHASED,
-                            onClick = { viewModel.onFilterStatusChanged(FilterStatus.PURCHASED) },
-                            label = { 
-                                Text(
-                                    FilterStatus.PURCHASED.displayName,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                ) 
-                            }
-                        )
+                            FilterChip(
+                                selected = filterStatus == FilterStatus.PURCHASED,
+                                onClick = { viewModel.onFilterStatusChanged(FilterStatus.PURCHASED) },
+                                label = { 
+                                    Text(
+                                        FilterStatus.PURCHASED.displayName,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Visible
+                                    ) 
+                                }
+                            )
+                        }
                     }
                     
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(ResponsiveUtils.getSmallSpacing()))
                     
                     // Estatísticas
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(ResponsiveUtils.getStatisticCardSpacing())
                     ) {
                         StatisticCard(
                             label = "Total",
@@ -373,10 +411,10 @@ fun ListaComprasScreen(
                     
                     // Estatísticas de preços (se houver preços)
                     if (temPrecos) {
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(ResponsiveUtils.getSpacing()))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(ResponsiveUtils.getStatisticCardSpacing())
                         ) {
                             StatisticCard(
                                 label = "Total Geral",
@@ -401,7 +439,7 @@ fun ListaComprasScreen(
 
                     // Barra de progresso
                     if (totalItens > 0) {
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(ResponsiveUtils.getSpacing()))
                         Column {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -467,8 +505,10 @@ fun ListaComprasScreen(
 
                     // Lista de itens
                     LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        contentPadding = PaddingValues(bottom = 120.dp),
+                        verticalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSpacing()),
+                        contentPadding = PaddingValues(
+                            bottom = if (ResponsiveUtils.isSmallScreen()) 100.dp else 120.dp
+                        ),
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(

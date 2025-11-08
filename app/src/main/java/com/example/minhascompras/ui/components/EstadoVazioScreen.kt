@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.minhascompras.ui.utils.ResponsiveUtils
 
 @Composable
 fun EstadoVazioScreen(
@@ -23,19 +24,20 @@ fun EstadoVazioScreen(
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-            modifier = Modifier.padding(32.dp)
+            verticalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSpacing()),
+            modifier = Modifier.padding(ResponsiveUtils.getHorizontalPadding())
         ) {
+            val emptyIconSize = if (ResponsiveUtils.isSmallScreen()) 80.dp else 120.dp
             Icon(
                 imageVector = Icons.Default.ShoppingCart,
                 contentDescription = "Ícone de carrinho de compras vazio",
-                modifier = Modifier.size(120.dp),
+                modifier = Modifier.size(emptyIconSize),
                 tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
             )
             
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSmallSpacing())
             ) {
                 Text(
                     text = "Sua lista está vazia!",

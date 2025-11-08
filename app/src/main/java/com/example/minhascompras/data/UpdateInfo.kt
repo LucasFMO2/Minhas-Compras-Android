@@ -72,27 +72,18 @@ data class UpdateInfo(
         }
         
         private fun extractVersionCode(tagName: String): Int {
-            // Lógica automática para calcular versionCode a partir do versionName
-            // Fórmula baseada no histórico real do projeto:
-            // 
-            // Histórico:
-            // - 2.3 -> 5
-            // - 2.4 -> 6
-            // - 2.5 -> 7
-            // - 2.6 -> 8
-            // - 2.7 -> 9
-            // - 2.8 -> 10
-            // - 2.9 -> 11
-            // - 2.9.1 -> 12 (11 + 1)
-            // - 2.9.2 -> 13 (11 + 2)
-            // - 2.9.3 -> 14 (11 + 3)
-            // - 2.10.0 -> 16
-            //
-            // Fórmula para versões 2.x:
-            // - Para minor < 10: baseVersionCode = minor + 2
-            // - Para minor >= 10: baseVersionCode = (major - 2) * 10 + minor + 5 + 1
-            // - Para patch versions: versionCode = baseVersionCode + patch
-            
+            // Mapeamento direto de versão para versionCode
+            // Baseado no histórico real do projeto:
+            // v2.3 -> versionCode 5
+            // v2.4 -> versionCode 6
+            // v2.5 -> versionCode 7
+            // v2.6 -> versionCode 8
+            // v2.7 -> versionCode 9
+            // v2.8 -> versionCode 10
+            // v2.9 -> versionCode 11
+            // v2.9.1 -> versionCode 12
+            // v2.9.2 -> versionCode 13
+            // v2.9.3 -> versionCode 14
             try {
                 val cleanTag = tagName.removePrefix("v").removePrefix("V")
                 val parts = cleanTag.split(".")
@@ -104,29 +95,45 @@ data class UpdateInfo(
                     val major = parts[0].toIntOrNull() ?: 0
                     val minor = parts[1].toIntOrNull() ?: 0
                     
-                    // Calcular baseVersionCode usando fórmula automática
-                    val baseVersionCode = if (minor < 10) {
-                        // Para versões 2.3 até 2.9: baseVersionCode = minor + 2
-                        minor + 2
-                    } else {
-                        // Para versões 2.10+: baseVersionCode = (major - 2) * 10 + minor + 5 + 1
-                        (major - 2) * 10 + minor + 5 + 1
-                    }
-                    
-                    // Verificar se há patch version (ex: 2.9.1, 2.9.2, 2.9.3, 2.10.0)
+                    // Verificar se há patch version (ex: 2.9.1, 2.9.2, 2.9.3)
                     if (parts.size >= 3) {
                         val patch = parts[2].toIntOrNull() ?: 0
-                        // Adicionar patch ao baseVersionCode
+                        // Obter versionCode base da versão major.minor
+                        val baseVersionCode = when ("$major.$minor") {
+                            "2.3" -> 5
+                            "2.4" -> 6
+                            "2.5" -> 7
+                            "2.6" -> 8
+                            "2.7" -> 9
+                            "2.8" -> 10
+                            "2.9" -> 11
+                            else -> (major - 2) * 10 + minor + 5
+                        }
+                        // Adicionar patch ao versionCode base
+                        // v2.9.1: 11 + 1 = 12
+                        // v2.9.2: 11 + 2 = 13
+                        // v2.9.3: 11 + 3 = 14
                         val result = baseVersionCode + patch
                         android.util.Log.d("UpdateInfo", "Extracted versionCode (with patch): $result (base: $baseVersionCode + patch: $patch)")
                         return result
                     } else {
-                        // Versão sem patch (ex: 2.9, 2.10)
-                        android.util.Log.d("UpdateInfo", "Extracted versionCode (no patch): $baseVersionCode")
-                        return baseVersionCode
+                        // Versão sem patch (ex: 2.9)
+                        val result = when ("$major.$minor") {
+                            "2.3" -> 5
+                            "2.4" -> 6
+                            "2.5" -> 7
+                            "2.6" -> 8
+                            "2.7" -> 9
+                            "2.8" -> 10
+                            "2.9" -> 11
+                            "2.10" -> 12
+                            "3.0" -> 13
+                            else -> (major - 2) * 10 + minor + 5
+                        }
+                        android.util.Log.d("UpdateInfo", "Extracted versionCode (no patch): $result")
+                        return result
                     }
                 } else if (parts.size == 1) {
-                    // Versão com apenas major (ex: 2, 3)
                     val result = parts[0].toIntOrNull() ?: 0
                     android.util.Log.d("UpdateInfo", "Extracted versionCode (single part): $result")
                     return result

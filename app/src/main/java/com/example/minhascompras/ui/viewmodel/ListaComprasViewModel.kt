@@ -59,7 +59,7 @@ class ListaComprasViewModel(
     // Observar quando todos os itens estão comprados para arquivar automaticamente
     init {
         viewModelScope.launch {
-            itens.collect { items ->
+            repository.allItens.collect { items ->
                 if (items.isNotEmpty() && items.all { it.comprado }) {
                     // Todos os itens estão comprados, arquivar a lista
                     repository.archiveCurrentList(items)

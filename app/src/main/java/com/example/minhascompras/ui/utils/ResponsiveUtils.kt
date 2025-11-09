@@ -3,9 +3,7 @@ package com.example.minhascompras.ui.utils
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
 /**
  * Utilitários para criar layouts responsivos baseados no tamanho da tela
@@ -165,76 +163,6 @@ object ResponsiveUtils {
     @Composable
     fun isLargeScreen(): Boolean {
         return getScreenWidth().value >= 600
-    }
-    
-    /**
-     * Retorna tamanho de fonte para nomes de itens baseado no tamanho da tela
-     */
-    @Composable
-    fun getItemNameFontSize(): TextUnit {
-        val screenWidth = getScreenWidth().value
-        return when {
-            screenWidth < 360 -> 13.sp  // Telas muito pequenas
-            screenWidth < 600 -> 14.sp  // Telas pequenas/médias
-            screenWidth < 840 -> 15.sp  // Telas médias/grandes
-            else -> 16.sp               // Telas grandes/tablets
-        }
-    }
-    
-    /**
-     * Retorna tamanho de fonte para valores monetários baseado no tamanho da tela
-     */
-    @Composable
-    fun getPriceFontSize(): TextUnit {
-        val screenWidth = getScreenWidth().value
-        return when {
-            screenWidth < 360 -> 10.sp  // Telas muito pequenas
-            screenWidth < 600 -> 11.sp  // Telas pequenas/médias
-            screenWidth < 840 -> 12.sp  // Telas médias/grandes
-            else -> 13.sp                // Telas grandes/tablets
-        }
-    }
-    
-    /**
-     * Retorna tamanho de fonte para valores de estatísticas baseado no tamanho da tela
-     */
-    @Composable
-    fun getStatisticValueFontSize(): TextUnit {
-        val screenWidth = getScreenWidth().value
-        return when {
-            screenWidth < 360 -> 14.sp  // Telas muito pequenas
-            screenWidth < 600 -> 16.sp  // Telas pequenas/médias
-            screenWidth < 840 -> 18.sp  // Telas médias/grandes
-            else -> 20.sp                // Telas grandes/tablets
-        }
-    }
-    
-    /**
-     * Retorna tamanho de fonte para labels de estatísticas baseado no tamanho da tela
-     */
-    @Composable
-    fun getStatisticLabelFontSize(): TextUnit {
-        val screenWidth = getScreenWidth().value
-        return when {
-            screenWidth < 360 -> 9.sp   // Telas muito pequenas
-            screenWidth < 600 -> 10.sp  // Telas pequenas/médias
-            screenWidth < 840 -> 11.sp  // Telas médias/grandes
-            else -> 12.sp                // Telas grandes/tablets
-        }
-    }
-    
-    /**
-     * Retorna tamanho de fonte para quantidade baseado no tamanho da tela
-     */
-    @Composable
-    fun getQuantityFontSize(): TextUnit {
-        val screenWidth = getScreenWidth().value
-        return when {
-            screenWidth < 360 -> 9.sp   // Telas muito pequenas
-            screenWidth < 600 -> 10.sp  // Telas pequenas/médias
-            screenWidth < 840 -> 11.sp  // Telas médias/grandes
-            else -> 12.sp                // Telas grandes/tablets
-        }
     }
 }
 

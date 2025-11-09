@@ -17,7 +17,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.minhascompras.data.ItemCompra
 import com.example.minhascompras.ui.utils.ResponsiveUtils
@@ -90,7 +89,7 @@ fun ItemCompraCard(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = item.nome,
-                        fontSize = ResponsiveUtils.getItemNameFontSize(),
+                        style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.SemiBold,
                         textDecoration = if (item.comprado) {
                             TextDecoration.LineThrough
@@ -101,10 +100,7 @@ fun ItemCompraCard(
                             MaterialTheme.colorScheme.onSurfaceVariant
                         } else {
                             MaterialTheme.colorScheme.onSurface
-                        },
-                        maxLines = 1,
-                        overflow = TextOverflow.Clip,
-                        modifier = Modifier.fillMaxWidth()
+                        }
                     )
                     
                     Spacer(modifier = Modifier.height(ResponsiveUtils.getSmallSpacing()))
@@ -120,12 +116,10 @@ fun ItemCompraCard(
                             ) {
                                 Text(
                                     text = "Qtd: ${item.quantidade}",
-                                    fontSize = ResponsiveUtils.getQuantityFontSize(),
+                                    style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Medium,
                                     color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Clip
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                 )
                             }
                         }
@@ -137,12 +131,10 @@ fun ItemCompraCard(
                             ) {
                                 Text(
                                     text = formatador.format(item.preco),
-                                    fontSize = ResponsiveUtils.getPriceFontSize(),
+                                    style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onTertiaryContainer,
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Clip
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                 )
                             }
                         }

@@ -332,8 +332,9 @@ fun ListaComprasScreen(
                                 label = { 
                                     Text(
                                         FilterStatus.ALL.displayName,
+                                        style = MaterialTheme.typography.labelMedium,
                                         maxLines = 1,
-                                        overflow = TextOverflow.Clip
+                                        overflow = TextOverflow.Visible
                                     ) 
                                 },
                                 modifier = Modifier.fillMaxWidth()
@@ -344,8 +345,9 @@ fun ListaComprasScreen(
                                 label = { 
                                     Text(
                                         FilterStatus.PENDING.displayName,
+                                        style = MaterialTheme.typography.labelMedium,
                                         maxLines = 1,
-                                        overflow = TextOverflow.Clip
+                                        overflow = TextOverflow.Visible
                                     ) 
                                 },
                                 modifier = Modifier.fillMaxWidth()
@@ -356,8 +358,9 @@ fun ListaComprasScreen(
                                 label = { 
                                     Text(
                                         FilterStatus.PURCHASED.displayName,
+                                        style = MaterialTheme.typography.labelMedium,
                                         maxLines = 1,
-                                        overflow = TextOverflow.Clip
+                                        overflow = TextOverflow.Visible
                                     ) 
                                 },
                                 modifier = Modifier.fillMaxWidth()
@@ -369,7 +372,7 @@ fun ListaComprasScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(bottom = ResponsiveUtils.getSmallSpacing()),
-                            horizontalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSmallSpacing())
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             FilterChip(
                                 selected = filterStatus == FilterStatus.ALL,
@@ -377,11 +380,14 @@ fun ListaComprasScreen(
                                 label = { 
                                     Text(
                                         FilterStatus.ALL.displayName,
+                                        style = MaterialTheme.typography.labelMedium,
                                         maxLines = 1,
-                                        overflow = TextOverflow.Clip
+                                        overflow = TextOverflow.Visible
                                     ) 
                                 },
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(horizontal = 2.dp)
                             )
                             FilterChip(
                                 selected = filterStatus == FilterStatus.PENDING,
@@ -389,11 +395,14 @@ fun ListaComprasScreen(
                                 label = { 
                                     Text(
                                         FilterStatus.PENDING.displayName,
+                                        style = MaterialTheme.typography.labelMedium,
                                         maxLines = 1,
-                                        overflow = TextOverflow.Clip
+                                        overflow = TextOverflow.Visible
                                     ) 
                                 },
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(horizontal = 2.dp)
                             )
                             FilterChip(
                                 selected = filterStatus == FilterStatus.PURCHASED,
@@ -401,11 +410,14 @@ fun ListaComprasScreen(
                                 label = { 
                                     Text(
                                         FilterStatus.PURCHASED.displayName,
+                                        style = MaterialTheme.typography.labelMedium,
                                         maxLines = 1,
-                                        overflow = TextOverflow.Clip
+                                        overflow = TextOverflow.Visible
                                     ) 
                                 },
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(horizontal = 2.dp)
                             )
                         }
                     }

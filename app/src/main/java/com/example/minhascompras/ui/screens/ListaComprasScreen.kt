@@ -640,10 +640,10 @@ fun ListaComprasScreen(
                 itemParaEditar = null
             },
             onConfirm = { nome, quantidade, preco, categoria ->
-                if (itemParaEditar != null) {
+                itemParaEditar?.let { item ->
                     // Editar item existente
                     viewModel.atualizarItem(
-                        itemParaEditar!!.copy(
+                        item.copy(
                             nome = nome,
                             quantidade = quantidade,
                             preco = preco,
@@ -651,7 +651,7 @@ fun ListaComprasScreen(
                         )
                     )
                     itemParaEditar = null
-                } else {
+                } ?: run {
                     // Adicionar novo item
                     viewModel.inserirItem(nome, quantidade, preco, categoria)
                     showDialog = false

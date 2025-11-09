@@ -168,22 +168,26 @@ fun SettingsScreen(
             },
             title = { Text("Confirmar Importação") },
             text = { 
-                Text("Todos os itens atuais serão substituídos por ${pendingImportItems!!.size} item(ns) do arquivo. Deseja continuar?")
+                pendingImportItems?.let { items ->
+                    Text("Todos os itens atuais serão substituídos por ${items.size} item(ns) do arquivo. Deseja continuar?")
+                } ?: Text("Erro: dados de importação não disponíveis")
             },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        scope.launch {
-                            try {
-                                viewModel.importItens(pendingImportItems!!)
-                                showImportSuccess = true
-                                showImportConfirmation = false
-                                pendingImportItems = null
-                            } catch (e: Exception) {
-                                importErrorMessage = e.message ?: "Erro ao importar dados"
-                                showImportError = true
-                                showImportConfirmation = false
-                                pendingImportItems = null
+                        pendingImportItems?.let { items ->
+                            scope.launch {
+                                try {
+                                    viewModel.importItens(items)
+                                    showImportSuccess = true
+                                    showImportConfirmation = false
+                                    pendingImportItems = null
+                                } catch (e: Exception) {
+                                    importErrorMessage = e.message ?: "Erro ao importar dados"
+                                    showImportError = true
+                                    showImportConfirmation = false
+                                    pendingImportItems = null
+                                }
                             }
                         }
                     }

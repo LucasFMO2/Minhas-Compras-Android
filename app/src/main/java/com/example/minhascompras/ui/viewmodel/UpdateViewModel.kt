@@ -9,6 +9,7 @@ import com.example.minhascompras.data.UpdateInfo
 import com.example.minhascompras.data.UpdateManager
 import com.example.minhascompras.data.UpdateNotificationManager
 import com.example.minhascompras.data.UpdatePreferencesManager
+import com.example.minhascompras.utils.Logger
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -63,8 +64,8 @@ class UpdateViewModel(private val context: Context) : ViewModel() {
                 val currentVersionCode = getCurrentVersionCode()
                 val currentVersionName = getCurrentVersionName()
                 
-                android.util.Log.d("UpdateViewModel", "Checking for update...")
-                android.util.Log.d("UpdateViewModel", "Current version: $currentVersionName (code: $currentVersionCode)")
+                Logger.d("UpdateViewModel", "Checking for update...")
+                Logger.d("UpdateViewModel", "Current version: $currentVersionName (code: $currentVersionCode)")
                 
                 val updateInfo = updateManager.checkForUpdate(currentVersionCode)
                 
@@ -72,7 +73,7 @@ class UpdateViewModel(private val context: Context) : ViewModel() {
                 preferencesManager.setLastCheckTime()
                 
                 if (updateInfo != null) {
-                    android.util.Log.d("UpdateViewModel", "Update found: ${updateInfo.versionName} (code: ${updateInfo.versionCode})")
+                    Logger.d("UpdateViewModel", "Update found: ${updateInfo.versionName} (code: ${updateInfo.versionCode})")
                     _updateState.value = UpdateState.UpdateAvailable(updateInfo)
                     // Mostrar notificação se solicitado
                     if (showNotification) {
@@ -82,11 +83,11 @@ class UpdateViewModel(private val context: Context) : ViewModel() {
                         )
                     }
                 } else {
-                    android.util.Log.d("UpdateViewModel", "No update available")
+                    Logger.d("UpdateViewModel", "No update available")
                     _updateState.value = UpdateState.Error("Você já está na versão mais recente!")
                 }
             } catch (e: Exception) {
-                android.util.Log.e("UpdateViewModel", "Error checking for update", e)
+                Logger.e("UpdateViewModel", "Error checking for update", e)
                 _updateState.value = UpdateState.Error("Erro ao verificar atualizações: ${e.message}")
             }
         }
@@ -97,13 +98,13 @@ class UpdateViewModel(private val context: Context) : ViewModel() {
             try {
                 // Verificar se deve fazer a verificação (evitar verificar toda vez)
                 val shouldCheck = preferencesManager.shouldCheckForUpdate()
-                android.util.Log.d("UpdateViewModel", "Background check - should check: $shouldCheck")
+                Logger.d("UpdateViewModel", "Background check - should check: $shouldCheck")
                 
                 if (shouldCheck) {
                     val currentVersionCode = getCurrentVersionCode()
                     val currentVersionName = getCurrentVersionName()
                     
-                    android.util.Log.d("UpdateViewModel", "Background check - Current version: $currentVersionName (code: $currentVersionCode)")
+                    Logger.d("UpdateViewModel", "Background check - Current version: $currentVersionName (code: $currentVersionCode)")
                     
                     val updateInfo = updateManager.checkForUpdate(currentVersionCode)
                     
@@ -112,17 +113,17 @@ class UpdateViewModel(private val context: Context) : ViewModel() {
                     
                     // Se há atualização disponível, mostrar notificação
                     if (updateInfo != null) {
-                        android.util.Log.d("UpdateViewModel", "Background check - Update found: ${updateInfo.versionName}")
+                        Logger.d("UpdateViewModel", "Background check - Update found: ${updateInfo.versionName}")
                         notificationManager.showUpdateAvailableNotification(
                             updateInfo.versionName,
                             updateInfo.releaseNotes
                         )
                     } else {
-                        android.util.Log.d("UpdateViewModel", "Background check - No update available")
+                        Logger.d("UpdateViewModel", "Background check - No update available")
                     }
                 }
             } catch (e: Exception) {
-                android.util.Log.e("UpdateViewModel", "Error in background check", e)
+                Logger.e("UpdateViewModel", "Error in background check", e)
             }
         }
     }

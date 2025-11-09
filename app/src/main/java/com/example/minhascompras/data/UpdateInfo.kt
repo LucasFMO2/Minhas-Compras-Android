@@ -1,5 +1,6 @@
 package com.example.minhascompras.data
 
+import com.example.minhascompras.utils.Logger
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -29,25 +30,25 @@ data class UpdateInfo(
             // Extrair versionCode do tag_name
             val versionCode = extractVersionCode(release.tag_name)
             
-            android.util.Log.d("UpdateInfo", "=== Update Check ===")
-            android.util.Log.d("UpdateInfo", "Release tag: ${release.tag_name}")
-            android.util.Log.d("UpdateInfo", "Extracted versionCode: $versionCode")
-            android.util.Log.d("UpdateInfo", "Current versionCode: $currentVersionCode")
-            android.util.Log.d("UpdateInfo", "Comparison: $versionCode > $currentVersionCode = ${versionCode > currentVersionCode}")
+            Logger.d("UpdateInfo", "=== Update Check ===")
+            Logger.d("UpdateInfo", "Release tag: ${release.tag_name}")
+            Logger.d("UpdateInfo", "Extracted versionCode: $versionCode")
+            Logger.d("UpdateInfo", "Current versionCode: $currentVersionCode")
+            Logger.d("UpdateInfo", "Comparison: $versionCode > $currentVersionCode = ${versionCode > currentVersionCode}")
             
             // Validação: versionCode deve ser maior que 0
             if (versionCode <= 0) {
-                android.util.Log.e("UpdateInfo", "Invalid versionCode extracted: $versionCode")
+                Logger.e("UpdateInfo", "Invalid versionCode extracted: $versionCode")
                 return null
             }
             
             // Comparação: se o versionCode extraído for maior que o atual, há atualização
             if (versionCode <= currentVersionCode) {
-                android.util.Log.d("UpdateInfo", "No update available - versionCode $versionCode <= current $currentVersionCode")
+                Logger.d("UpdateInfo", "No update available - versionCode $versionCode <= current $currentVersionCode")
                 return null
             }
             
-            android.util.Log.d("UpdateInfo", "Update available! New versionCode: $versionCode")
+            Logger.d("UpdateInfo", "Update available! New versionCode: $versionCode")
             
             // Encontrar o asset do APK
             val apkAsset = release.assets.firstOrNull { 
@@ -55,12 +56,12 @@ data class UpdateInfo(
             }
             
             if (apkAsset == null) {
-                android.util.Log.e("UpdateInfo", "No APK asset found in release. Assets: ${release.assets.map { it.name }}")
+                Logger.e("UpdateInfo", "No APK asset found in release. Assets: ${release.assets.map { it.name }}")
                 return null
             }
             
-            android.util.Log.d("UpdateInfo", "APK asset found: ${apkAsset.name}")
-            android.util.Log.d("UpdateInfo", "Download URL: ${apkAsset.browser_download_url}")
+            Logger.d("UpdateInfo", "APK asset found: ${apkAsset.name}")
+            Logger.d("UpdateInfo", "Download URL: ${apkAsset.browser_download_url}")
             
             return UpdateInfo(
                 versionName = release.tag_name.removePrefix("v"),
@@ -98,11 +99,11 @@ data class UpdateInfo(
                 val cleanTag = tagName.removePrefix("v").removePrefix("V")
                 val parts = cleanTag.split(".")
                 
-                android.util.Log.d("UpdateInfo", "Extracting versionCode from tag: $tagName -> $cleanTag")
-                android.util.Log.d("UpdateInfo", "Parts: ${parts.joinToString(", ")}")
+                Logger.d("UpdateInfo", "Extracting versionCode from tag: $tagName -> $cleanTag")
+                Logger.d("UpdateInfo", "Parts: ${parts.joinToString(", ")}")
                 
                 if (parts.size < 2) {
-                    android.util.Log.e("UpdateInfo", "Invalid tag format (need at least major.minor): $tagName")
+                    Logger.e("UpdateInfo", "Invalid tag format (need at least major.minor): $tagName")
                     return 0
                 }
                 
@@ -111,7 +112,7 @@ data class UpdateInfo(
                 
                 // Validar major version
                 if (major != 2) {
-                    android.util.Log.w("UpdateInfo", "Unsupported major version: $major. Using generic formula.")
+                    Logger.w("UpdateInfo", "Unsupported major version: $major. Using generic formula.")
                 }
                 
                 // Calcular baseVersionCode para versão major.minor sem patch
@@ -138,19 +139,19 @@ data class UpdateInfo(
                     if (componentValues.isNotEmpty()) {
                         val sum = componentValues.sum()
                         result = baseVersionCode + sum
-                        android.util.Log.d("UpdateInfo", "Extracted versionCode (with ${additionalComponents.size} additional components): $result (base: $baseVersionCode + sum: $sum)")
-                        android.util.Log.d("UpdateInfo", "Component values: ${componentValues.joinToString(", ")}")
+                        Logger.d("UpdateInfo", "Extracted versionCode (with ${additionalComponents.size} additional components): $result (base: $baseVersionCode + sum: $sum)")
+                        Logger.d("UpdateInfo", "Component values: ${componentValues.joinToString(", ")}")
                     } else {
-                        android.util.Log.w("UpdateInfo", "Invalid component values in tag: $tagName")
+                        Logger.w("UpdateInfo", "Invalid component values in tag: $tagName")
                     }
                 } else {
                     // Versão sem componentes adicionais (ex: 2.9, 2.10)
-                    android.util.Log.d("UpdateInfo", "Extracted versionCode (no additional components): $baseVersionCode")
+                    Logger.d("UpdateInfo", "Extracted versionCode (no additional components): $baseVersionCode")
                 }
                 
                 return result
             } catch (e: Exception) {
-                android.util.Log.e("UpdateInfo", "Error extracting versionCode from tag: $tagName", e)
+                Logger.e("UpdateInfo", "Error extracting versionCode from tag: $tagName", e)
                 return 0
             }
         }

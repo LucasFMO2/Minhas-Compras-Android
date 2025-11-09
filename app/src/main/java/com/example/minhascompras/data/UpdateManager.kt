@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import androidx.core.content.FileProvider
+import com.example.minhascompras.utils.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -32,31 +33,30 @@ class UpdateManager(private val context: Context) {
             
             if (connection.responseCode == HttpURLConnection.HTTP_OK) {
                 val response = connection.inputStream.bufferedReader().use { it.readText() }
-                android.util.Log.d("UpdateManager", "GitHub API Response received")
+                Logger.d("UpdateManager", "GitHub API Response received")
                 
                 val release = json.decodeFromString<GitHubRelease>(response)
-                android.util.Log.d("UpdateManager", "Release parsed: tag=${release.tag_name}, assets=${release.assets.size}")
+                Logger.d("UpdateManager", "Release parsed: tag=${release.tag_name}, assets=${release.assets.size}")
                 
                 val updateInfo = UpdateInfo.fromGitHubRelease(release, currentVersionCode)
                 
-                // Log para debug
-                android.util.Log.d("UpdateManager", "=== Update Check Result ===")
-                android.util.Log.d("UpdateManager", "Current versionCode: $currentVersionCode")
-                android.util.Log.d("UpdateManager", "Release tag: ${release.tag_name}")
-                android.util.Log.d("UpdateManager", "Extracted versionCode: ${updateInfo?.versionCode}")
-                android.util.Log.d("UpdateManager", "Update available: ${updateInfo != null}")
+                Logger.d("UpdateManager", "=== Update Check Result ===")
+                Logger.d("UpdateManager", "Current versionCode: $currentVersionCode")
+                Logger.d("UpdateManager", "Release tag: ${release.tag_name}")
+                Logger.d("UpdateManager", "Extracted versionCode: ${updateInfo?.versionCode}")
+                Logger.d("UpdateManager", "Update available: ${updateInfo != null}")
                 if (updateInfo != null) {
-                    android.util.Log.d("UpdateManager", "Update versionName: ${updateInfo.versionName}")
-                    android.util.Log.d("UpdateManager", "Update fileName: ${updateInfo.fileName}")
+                    Logger.d("UpdateManager", "Update versionName: ${updateInfo.versionName}")
+                    Logger.d("UpdateManager", "Update fileName: ${updateInfo.fileName}")
                 }
                 
                 return@withContext updateInfo
             } else {
-                android.util.Log.e("UpdateManager", "HTTP Error: ${connection.responseCode} - ${connection.responseMessage}")
+                Logger.e("UpdateManager", "HTTP Error: ${connection.responseCode} - ${connection.responseMessage}")
             }
             null
         } catch (e: Exception) {
-            android.util.Log.e("UpdateManager", "Error checking for update", e)
+            Logger.e("UpdateManager", "Error checking for update", e)
             e.printStackTrace()
             null
         }

@@ -19,28 +19,28 @@ class ItemCompraRepository(
         filterStatus: FilterStatus,
         sortOrder: SortOrder
     ): Flow<List<ItemCompra>> {
-        val normalizedQuery = searchQuery.trim().lowercase()
+        val normalizedQuery = searchQuery.trim()
         
         val baseFlow = when (filterStatus) {
             FilterStatus.ALL -> {
                 if (normalizedQuery.isEmpty()) {
                     itemCompraDao.getAllItens()
                 } else {
-                    itemCompraDao.searchItens(searchQuery)
+                    itemCompraDao.searchItens(normalizedQuery)
                 }
             }
             FilterStatus.PENDING -> {
                 if (normalizedQuery.isEmpty()) {
                     itemCompraDao.getItensByStatus(comprado = false)
                 } else {
-                    itemCompraDao.searchItensByStatus(searchQuery, comprado = false)
+                    itemCompraDao.searchItensByStatus(normalizedQuery, comprado = false)
                 }
             }
             FilterStatus.PURCHASED -> {
                 if (normalizedQuery.isEmpty()) {
                     itemCompraDao.getItensByStatus(comprado = true)
                 } else {
-                    itemCompraDao.searchItensByStatus(searchQuery, comprado = true)
+                    itemCompraDao.searchItensByStatus(normalizedQuery, comprado = true)
                 }
             }
         }

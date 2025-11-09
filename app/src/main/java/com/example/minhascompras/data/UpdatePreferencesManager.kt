@@ -15,7 +15,7 @@ private val Context.updatePreferencesDataStore: DataStore<Preferences> by prefer
 class UpdatePreferencesManager(private val context: Context) {
     companion object {
         private val LAST_CHECK_KEY = longPreferencesKey("last_update_check")
-        private const val CHECK_INTERVAL_MS = 1 * 60 * 60 * 1000L // 1 hora (para testes, pode ser ajustado)
+        private const val CHECK_INTERVAL_MS = 1 * 60 * 60 * 1000L // Intervalo de 1 hora entre verificações de atualização
     }
 
     val lastCheckTime: Flow<Long> = context.updatePreferencesDataStore.data.map { preferences ->

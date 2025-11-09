@@ -141,9 +141,17 @@ fun AdicionarItemDialog(
                     )
                     OutlinedTextField(
                         value = preco,
-                        onValueChange = { 
-                            val filtered = it.filter { char -> char.isDigit() || char == '.' || char == ',' }
-                            preco = filtered.replace(',', '.')
+                        onValueChange = { newValue ->
+                            // Permitir apenas dígitos, um ponto ou vírgula
+                            val filtered = newValue.filter { char -> char.isDigit() || char == '.' || char == ',' }
+                            // Garantir apenas um separador decimal
+                            val withSingleDecimal = if (filtered.count { it == '.' || it == ',' } > 1) {
+                                val firstDecimalIndex = filtered.indexOfFirst { it == '.' || it == ',' }
+                                filtered.substring(0, firstDecimalIndex + 1) + filtered.substring(firstDecimalIndex + 1).filter { it.isDigit() }
+                            } else {
+                                filtered
+                            }
+                            preco = withSingleDecimal.replace(',', '.')
                         },
                         label = { Text("Preço (R$)") },
                         placeholder = { Text("0.00") },

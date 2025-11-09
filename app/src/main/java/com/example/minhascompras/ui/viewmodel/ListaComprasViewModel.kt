@@ -1,6 +1,5 @@
 package com.example.minhascompras.ui.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -9,10 +8,12 @@ import com.example.minhascompras.data.ItemCompra
 import com.example.minhascompras.data.ItemCompraRepository
 import com.example.minhascompras.data.SortOrder
 import com.example.minhascompras.data.UserPreferencesManager
+import com.example.minhascompras.utils.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
@@ -66,19 +67,30 @@ class ListaComprasViewModel(
     )
 
     // Observar quando todos os itens estão comprados para arquivar automaticamente
+    // Usar uma flag para evitar arquivamento múltiplo durante a transação
+    private var isArchiving = false
+    
     init {
         viewModelScope.launch {
             try {
                 repository.allItens.collect { items ->
-                    // Só arquivar se houver itens e todos estiverem comprados
-                    if (items.isNotEmpty() && items.all { it.comprado }) {
-                        // Todos os itens estão comprados, arquivar a lista
-                        repository.archiveCurrentList(items)
+                    // Só arquivar se houver itens, todos estiverem comprados e não estiver arquivando
+                    if (!isArchiving && items.isNotEmpty() && items.all { it.comprado }) {
+                        isArchiving = true
+                        try {
+                            // Todos os itens estão comprados, arquivar a lista
+                            repository.archiveCurrentList(items)
+                        } finally {
+                            // Resetar flag após um pequeno delay para evitar re-trigger imediato
+                            delay(100)
+                            isArchiving = false
+                        }
                     }
                 }
             } catch (e: Exception) {
                 // Log do erro mas não crashar o app
-                Log.e("ListaComprasViewModel", "Erro ao observar itens para arquivamento", e)
+                Logger.e("ListaComprasViewModel", "Erro ao observar itens para arquivamento", e)
+                isArchiving = false
             }
         }
     }

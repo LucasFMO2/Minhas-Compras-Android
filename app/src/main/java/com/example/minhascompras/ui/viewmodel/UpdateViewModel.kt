@@ -145,8 +145,12 @@ class UpdateViewModel(private val context: Context) : ViewModel() {
             try {
                 val totalBytes = updateInfo.fileSize ?: 0L
                 val apkFile = updateManager.downloadUpdate(updateInfo) { progress ->
-                    // Calcular bytes baixados baseado no progresso
-                    val downloadedBytes = (totalBytes * progress / 100)
+                    // Calcular bytes baixados baseado no progresso apenas se totalBytes for conhecido
+                    val downloadedBytes = if (totalBytes > 0) {
+                        (totalBytes * progress / 100)
+                    } else {
+                        0L
+                    }
                     _updateState.value = UpdateState.Downloading(progress, downloadedBytes, totalBytes)
                     
                     // Atualizar notificação de progresso a cada 5%
@@ -172,7 +176,11 @@ class UpdateViewModel(private val context: Context) : ViewModel() {
     fun cancelDownload() {
         downloadJob?.cancel()
         updateManager.cancelDownload()
-        _updateState.value = UpdateState.Idle
+        // Aguardar um pouco para garantir que o cancelamento foi processado
+        viewModelScope.launch {
+            delay(100)
+            _updateState.value = UpdateState.Idle
+        }
     }
     
     fun installUpdate(apkFile: File) {

@@ -14,6 +14,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.concurrent.atomic.AtomicBoolean
 
 class UpdateManager(private val context: Context) {
     companion object {
@@ -26,16 +27,17 @@ class UpdateManager(private val context: Context) {
     }
     
     private val json = Json { ignoreUnknownKeys = true }
-    private var isDownloadCancelled = false
+    private val isDownloadCancelled = AtomicBoolean(false)
     
     suspend fun checkForUpdate(currentVersionCode: Int): UpdateInfo? = withContext(Dispatchers.IO) {
         var lastException: Exception? = null
         
         // Retry automático em caso de falha de rede
         repeat(MAX_RETRIES) { attempt ->
+            var connection: HttpURLConnection? = null
             try {
                 val url = URL(GITHUB_API_URL)
-                val connection = url.openConnection() as HttpURLConnection
+                connection = url.openConnection() as HttpURLConnection
                 connection.requestMethod = "GET"
                 connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
                 connection.setRequestProperty("User-Agent", "MinhasCompras-Android")
@@ -85,14 +87,21 @@ class UpdateManager(private val context: Context) {
                 if (attempt < MAX_RETRIES - 1) {
                     delay(RETRY_DELAY_MS)
                 }
+            } finally {
+                connection?.disconnect()
             }
+        }
+        
+        // Log da última exceção se todas as tentativas falharam
+        lastException?.let { exception ->
+            Logger.e("UpdateManager", "All retry attempts failed. Last error: ${exception.message}", exception)
         }
         
         null
     }
     
     fun cancelDownload() {
-        isDownloadCancelled = true
+        isDownloadCancelled.set(true)
     }
     
     private fun cleanupOldDownloads() {
@@ -136,14 +145,19 @@ class UpdateManager(private val context: Context) {
     }
     
     suspend fun downloadUpdate(updateInfo: UpdateInfo, onProgress: (Int) -> Unit): File? = withContext(Dispatchers.IO) {
-        isDownloadCancelled = false
+        isDownloadCancelled.set(false)
         
         // Limpar downloads antigos antes de baixar
         cleanupOldDownloads()
         
+        var connection: HttpURLConnection? = null
+        var inputStream: java.io.InputStream? = null
+        var outputStream: FileOutputStream? = null
+        var outputFile: File? = null
+        
         try {
             val url = URL(updateInfo.downloadUrl)
-            val connection = url.openConnection() as HttpURLConnection
+            connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "GET"
             connection.setRequestProperty("User-Agent", "MinhasCompras-Android")
             connection.connectTimeout = CONNECT_TIMEOUT_MS
@@ -151,18 +165,19 @@ class UpdateManager(private val context: Context) {
             connection.connect()
             
             val totalSize = connection.contentLength
-            if (totalSize <= 0) {
+            // Aceitar totalSize -1 (tamanho desconhecido) ou > 0
+            if (totalSize == 0) {
                 Logger.e("UpdateManager", "Invalid file size: $totalSize")
                 return@withContext null
             }
             
-            // Verificar espaço disponível
-            if (!hasEnoughSpace(totalSize.toLong())) {
+            // Verificar espaço disponível apenas se o tamanho for conhecido
+            if (totalSize > 0 && !hasEnoughSpace(totalSize.toLong())) {
                 Logger.e("UpdateManager", "Not enough space available. Required: $totalSize bytes")
                 return@withContext null
             }
             
-            val inputStream = connection.inputStream
+            inputStream = connection.inputStream
             
             // Criar diretório de downloads
             val downloadDir = File(context.getExternalFilesDir(null), DOWNLOAD_DIR)
@@ -171,12 +186,12 @@ class UpdateManager(private val context: Context) {
             }
             
             // Deletar APK anterior se existir
-            val outputFile = File(downloadDir, updateInfo.fileName)
+            outputFile = File(downloadDir, updateInfo.fileName)
             if (outputFile.exists()) {
                 outputFile.delete()
             }
             
-            val outputStream = FileOutputStream(outputFile)
+            outputStream = FileOutputStream(outputFile)
             
             val buffer = ByteArray(8192 * 4) // Buffer maior para melhor performance
             var downloaded = 0
@@ -185,7 +200,7 @@ class UpdateManager(private val context: Context) {
             
             try {
                 while (inputStream.read(buffer).also { bytesRead = it } != -1) {
-                    if (isDownloadCancelled) {
+                    if (isDownloadCancelled.get()) {
                         Logger.d("UpdateManager", "Download cancelled by user")
                         outputStream.close()
                         inputStream.close()
@@ -209,9 +224,11 @@ class UpdateManager(private val context: Context) {
                 outputStream.flush()
                 outputStream.close()
                 inputStream.close()
+                outputStream = null
+                inputStream = null
                 
-                // Validar que o arquivo foi baixado completamente
-                if (outputFile.length() != totalSize.toLong()) {
+                // Validar que o arquivo foi baixado completamente apenas se o tamanho for conhecido
+                if (totalSize > 0 && outputFile.length() != totalSize.toLong()) {
                     Logger.e("UpdateManager", "Download incomplete. Expected: $totalSize, Got: ${outputFile.length()}")
                     outputFile.delete()
                     return@withContext null
@@ -220,16 +237,19 @@ class UpdateManager(private val context: Context) {
                 Logger.d("UpdateManager", "Download completed successfully. Size: ${outputFile.length()} bytes")
                 outputFile
             } catch (e: Exception) {
-                outputStream.close()
-                inputStream.close()
-                if (outputFile.exists()) {
-                    outputFile.delete()
-                }
+                outputStream?.close()
+                inputStream?.close()
+                outputFile?.delete()
                 throw e
             }
         } catch (e: Exception) {
             Logger.e("UpdateManager", "Error downloading update", e)
+            outputStream?.close()
+            inputStream?.close()
+            outputFile?.delete()
             null
+        } finally {
+            connection?.disconnect()
         }
     }
     

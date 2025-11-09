@@ -379,9 +379,13 @@ fun SettingsScreen(
                                     is UpdateState.Checking -> "Verificando atualizações..."
                                     is UpdateState.UpdateAvailable -> "Nova versão disponível: ${state.updateInfo.versionName}"
                                     is UpdateState.Downloading -> {
-                                        val downloadedMB = state.downloadedBytes / (1024.0 * 1024.0)
-                                        val totalMB = state.totalBytes / (1024.0 * 1024.0)
-                                        "Baixando: ${state.progress}% (${String.format("%.1f", downloadedMB)} MB / ${String.format("%.1f", totalMB)} MB)"
+                                        if (state.totalBytes > 0) {
+                                            val downloadedMB = state.downloadedBytes / (1024.0 * 1024.0)
+                                            val totalMB = state.totalBytes / (1024.0 * 1024.0)
+                                            "Baixando: ${state.progress}% (${String.format("%.1f", downloadedMB)} MB / ${String.format("%.1f", totalMB)} MB)"
+                                        } else {
+                                            "Baixando: ${state.progress}%"
+                                        }
                                     }
                                     is UpdateState.DownloadComplete -> "Download concluído! Toque para instalar"
                                     is UpdateState.Error -> state.message
@@ -555,11 +559,19 @@ fun SettingsScreen(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        Text(
-                            "${String.format("%.1f", downloadingState.downloadedBytes / (1024.0 * 1024.0))} MB / ${String.format("%.1f", downloadingState.totalBytes / (1024.0 * 1024.0))} MB",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        if (downloadingState.totalBytes > 0) {
+                            Text(
+                                "${String.format("%.1f", downloadingState.downloadedBytes / (1024.0 * 1024.0))} MB / ${String.format("%.1f", downloadingState.totalBytes / (1024.0 * 1024.0))} MB",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        } else {
+                            Text(
+                                "${String.format("%.1f", downloadingState.downloadedBytes / (1024.0 * 1024.0))} MB",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }

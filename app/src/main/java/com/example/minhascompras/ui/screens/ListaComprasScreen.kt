@@ -329,13 +329,25 @@ fun ListaComprasScreen(
                             FilterChip(
                                 selected = filterStatus == FilterStatus.ALL,
                                 onClick = { viewModel.onFilterStatusChanged(FilterStatus.ALL) },
-                                label = { Text(FilterStatus.ALL.displayName) },
+                                label = { 
+                                    Text(
+                                        FilterStatus.ALL.displayName,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Clip
+                                    ) 
+                                },
                                 modifier = Modifier.fillMaxWidth()
                             )
                             FilterChip(
                                 selected = filterStatus == FilterStatus.PENDING,
                                 onClick = { viewModel.onFilterStatusChanged(FilterStatus.PENDING) },
-                                label = { Text(FilterStatus.PENDING.displayName) },
+                                label = { 
+                                    Text(
+                                        FilterStatus.PENDING.displayName,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Clip
+                                    ) 
+                                },
                                 modifier = Modifier.fillMaxWidth()
                             )
                             FilterChip(
@@ -344,8 +356,8 @@ fun ListaComprasScreen(
                                 label = { 
                                     Text(
                                         FilterStatus.PURCHASED.displayName,
-                                        maxLines = 2,
-                                        overflow = TextOverflow.Visible
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Clip
                                     ) 
                                 },
                                 modifier = Modifier.fillMaxWidth()
@@ -357,28 +369,43 @@ fun ListaComprasScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(bottom = ResponsiveUtils.getSmallSpacing()),
-                            horizontalArrangement = Arrangement.SpaceAround
+                            horizontalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSmallSpacing())
                         ) {
-                        FilterChip(
-                            selected = filterStatus == FilterStatus.ALL,
-                            onClick = { viewModel.onFilterStatusChanged(FilterStatus.ALL) },
-                            label = { Text(FilterStatus.ALL.displayName) }
-                        )
-                        FilterChip(
-                            selected = filterStatus == FilterStatus.PENDING,
-                            onClick = { viewModel.onFilterStatusChanged(FilterStatus.PENDING) },
-                            label = { Text(FilterStatus.PENDING.displayName) }
-                        )
+                            FilterChip(
+                                selected = filterStatus == FilterStatus.ALL,
+                                onClick = { viewModel.onFilterStatusChanged(FilterStatus.ALL) },
+                                label = { 
+                                    Text(
+                                        FilterStatus.ALL.displayName,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Clip
+                                    ) 
+                                },
+                                modifier = Modifier.weight(1f)
+                            )
+                            FilterChip(
+                                selected = filterStatus == FilterStatus.PENDING,
+                                onClick = { viewModel.onFilterStatusChanged(FilterStatus.PENDING) },
+                                label = { 
+                                    Text(
+                                        FilterStatus.PENDING.displayName,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Clip
+                                    ) 
+                                },
+                                modifier = Modifier.weight(1f)
+                            )
                             FilterChip(
                                 selected = filterStatus == FilterStatus.PURCHASED,
                                 onClick = { viewModel.onFilterStatusChanged(FilterStatus.PURCHASED) },
                                 label = { 
                                     Text(
                                         FilterStatus.PURCHASED.displayName,
-                                        maxLines = 2,
-                                        overflow = TextOverflow.Visible
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Clip
                                     ) 
-                                }
+                                },
+                                modifier = Modifier.weight(1f)
                             )
                         }
                     }

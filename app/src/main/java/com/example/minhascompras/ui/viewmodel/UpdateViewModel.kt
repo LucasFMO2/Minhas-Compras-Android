@@ -10,6 +10,7 @@ import com.example.minhascompras.data.UpdateManager
 import com.example.minhascompras.data.UpdateNotificationManager
 import com.example.minhascompras.data.UpdatePreferencesManager
 import com.example.minhascompras.utils.Logger
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,9 +22,9 @@ sealed class UpdateState {
     object Idle : UpdateState()
     object Checking : UpdateState()
     data class UpdateAvailable(val updateInfo: UpdateInfo) : UpdateState()
-    data class Downloading(val progress: Int) : UpdateState()
+    data class Downloading(val progress: Int, val downloadedBytes: Long, val totalBytes: Long) : UpdateState()
     data class DownloadComplete(val apkFile: File) : UpdateState()
-    data class Error(val message: String) : UpdateState()
+    data class Error(val message: String, val isRetryable: Boolean = false) : UpdateState()
 }
 
 class UpdateViewModel(private val context: Context) : ViewModel() {
@@ -33,6 +34,8 @@ class UpdateViewModel(private val context: Context) : ViewModel() {
     
     private val _updateState = MutableStateFlow<UpdateState>(UpdateState.Idle)
     val updateState: StateFlow<UpdateState> = _updateState.asStateFlow()
+    
+    private var downloadJob: Job? = null
     
     fun getCurrentVersionCode(): Int {
         return try {
@@ -84,11 +87,17 @@ class UpdateViewModel(private val context: Context) : ViewModel() {
                     }
                 } else {
                     Logger.d("UpdateViewModel", "No update available")
-                    _updateState.value = UpdateState.Error("Você já está na versão mais recente!")
+                    _updateState.value = UpdateState.Error("Você já está na versão mais recente!", isRetryable = false)
                 }
+            } catch (e: java.net.SocketTimeoutException) {
+                Logger.e("UpdateViewModel", "Timeout checking for update", e)
+                _updateState.value = UpdateState.Error("Tempo de conexão esgotado. Verifique sua internet e tente novamente.", isRetryable = true)
+            } catch (e: java.net.UnknownHostException) {
+                Logger.e("UpdateViewModel", "Network error checking for update", e)
+                _updateState.value = UpdateState.Error("Sem conexão com a internet. Verifique sua conexão e tente novamente.", isRetryable = true)
             } catch (e: Exception) {
                 Logger.e("UpdateViewModel", "Error checking for update", e)
-                _updateState.value = UpdateState.Error("Erro ao verificar atualizações: ${e.message}")
+                _updateState.value = UpdateState.Error("Erro ao verificar atualizações: ${e.message ?: "Erro desconhecido"}", isRetryable = true)
             }
         }
     }
@@ -129,19 +138,41 @@ class UpdateViewModel(private val context: Context) : ViewModel() {
     }
     
     fun downloadUpdate(updateInfo: UpdateInfo) {
-        viewModelScope.launch {
-            _updateState.value = UpdateState.Downloading(0)
+        downloadJob?.cancel()
+        downloadJob = viewModelScope.launch {
+            _updateState.value = UpdateState.Downloading(0, 0, 0)
             
-            val apkFile = updateManager.downloadUpdate(updateInfo) { progress ->
-                _updateState.value = UpdateState.Downloading(progress)
-            }
-            
-            if (apkFile != null) {
-                _updateState.value = UpdateState.DownloadComplete(apkFile)
-            } else {
-                _updateState.value = UpdateState.Error("Erro ao baixar a atualização")
+            try {
+                val totalBytes = updateInfo.fileSize ?: 0L
+                val apkFile = updateManager.downloadUpdate(updateInfo) { progress ->
+                    // Calcular bytes baixados baseado no progresso
+                    val downloadedBytes = (totalBytes * progress / 100)
+                    _updateState.value = UpdateState.Downloading(progress, downloadedBytes, totalBytes)
+                    
+                    // Atualizar notificação de progresso a cada 5%
+                    if (progress % 5 == 0 || progress == 100) {
+                        notificationManager.showDownloadProgressNotification(progress, updateInfo.versionName)
+                    }
+                }
+                
+                if (apkFile != null) {
+                    _updateState.value = UpdateState.DownloadComplete(apkFile)
+                    // Mostrar notificação de download completo
+                    notificationManager.showDownloadCompleteNotification(updateInfo.versionName)
+                } else {
+                    _updateState.value = UpdateState.Error("Erro ao baixar a atualização. O download pode ter sido cancelado ou não há espaço suficiente.", isRetryable = true)
+                }
+            } catch (e: Exception) {
+                Logger.e("UpdateViewModel", "Error downloading update", e)
+                _updateState.value = UpdateState.Error("Erro ao baixar: ${e.message ?: "Erro desconhecido"}", isRetryable = true)
             }
         }
+    }
+    
+    fun cancelDownload() {
+        downloadJob?.cancel()
+        updateManager.cancelDownload()
+        _updateState.value = UpdateState.Idle
     }
     
     fun installUpdate(apkFile: File) {

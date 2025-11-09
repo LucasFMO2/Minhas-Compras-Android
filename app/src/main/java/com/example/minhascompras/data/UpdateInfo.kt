@@ -23,7 +23,8 @@ data class UpdateInfo(
     val versionCode: Int,
     val downloadUrl: String,
     val releaseNotes: String,
-    val fileName: String
+    val fileName: String,
+    val fileSize: Long = 0L
 ) {
     companion object {
         fun fromGitHubRelease(release: GitHubRelease, currentVersionCode: Int): UpdateInfo? {
@@ -68,7 +69,8 @@ data class UpdateInfo(
                 versionCode = versionCode,
                 downloadUrl = apkAsset.browser_download_url,
                 releaseNotes = release.body,
-                fileName = apkAsset.name
+                fileName = apkAsset.name,
+                fileSize = apkAsset.size
             )
         }
         

@@ -10,6 +10,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Settings
@@ -341,8 +342,19 @@ fun SettingsScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
-                    if (updateState !is UpdateState.Checking && updateState !is UpdateState.Downloading) {
-                        updateViewModel.checkForUpdate(showNotification = false)
+                    when (updateState) {
+                        is UpdateState.Checking, is UpdateState.Downloading -> {
+                            // Não fazer nada durante verificação ou download
+                        }
+                        is UpdateState.Error -> {
+                            // Se for erro retryable, tentar novamente
+                            if ((updateState as UpdateState.Error).isRetryable) {
+                                updateViewModel.checkForUpdate(showNotification = false)
+                            }
+                        }
+                        else -> {
+                            updateViewModel.checkForUpdate(showNotification = false)
+                        }
                     }
                 },
                 enabled = updateState !is UpdateState.Checking && updateState !is UpdateState.Downloading
@@ -360,29 +372,65 @@ fun SettingsScreen(
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold
                         )
-                        Text(
-                            when (val state = updateState) {
-                                is UpdateState.Idle -> "Versão atual: $currentVersion"
-                                is UpdateState.Checking -> "Verificando..."
-                                is UpdateState.UpdateAvailable -> "Nova versão disponível: ${state.updateInfo.versionName}"
-                                is UpdateState.Downloading -> "Baixando: ${state.progress}%"
-                                is UpdateState.DownloadComplete -> "Download concluído! Toque para instalar"
-                                is UpdateState.Error -> state.message
+                        Column {
+                            Text(
+                                when (val state = updateState) {
+                                    is UpdateState.Idle -> "Versão atual: $currentVersion"
+                                    is UpdateState.Checking -> "Verificando atualizações..."
+                                    is UpdateState.UpdateAvailable -> "Nova versão disponível: ${state.updateInfo.versionName}"
+                                    is UpdateState.Downloading -> {
+                                        val downloadedMB = state.downloadedBytes / (1024.0 * 1024.0)
+                                        val totalMB = state.totalBytes / (1024.0 * 1024.0)
+                                        "Baixando: ${state.progress}% (${String.format("%.1f", downloadedMB)} MB / ${String.format("%.1f", totalMB)} MB)"
+                                    }
+                                    is UpdateState.DownloadComplete -> "Download concluído! Toque para instalar"
+                                    is UpdateState.Error -> state.message
+                                },
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            // Mostrar tamanho do arquivo quando disponível
+                            val availableState = updateState
+                            if (availableState is UpdateState.UpdateAvailable) {
+                                val fileSizeMB = availableState.updateInfo.fileSize / (1024.0 * 1024.0)
+                                if (fileSizeMB > 0) {
+                                    Text(
+                                        "Tamanho: ${String.format("%.1f", fileSizeMB)} MB",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                    ) {
+                        if (updateState is UpdateState.Downloading) {
+                            IconButton(
+                                onClick = { updateViewModel.cancelDownload() },
+                                modifier = Modifier.size(24.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Cancelar download",
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+                        Icon(
+                            imageVector = when (updateState) {
+                                is UpdateState.Checking -> Icons.Default.Refresh
+                                is UpdateState.UpdateAvailable -> Icons.Default.Add
+                                is UpdateState.DownloadComplete -> Icons.Default.Settings
+                                is UpdateState.Error -> Icons.Default.Refresh
+                                else -> Icons.Default.Settings
                             },
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            contentDescription = "Atualizações",
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
-                    Icon(
-                        imageVector = when (updateState) {
-                            is UpdateState.Checking -> Icons.Default.Refresh
-                            is UpdateState.UpdateAvailable -> Icons.Default.Add
-                            is UpdateState.DownloadComplete -> Icons.Default.Settings
-                            else -> Icons.Default.Settings
-                        },
-                        contentDescription = "Atualizações",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
                 }
             }
 
@@ -393,15 +441,28 @@ fun SettingsScreen(
                         onDismissRequest = { updateViewModel.resetState() },
                         title = { Text("Atualização Disponível") },
                         text = {
-                            Column {
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
                                 Text("Nova versão: ${state.updateInfo.versionName}")
-                                Spacer(modifier = Modifier.height(8.dp))
+                                if (state.updateInfo.fileSize > 0) {
+                                    val fileSizeMB = state.updateInfo.fileSize / (1024.0 * 1024.0)
+                                    Text(
+                                        "Tamanho: ${String.format("%.1f", fileSizeMB)} MB",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                                 if (state.updateInfo.releaseNotes.isNotEmpty()) {
+                                    Spacer(modifier = Modifier.height(4.dp))
                                     Text(
                                         "Novidades:",
                                         fontWeight = FontWeight.Bold
                                     )
-                                    Text(state.updateInfo.releaseNotes)
+                                    Text(
+                                        state.updateInfo.releaseNotes,
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
                                 }
                             }
                         },
@@ -448,8 +509,25 @@ fun SettingsScreen(
                         title = { Text("Erro") },
                         text = { Text(state.message) },
                         confirmButton = {
-                            TextButton(onClick = { updateViewModel.resetState() }) {
-                                Text("OK")
+                            if (state.isRetryable) {
+                                Button(
+                                    onClick = {
+                                        updateViewModel.checkForUpdate(showNotification = false)
+                                    }
+                                ) {
+                                    Text("Tentar Novamente")
+                                }
+                            } else {
+                                TextButton(onClick = { updateViewModel.resetState() }) {
+                                    Text("OK")
+                                }
+                            }
+                        },
+                        dismissButton = {
+                            if (state.isRetryable) {
+                                TextButton(onClick = { updateViewModel.resetState() }) {
+                                    Text("Cancelar")
+                                }
                             }
                         }
                     )
@@ -457,12 +535,33 @@ fun SettingsScreen(
                 else -> {}
             }
 
-            // Barra de progresso durante download
-            if (updateState is UpdateState.Downloading) {
-                LinearProgressIndicator(
-                    progress = { (updateState as UpdateState.Downloading).progress / 100f },
-                    modifier = Modifier.fillMaxWidth()
-                )
+            // Barra de progresso durante download com informações detalhadas
+            val downloadingState = updateState
+            if (downloadingState is UpdateState.Downloading) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    LinearProgressIndicator(
+                        progress = { downloadingState.progress / 100f },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            "${downloadingState.progress}%",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            "${String.format("%.1f", downloadingState.downloadedBytes / (1024.0 * 1024.0))} MB / ${String.format("%.1f", downloadingState.totalBytes / (1024.0 * 1024.0))} MB",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(8.dp))

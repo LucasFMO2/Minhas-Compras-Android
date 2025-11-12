@@ -348,8 +348,8 @@ fun SettingsScreen(
                             // Não fazer nada durante verificação ou download
                         }
                         is UpdateState.UpToDate -> {
-                            // Se já está atualizado, apenas resetar o estado para permitir nova verificação
-                            updateViewModel.resetState()
+                            // Se já está atualizado, verificar novamente para mostrar o diálogo de aviso
+                            updateViewModel.checkForUpdate(showNotification = false)
                         }
                         is UpdateState.Error -> {
                             // Se for erro retryable, tentar novamente
@@ -455,35 +455,34 @@ fun SettingsScreen(
             if (updateState is UpdateState.UpToDate) {
                 AlertDialog(
                     onDismissRequest = { updateViewModel.resetState() },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(48.dp)
+                        )
+                    },
                     title = { 
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.CheckCircle,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Text("Você está atualizado!")
-                        }
+                        Text("Você já está na versão mais recente!")
                     },
                     text = {
                         Column(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text("Parabéns! Você já está usando a versão mais recente do aplicativo.")
+                            Text("Não há atualizações disponíveis no momento. Você já está usando a versão mais recente do aplicativo.")
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                "Versão atual: $currentVersion",
+                                "Versão atual instalada: $currentVersion",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontWeight = FontWeight.SemiBold
                             )
                         }
                     },
                     confirmButton = {
                         TextButton(onClick = { updateViewModel.resetState() }) {
-                            Text("OK")
+                            Text("Entendi")
                         }
                     }
                 )

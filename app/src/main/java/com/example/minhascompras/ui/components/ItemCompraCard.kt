@@ -104,9 +104,8 @@ fun ItemCompraCard(
                     )
                     
                     Spacer(modifier = Modifier.height(ResponsiveUtils.getSmallSpacing()))
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSmallSpacing()),
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSmallSpacing())
                     ) {
                         if (item.quantidade > 1) {
                             Surface(

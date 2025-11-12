@@ -1,5 +1,7 @@
 package com.example.minhascompras.data
 
+import com.example.minhascompras.data.supabase.AuthService
+import com.example.minhascompras.data.supabase.SupabaseSyncService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -8,6 +10,8 @@ class ItemCompraRepository(
     private val itemCompraDao: ItemCompraDao,
     private val historyDao: HistoryDao
 ) {
+    private val syncService = SupabaseSyncService(itemCompraDao, historyDao)
+    private val authService = AuthService.getInstance()
     val allItens: Flow<List<ItemCompra>> = itemCompraDao.getAllItens()
 
     suspend fun getAllItensList(): List<ItemCompra> {
@@ -77,19 +81,55 @@ class ItemCompraRepository(
     }
 
     suspend fun insert(item: ItemCompra): Long {
-        return itemCompraDao.insert(item)
+        val id = itemCompraDao.insert(item)
+        // Sincronizar com Supabase se disponível e usuário autenticado
+        if (syncService.isAvailable() && authService.isAuthenticated()) {
+            val userId = authService.getCurrentUserId()
+            val insertedItem = item.copy(id = id)
+            syncService.syncItemToSupabase(insertedItem, userId).onFailure {
+                // Log do erro, mas não falha a operação local
+            }
+        }
+        return id
     }
 
     suspend fun update(item: ItemCompra) {
         itemCompraDao.update(item)
+        // Sincronizar com Supabase se disponível e usuário autenticado
+        if (syncService.isAvailable() && authService.isAuthenticated()) {
+            val userId = authService.getCurrentUserId()
+            syncService.syncItemToSupabase(item, userId).onFailure {
+                // Log do erro, mas não falha a operação local
+            }
+        }
     }
 
     suspend fun delete(item: ItemCompra) {
         itemCompraDao.delete(item)
+        // Sincronizar com Supabase se disponível e usuário autenticado
+        if (syncService.isAvailable() && authService.isAuthenticated() && item.id > 0) {
+            val userId = authService.getCurrentUserId()
+            syncService.deleteItemFromSupabase(item.id, userId).onFailure {
+                // Log do erro, mas não falha a operação local
+            }
+        }
     }
 
     suspend fun deleteComprados() {
+        // Obter itens comprados antes de deletar para sincronizar
+        val comprados = itemCompraDao.getAllItens().first().filter { it.comprado }
         itemCompraDao.deleteComprados()
+        // Sincronizar deleções com Supabase
+        if (syncService.isAvailable() && authService.isAuthenticated()) {
+            val userId = authService.getCurrentUserId()
+            comprados.forEach { item ->
+                if (item.id > 0) {
+                    syncService.deleteItemFromSupabase(item.id, userId).onFailure {
+                        // Log do erro, mas não falha a operação local
+                    }
+                }
+            }
+        }
     }
 
     suspend fun replaceAllItems(items: List<ItemCompra>) {
@@ -116,6 +156,14 @@ class ItemCompraRepository(
         }
         
         historyDao.insertHistoryWithItems(history, historyItems)
+        
+        // Sincronizar histórico com Supabase se disponível
+        if (syncService.isAvailable() && authService.isAuthenticated()) {
+            val userId = authService.getCurrentUserId()
+            syncService.syncHistoryToSupabase(history, userId).onFailure {
+                // Log do erro, mas não falha a operação local
+            }
+        }
         
         // Limpar a lista atual
         itemCompraDao.deleteAll()
@@ -148,6 +196,35 @@ class ItemCompraRepository(
             }
             itemCompraDao.insertAll(items)
         }
+    }
+
+    /**
+     * Sincroniza todos os dados locais para o Supabase
+     */
+    suspend fun syncToSupabase(): Result<Unit> {
+        if (!syncService.isAvailable() || !authService.isAuthenticated()) {
+            return Result.failure(Exception("Supabase não disponível ou usuário não autenticado"))
+        }
+        val userId = authService.getCurrentUserId() ?: return Result.failure(Exception("Usuário não autenticado"))
+        return syncService.syncAllItemsToSupabase(userId)
+    }
+
+    /**
+     * Sincroniza dados do Supabase para o local
+     */
+    suspend fun syncFromSupabase(): Result<Unit> {
+        if (!syncService.isAvailable() || !authService.isAuthenticated()) {
+            return Result.failure(Exception("Supabase não disponível ou usuário não autenticado"))
+        }
+        val userId = authService.getCurrentUserId() ?: return Result.failure(Exception("Usuário não autenticado"))
+        return syncService.syncItemsFromSupabase(userId)
+    }
+
+    /**
+     * Verifica se a sincronização está disponível
+     */
+    fun isSyncAvailable(): Boolean {
+        return syncService.isAvailable() && authService.isAuthenticated()
     }
 }
 

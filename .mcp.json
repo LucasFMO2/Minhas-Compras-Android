@@ -18,6 +18,13 @@
 				"AZURE_OPENAI_API_KEY": "YOUR_AZURE_KEY_HERE",
 				"OLLAMA_API_KEY": "YOUR_OLLAMA_API_KEY_HERE"
 			}
+		},
+		"Navegador": {
+			"command": "npx",
+			"args": [
+				"-y",
+				"@agentdeskai/browser-tools-server@1.2.0"
+			]
 		}
 	}
 }

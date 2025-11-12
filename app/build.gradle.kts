@@ -13,8 +13,8 @@ android {
         applicationId = "com.example.minhascompras"
         minSdk = 24
         targetSdk = 34
-        versionCode = 25
-        versionName = "2.10.11"
+        versionCode = 26
+        versionName = "2.10.12"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -82,6 +82,14 @@ dependencies {
     
     // DataStore
     implementation(libs.androidx.datastore.preferences)
+    
+    // Supabase
+    implementation(libs.supabase.postgrest)
+    implementation(libs.supabase.realtime)
+    implementation(libs.supabase.storage)
+    implementation(libs.supabase.auth)
+    implementation(libs.supabase.functions)
+    implementation(libs.okhttp)
     
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

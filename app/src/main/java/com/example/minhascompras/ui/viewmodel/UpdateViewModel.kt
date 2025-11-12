@@ -21,6 +21,7 @@ import java.io.File
 sealed class UpdateState {
     object Idle : UpdateState()
     object Checking : UpdateState()
+    object UpToDate : UpdateState() // Nova versão mais recente já instalada
     data class UpdateAvailable(val updateInfo: UpdateInfo) : UpdateState()
     data class Downloading(val progress: Int, val downloadedBytes: Long, val totalBytes: Long) : UpdateState()
     data class DownloadComplete(val apkFile: File) : UpdateState()
@@ -86,8 +87,8 @@ class UpdateViewModel(private val context: Context) : ViewModel() {
                         )
                     }
                 } else {
-                    Logger.d("UpdateViewModel", "No update available")
-                    _updateState.value = UpdateState.Error("Você já está na versão mais recente!", isRetryable = false)
+                    Logger.d("UpdateViewModel", "No update available - already up to date")
+                    _updateState.value = UpdateState.UpToDate
                 }
             } catch (e: java.net.SocketTimeoutException) {
                 Logger.e("UpdateViewModel", "Timeout checking for update", e)

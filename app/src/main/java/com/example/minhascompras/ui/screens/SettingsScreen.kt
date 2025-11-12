@@ -10,6 +10,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
@@ -346,6 +347,10 @@ fun SettingsScreen(
                         is UpdateState.Checking, is UpdateState.Downloading -> {
                             // Não fazer nada durante verificação ou download
                         }
+                        is UpdateState.UpToDate -> {
+                            // Se já está atualizado, apenas resetar o estado para permitir nova verificação
+                            updateViewModel.resetState()
+                        }
                         is UpdateState.Error -> {
                             // Se for erro retryable, tentar novamente
                             if ((updateState as UpdateState.Error).isRetryable) {
@@ -377,6 +382,7 @@ fun SettingsScreen(
                                 when (val state = updateState) {
                                     is UpdateState.Idle -> "Versão atual: $currentVersion"
                                     is UpdateState.Checking -> "Verificando atualizações..."
+                                    is UpdateState.UpToDate -> "Você está na versão mais recente! ✓"
                                     is UpdateState.UpdateAvailable -> "Nova versão disponível: ${state.updateInfo.versionName}"
                                     is UpdateState.Downloading -> {
                                         if (state.totalBytes > 0) {
@@ -391,7 +397,10 @@ fun SettingsScreen(
                                     is UpdateState.Error -> state.message
                                 },
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = when (updateState) {
+                                    is UpdateState.UpToDate -> MaterialTheme.colorScheme.primary
+                                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                                }
                             )
                             // Mostrar tamanho do arquivo quando disponível
                             val availableState = updateState
@@ -426,16 +435,58 @@ fun SettingsScreen(
                         Icon(
                             imageVector = when (updateState) {
                                 is UpdateState.Checking -> Icons.Default.Refresh
+                                is UpdateState.UpToDate -> Icons.Default.CheckCircle
                                 is UpdateState.UpdateAvailable -> Icons.Default.Add
                                 is UpdateState.DownloadComplete -> Icons.Default.Settings
                                 is UpdateState.Error -> Icons.Default.Refresh
                                 else -> Icons.Default.Settings
                             },
                             contentDescription = "Atualizações",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = when (updateState) {
+                                is UpdateState.UpToDate -> MaterialTheme.colorScheme.primary
+                                else -> MaterialTheme.colorScheme.primary
+                            }
                         )
                     }
                 }
+            }
+
+            // Diálogo de versão atualizada
+            if (updateState is UpdateState.UpToDate) {
+                AlertDialog(
+                    onDismissRequest = { updateViewModel.resetState() },
+                    title = { 
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Text("Você está atualizado!")
+                        }
+                    },
+                    text = {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text("Parabéns! Você já está usando a versão mais recente do aplicativo.")
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                "Versão atual: $currentVersion",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = { updateViewModel.resetState() }) {
+                            Text("OK")
+                        }
+                    }
+                )
             }
 
             // Diálogo de atualização disponível

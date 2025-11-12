@@ -14,25 +14,28 @@ import kotlinx.coroutines.flow.asStateFlow
  * Serviço de autenticação usando Supabase Auth
  */
 class AuthService {
-    private val supabase: SupabaseClient? = if (SupabaseConfig.isConfigured()) {
-        SupabaseConfig.createClient()
-    } else {
-        null
-    }
+    // TEMPORARIAMENTE DESABILITADO: Supabase desabilitado para evitar crashes
+    private val supabase: SupabaseClient? = null
+    // private val supabase: SupabaseClient? = if (SupabaseConfig.isConfigured()) {
+    //     SupabaseConfig.createClient()
+    // } else {
+    //     null
+    // }
 
     private val _currentUser = MutableStateFlow<UserInfo?>(null)
     val currentUser: StateFlow<UserInfo?> = _currentUser.asStateFlow()
 
     init {
+        // TEMPORARIAMENTE DESABILITADO: Verificação de sessão desabilitada
         // Verificar se há usuário logado ao inicializar
-        if (supabase != null) {
-            try {
-                val session = supabase.auth.currentSessionOrNull()
-                _currentUser.value = session?.user
-            } catch (e: Exception) {
-                Logger.e(TAG, "Erro ao verificar usuário atual", e)
-            }
-        }
+        // if (supabase != null) {
+        //     try {
+        //         val session = supabase.auth.currentSessionOrNull()
+        //         _currentUser.value = session?.user
+        //     } catch (e: Exception) {
+        //         Logger.e(TAG, "Erro ao verificar usuário atual", e)
+        //     }
+        // }
     }
 
     /**
@@ -67,19 +70,10 @@ class AuthService {
      * Faz logout
      */
     suspend fun signOut(): Result<Unit> {
-        if (supabase == null) {
-            return Result.failure(Exception("Supabase não configurado"))
-        }
-
-        return try {
-            supabase.auth.signOut()
-            _currentUser.value = null
-            Logger.d(TAG, "Usuário deslogado")
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Logger.e(TAG, "Erro ao fazer logout", e)
-            Result.failure(e)
-        }
+        // TEMPORARIAMENTE DESABILITADO: Aguardando correção da API do Supabase
+        _currentUser.value = null
+        Logger.d(TAG, "Logout (Supabase temporariamente desabilitado)")
+        return Result.success(Unit)
     }
 
     /**
@@ -100,7 +94,9 @@ class AuthService {
      * Verifica se o serviço está disponível
      */
     fun isAvailable(): Boolean {
-        return supabase != null && SupabaseConfig.isConfigured()
+        // TEMPORARIAMENTE DESABILITADO: Sempre retorna false
+        return false
+        // return supabase != null && SupabaseConfig.isConfigured()
     }
 
     companion object {

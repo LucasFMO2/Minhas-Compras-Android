@@ -18,11 +18,13 @@ class SupabaseSyncService(
     private val itemCompraDao: ItemCompraDao,
     private val historyDao: HistoryDao
 ) {
-    private val supabase: SupabaseClient? = if (SupabaseConfig.isConfigured()) {
-        SupabaseConfig.createClient()
-    } else {
-        null
-    }
+    // TEMPORARIAMENTE DESABILITADO: Supabase desabilitado para evitar crashes
+    private val supabase: SupabaseClient? = null
+    // private val supabase: SupabaseClient? = if (SupabaseConfig.isConfigured()) {
+    //     SupabaseConfig.createClient()
+    // } else {
+    //     null
+    // }
 
     /**
      * Sincroniza todos os itens locais para o Supabase
@@ -89,7 +91,9 @@ class SupabaseSyncService(
      * Verifica se o Supabase está disponível e configurado
      */
     fun isAvailable(): Boolean {
-        return supabase != null && SupabaseConfig.isConfigured()
+        // TEMPORARIAMENTE DESABILITADO: Sempre retorna false
+        return false
+        // return supabase != null && SupabaseConfig.isConfigured()
     }
 
     companion object {

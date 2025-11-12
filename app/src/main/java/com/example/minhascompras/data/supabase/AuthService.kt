@@ -43,19 +43,10 @@ class AuthService {
             return Result.failure(Exception("Supabase não configurado"))
         }
 
-        return try {
-            val result = supabase.auth.signUpWith(Email) {
-                this.email = email
-                this.password = password
-            }
-            
-            _currentUser.value = result.user
-            Logger.d(TAG, "Usuário registrado: ${result.user?.email}")
-            Result.success(result.user ?: throw Exception("Usuário não retornado"))
-        } catch (e: Exception) {
-            Logger.e(TAG, "Erro ao registrar usuário", e)
-            Result.failure(e)
-        }
+        // TEMPORARIAMENTE DESABILITADO: Aguardando correção da API do Supabase
+        // TODO: Corrigir sintaxe da API do Supabase e reativar
+        Logger.d(TAG, "Autenticação Supabase temporariamente desabilitada")
+        return Result.failure(Exception("Supabase temporariamente desabilitado"))
     }
 
     /**
@@ -66,19 +57,10 @@ class AuthService {
             return Result.failure(Exception("Supabase não configurado"))
         }
 
-        return try {
-            val result = supabase.auth.signInWith(Email) {
-                this.email = email
-                this.password = password
-            }
-            
-            _currentUser.value = result.user
-            Logger.d(TAG, "Usuário logado: ${result.user?.email}")
-            Result.success(result.user ?: throw Exception("Usuário não retornado"))
-        } catch (e: Exception) {
-            Logger.e(TAG, "Erro ao fazer login", e)
-            Result.failure(e)
-        }
+        // TEMPORARIAMENTE DESABILITADO: Aguardando correção da API do Supabase
+        // TODO: Corrigir sintaxe da API do Supabase e reativar
+        Logger.d(TAG, "Autenticação Supabase temporariamente desabilitada")
+        return Result.failure(Exception("Supabase temporariamente desabilitado"))
     }
 
     /**

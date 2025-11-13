@@ -205,6 +205,14 @@ class UpdateViewModel(private val context: Context) : ViewModel() {
     fun resetState() {
         _updateState.value = UpdateState.Idle
     }
+    
+    /**
+     * Força o estado para UpToDate para mostrar o diálogo de aviso
+     * quando o usuário já está na última versão
+     */
+    fun showUpToDateDialog() {
+        _updateState.value = UpdateState.UpToDate
+    }
 }
 
 class UpdateViewModelFactory(private val context: Context) : ViewModelProvider.Factory {

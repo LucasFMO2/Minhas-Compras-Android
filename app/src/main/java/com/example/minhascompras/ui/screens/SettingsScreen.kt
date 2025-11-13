@@ -348,8 +348,8 @@ fun SettingsScreen(
                             // Não fazer nada durante verificação ou download
                         }
                         is UpdateState.UpToDate -> {
-                            // Se já está atualizado, verificar novamente para mostrar o diálogo de aviso
-                            updateViewModel.checkForUpdate(showNotification = false)
+                            // Se já está atualizado, mostrar o diálogo de aviso imediatamente
+                            updateViewModel.showUpToDateDialog()
                         }
                         is UpdateState.Error -> {
                             // Se for erro retryable, tentar novamente

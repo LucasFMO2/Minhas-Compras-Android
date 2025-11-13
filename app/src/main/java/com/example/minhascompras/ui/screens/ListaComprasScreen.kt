@@ -341,105 +341,49 @@ fun ListaComprasScreen(
                     )
                     
                     // Chips de filtro
-                    if (isSmallScreen) {
-                        FlowRow(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = ResponsiveUtils.getSmallSpacing()),
-                            horizontalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSmallSpacing()),
-                            verticalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSmallSpacing())
-                        ) {
-                            FilterChip(
-                                selected = filterStatus == FilterStatus.ALL,
-                                onClick = { viewModel.onFilterStatusChanged(FilterStatus.ALL) },
-                                label = {
-                                    Text(
-                                        FilterStatus.ALL.displayName,
-                                        style = MaterialTheme.typography.labelMedium,
-                                        maxLines = 1
-                                    )
-                                },
-                                modifier = Modifier.wrapContentWidth()
-                            )
-                            FilterChip(
-                                selected = filterStatus == FilterStatus.PENDING,
-                                onClick = { viewModel.onFilterStatusChanged(FilterStatus.PENDING) },
-                                label = {
-                                    Text(
-                                        FilterStatus.PENDING.displayName,
-                                        style = MaterialTheme.typography.labelMedium,
-                                        maxLines = 1
-                                    )
-                                },
-                                modifier = Modifier.wrapContentWidth()
-                            )
-                            FilterChip(
-                                selected = filterStatus == FilterStatus.PURCHASED,
-                                onClick = { viewModel.onFilterStatusChanged(FilterStatus.PURCHASED) },
-                                label = {
-                                    Text(
-                                        FilterStatus.PURCHASED.displayName,
-                                        style = MaterialTheme.typography.labelMedium,
-                                        maxLines = 1
-                                    )
-                                },
-                                modifier = Modifier.wrapContentWidth()
-                            )
-                        }
-                    } else {
-                        // Layout horizontal para telas maiores
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = ResponsiveUtils.getSmallSpacing()),
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            FilterChip(
-                                selected = filterStatus == FilterStatus.ALL,
-                                onClick = { viewModel.onFilterStatusChanged(FilterStatus.ALL) },
-                                label = { 
-                                    Text(
-                                        FilterStatus.ALL.displayName,
-                                        style = MaterialTheme.typography.labelMedium,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Visible
-                                    ) 
-                                },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(horizontal = 2.dp)
-                            )
-                            FilterChip(
-                                selected = filterStatus == FilterStatus.PENDING,
-                                onClick = { viewModel.onFilterStatusChanged(FilterStatus.PENDING) },
-                                label = { 
-                                    Text(
-                                        FilterStatus.PENDING.displayName,
-                                        style = MaterialTheme.typography.labelMedium,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Visible
-                                    ) 
-                                },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(horizontal = 2.dp)
-                            )
-                            FilterChip(
-                                selected = filterStatus == FilterStatus.PURCHASED,
-                                onClick = { viewModel.onFilterStatusChanged(FilterStatus.PURCHASED) },
-                                label = { 
-                                    Text(
-                                        FilterStatus.PURCHASED.displayName,
-                                        style = MaterialTheme.typography.labelMedium,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Visible
-                                    ) 
-                                },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(horizontal = 2.dp)
-                            )
-                        }
+                    FlowRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = ResponsiveUtils.getSmallSpacing()),
+                        horizontalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSmallSpacing()),
+                        verticalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSmallSpacing())
+                    ) {
+                        FilterChip(
+                            selected = filterStatus == FilterStatus.ALL,
+                            onClick = { viewModel.onFilterStatusChanged(FilterStatus.ALL) },
+                            label = {
+                                Text(
+                                    FilterStatus.ALL.displayName,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    maxLines = 1
+                                )
+                            },
+                            modifier = Modifier.wrapContentWidth()
+                        )
+                        FilterChip(
+                            selected = filterStatus == FilterStatus.PENDING,
+                            onClick = { viewModel.onFilterStatusChanged(FilterStatus.PENDING) },
+                            label = {
+                                Text(
+                                    FilterStatus.PENDING.displayName,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    maxLines = 1
+                                )
+                            },
+                            modifier = Modifier.wrapContentWidth()
+                        )
+                        FilterChip(
+                            selected = filterStatus == FilterStatus.PURCHASED,
+                            onClick = { viewModel.onFilterStatusChanged(FilterStatus.PURCHASED) },
+                            label = {
+                                Text(
+                                    FilterStatus.PURCHASED.displayName,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    maxLines = 1
+                                )
+                            },
+                            modifier = Modifier.wrapContentWidth()
+                        )
                     }
                     
                     Spacer(modifier = Modifier.height(ResponsiveUtils.getSmallSpacing()))

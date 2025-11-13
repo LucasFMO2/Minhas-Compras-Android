@@ -358,7 +358,8 @@ fun SettingsScreen(
                             }
                         }
                         else -> {
-                            updateViewModel.checkForUpdate(showNotification = false)
+                            // Verificação manual - forçar verificação mesmo se muito recente
+                            updateViewModel.checkForUpdate(showNotification = false, force = true)
                         }
                     }
                 },

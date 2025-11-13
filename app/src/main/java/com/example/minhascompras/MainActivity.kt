@@ -23,6 +23,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.minhascompras.data.AppDatabase
 import com.example.minhascompras.data.ItemCompraRepository
+import com.example.minhascompras.data.UpdatePreferencesManager
 import com.example.minhascompras.data.ThemeMode
 import com.example.minhascompras.data.ThemePreferencesManager
 import com.example.minhascompras.data.UserPreferencesManager
@@ -95,9 +96,13 @@ class MainActivity : ComponentActivity() {
         val viewModelFactory = ListaComprasViewModelFactory(repository, userPreferencesManager)
         val historyViewModelFactory = HistoryViewModelFactory(repository)
         
-        // Verificar atualizações automaticamente após um delay (com tratamento de erro)
+        // Rastrear uso do app e verificar atualizações automaticamente
         lifecycleScope.launch {
             try {
+                // Atualizar timestamp de uso do app
+                val updatePreferencesManager = UpdatePreferencesManager(applicationContext)
+                updatePreferencesManager.updateLastAppUse()
+                
                 delay(3000) // Aguardar 3 segundos após abrir o app
                 val updateViewModel = UpdateViewModel(applicationContext)
                 updateViewModel.checkForUpdateInBackground()

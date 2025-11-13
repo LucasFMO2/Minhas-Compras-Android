@@ -21,7 +21,8 @@ class UpdateManager(private val context: Context) {
         private const val GITHUB_API_URL = "https://api.github.com/repos/nerddescoladofmo-cmyk/Minhas-Compras-Android/releases/latest"
         private const val DOWNLOAD_DIR = "updates"
         private const val MAX_RETRIES = 3
-        private const val RETRY_DELAY_MS = 2000L
+        private const val INITIAL_RETRY_DELAY_MS = 1000L // Delay inicial de 1 segundo
+        private const val MAX_RETRY_DELAY_MS = 10000L // Delay máximo de 10 segundos
         private const val CONNECT_TIMEOUT_MS = 15000
         private const val READ_TIMEOUT_MS = 30000
     }
@@ -32,7 +33,7 @@ class UpdateManager(private val context: Context) {
     suspend fun checkForUpdate(currentVersionCode: Int): UpdateInfo? = withContext(Dispatchers.IO) {
         var lastException: Exception? = null
         
-        // Retry automático em caso de falha de rede
+        // Retry automático com backoff exponencial em caso de falha de rede
         repeat(MAX_RETRIES) { attempt ->
             var connection: HttpURLConnection? = null
             try {
@@ -73,19 +74,28 @@ class UpdateManager(private val context: Context) {
                 lastException = e
                 Logger.e("UpdateManager", "Timeout error (attempt ${attempt + 1}/$MAX_RETRIES)", e)
                 if (attempt < MAX_RETRIES - 1) {
-                    delay(RETRY_DELAY_MS)
+                    // Backoff exponencial: 1s, 2s, 4s (limitado a MAX_RETRY_DELAY_MS)
+                    val retryDelay = minOf(INITIAL_RETRY_DELAY_MS * (1 shl attempt), MAX_RETRY_DELAY_MS)
+                    Logger.d("UpdateManager", "Retrying in ${retryDelay}ms...")
+                    delay(retryDelay)
                 }
             } catch (e: java.net.UnknownHostException) {
                 lastException = e
                 Logger.e("UpdateManager", "Network error (attempt ${attempt + 1}/$MAX_RETRIES)", e)
                 if (attempt < MAX_RETRIES - 1) {
-                    delay(RETRY_DELAY_MS)
+                    // Backoff exponencial: 1s, 2s, 4s (limitado a MAX_RETRY_DELAY_MS)
+                    val retryDelay = minOf(INITIAL_RETRY_DELAY_MS * (1 shl attempt), MAX_RETRY_DELAY_MS)
+                    Logger.d("UpdateManager", "Retrying in ${retryDelay}ms...")
+                    delay(retryDelay)
                 }
             } catch (e: Exception) {
                 lastException = e
                 Logger.e("UpdateManager", "Error checking for update (attempt ${attempt + 1}/$MAX_RETRIES)", e)
                 if (attempt < MAX_RETRIES - 1) {
-                    delay(RETRY_DELAY_MS)
+                    // Backoff exponencial: 1s, 2s, 4s (limitado a MAX_RETRY_DELAY_MS)
+                    val retryDelay = minOf(INITIAL_RETRY_DELAY_MS * (1 shl attempt), MAX_RETRY_DELAY_MS)
+                    Logger.d("UpdateManager", "Retrying in ${retryDelay}ms...")
+                    delay(retryDelay)
                 }
             } finally {
                 connection?.disconnect()

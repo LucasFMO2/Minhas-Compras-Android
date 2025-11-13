@@ -10,6 +10,7 @@ import com.example.minhascompras.data.UpdateManager
 import com.example.minhascompras.data.UpdateNotificationManager
 import com.example.minhascompras.data.UpdatePreferencesManager
 import com.example.minhascompras.utils.Logger
+import com.example.minhascompras.utils.NetworkUtils
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -61,15 +62,42 @@ class UpdateViewModel(private val context: Context) : ViewModel() {
         }
     }
     
-    fun checkForUpdate(showNotification: Boolean = false) {
+    fun checkForUpdate(showNotification: Boolean = false, force: Boolean = false) {
         viewModelScope.launch {
             _updateState.value = UpdateState.Checking
             try {
+                // Verificar conexão antes de tentar
+                if (!NetworkUtils.isConnected(context)) {
+                    Logger.w("UpdateViewModel", "No internet connection available")
+                    _updateState.value = UpdateState.Error("Sem conexão com a internet. Verifique sua conexão e tente novamente.", isRetryable = true)
+                    preferencesManager.recordCheckFailure()
+                    return@launch
+                }
+                
+                // Verificar se deve fazer verificação (a menos que seja forçado)
+                if (!force && !preferencesManager.shouldCheckForUpdate(force = false)) {
+                    Logger.d("UpdateViewModel", "Skipping check - too soon since last check")
+                    // Verificar cache se houver atualização disponível
+                    val hasCachedUpdate = preferencesManager.isUpdateAvailable()
+                    val lastVersionChecked = preferencesManager.getLastVersionChecked()
+                    val currentVersionCode = getCurrentVersionCode()
+                    
+                    if (hasCachedUpdate && lastVersionChecked > currentVersionCode) {
+                        // Há atualização em cache, mas precisamos buscar os detalhes
+                        Logger.d("UpdateViewModel", "Using cached update info")
+                        // Continuar com a verificação mesmo assim para obter detalhes atualizados
+                    } else {
+                        _updateState.value = UpdateState.UpToDate
+                        return@launch
+                    }
+                }
+                
                 val currentVersionCode = getCurrentVersionCode()
                 val currentVersionName = getCurrentVersionName()
                 
                 Logger.d("UpdateViewModel", "Checking for update...")
                 Logger.d("UpdateViewModel", "Current version: $currentVersionName (code: $currentVersionCode)")
+                Logger.d("UpdateViewModel", "WiFi connected: ${NetworkUtils.isWiFiConnected(context)}")
                 
                 val updateInfo = updateManager.checkForUpdate(currentVersionCode)
                 
@@ -78,6 +106,12 @@ class UpdateViewModel(private val context: Context) : ViewModel() {
                 
                 if (updateInfo != null) {
                     Logger.d("UpdateViewModel", "Update found: ${updateInfo.versionName} (code: ${updateInfo.versionCode})")
+                    
+                    // Salvar informações no cache
+                    preferencesManager.setLastSuccessfulCheck()
+                    preferencesManager.setLastVersionChecked(updateInfo.versionCode)
+                    preferencesManager.setUpdateAvailable(true)
+                    
                     _updateState.value = UpdateState.UpdateAvailable(updateInfo)
                     // Mostrar notificação se solicitado
                     if (showNotification) {
@@ -88,18 +122,27 @@ class UpdateViewModel(private val context: Context) : ViewModel() {
                     }
                 } else {
                     Logger.d("UpdateViewModel", "No update available - already up to date")
+                    
+                    // Salvar informações no cache
+                    preferencesManager.setLastSuccessfulCheck()
+                    preferencesManager.setLastVersionChecked(currentVersionCode)
+                    preferencesManager.setUpdateAvailable(false)
+                    
                     // Garantir que o estado UpToDate seja definido para mostrar o diálogo
                     _updateState.value = UpdateState.UpToDate
                     Logger.d("UpdateViewModel", "State set to UpToDate - dialog should appear")
                 }
             } catch (e: java.net.SocketTimeoutException) {
                 Logger.e("UpdateViewModel", "Timeout checking for update", e)
+                preferencesManager.recordCheckFailure()
                 _updateState.value = UpdateState.Error("Tempo de conexão esgotado. Verifique sua internet e tente novamente.", isRetryable = true)
             } catch (e: java.net.UnknownHostException) {
                 Logger.e("UpdateViewModel", "Network error checking for update", e)
+                preferencesManager.recordCheckFailure()
                 _updateState.value = UpdateState.Error("Sem conexão com a internet. Verifique sua conexão e tente novamente.", isRetryable = true)
             } catch (e: Exception) {
                 Logger.e("UpdateViewModel", "Error checking for update", e)
+                preferencesManager.recordCheckFailure()
                 _updateState.value = UpdateState.Error("Erro ao verificar atualizações: ${e.message ?: "Erro desconhecido"}", isRetryable = true)
             }
         }
@@ -108,8 +151,18 @@ class UpdateViewModel(private val context: Context) : ViewModel() {
     fun checkForUpdateInBackground() {
         viewModelScope.launch {
             try {
+                // Verificar conexão antes de tentar
+                if (!NetworkUtils.isConnected(context)) {
+                    Logger.d("UpdateViewModel", "Background check - No internet connection")
+                    return@launch
+                }
+                
+                // Verificar preferencialmente em WiFi (mas não bloquear se não estiver)
+                val isWiFi = NetworkUtils.isWiFiConnected(context)
+                Logger.d("UpdateViewModel", "Background check - WiFi connected: $isWiFi")
+                
                 // Verificar se deve fazer a verificação (evitar verificar toda vez)
-                val shouldCheck = preferencesManager.shouldCheckForUpdate()
+                val shouldCheck = preferencesManager.shouldCheckForUpdate(force = false)
                 Logger.d("UpdateViewModel", "Background check - should check: $shouldCheck")
                 
                 if (shouldCheck) {
@@ -123,21 +176,44 @@ class UpdateViewModel(private val context: Context) : ViewModel() {
                     // Salvar timestamp da verificação
                     preferencesManager.setLastCheckTime()
                     
-                    // Se há atualização disponível, mostrar notificação
                     if (updateInfo != null) {
                         Logger.d("UpdateViewModel", "Background check - Update found: ${updateInfo.versionName}")
-                        notificationManager.showUpdateAvailableNotification(
-                            updateInfo.versionName,
-                            updateInfo.releaseNotes
-                        )
+                        
+                        // Salvar informações no cache
+                        preferencesManager.setLastSuccessfulCheck()
+                        preferencesManager.setLastVersionChecked(updateInfo.versionCode)
+                        preferencesManager.setUpdateAvailable(true)
+                        
+                        // Mostrar notificação apenas se estiver em WiFi ou se for atualização crítica
+                        if (isWiFi || isCriticalUpdate(updateInfo)) {
+                            notificationManager.showUpdateAvailableNotification(
+                                updateInfo.versionName,
+                                updateInfo.releaseNotes
+                            )
+                        }
                     } else {
                         Logger.d("UpdateViewModel", "Background check - No update available")
+                        
+                        // Salvar informações no cache
+                        preferencesManager.setLastSuccessfulCheck()
+                        preferencesManager.setLastVersionChecked(currentVersionCode)
+                        preferencesManager.setUpdateAvailable(false)
                     }
                 }
             } catch (e: Exception) {
                 Logger.e("UpdateViewModel", "Error in background check", e)
+                preferencesManager.recordCheckFailure()
             }
         }
+    }
+    
+    /**
+     * Verifica se uma atualização é crítica (baseado em palavras-chave nas release notes)
+     */
+    private fun isCriticalUpdate(updateInfo: UpdateInfo): Boolean {
+        val criticalKeywords = listOf("crítico", "critical", "urgente", "urgent", "segurança", "security", "bug", "crash", "fix")
+        val releaseNotesLower = updateInfo.releaseNotes.lowercase()
+        return criticalKeywords.any { releaseNotesLower.contains(it) }
     }
     
     fun downloadUpdate(updateInfo: UpdateInfo) {
@@ -154,6 +230,19 @@ class UpdateViewModel(private val context: Context) : ViewModel() {
                     isRetryable = false
                 )
                 return@launch
+            }
+            
+            // Verificar conexão antes de iniciar download
+            if (!NetworkUtils.isConnected(context)) {
+                Logger.w("UpdateViewModel", "No internet connection for download")
+                _updateState.value = UpdateState.Error("Sem conexão com a internet. Conecte-se e tente novamente.", isRetryable = true)
+                return@launch
+            }
+            
+            // Avisar se não estiver em WiFi (mas permitir download se necessário)
+            val isWiFi = NetworkUtils.isWiFiConnected(context)
+            if (!isWiFi) {
+                Logger.w("UpdateViewModel", "Download iniciado sem WiFi - usando dados móveis")
             }
             
             _updateState.value = UpdateState.Downloading(0, 0, 0)

@@ -2,6 +2,7 @@ package com.example.minhascompras.data
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import androidx.core.content.FileProvider
@@ -32,6 +33,7 @@ class UpdateManager(private val context: Context) {
     
     suspend fun checkForUpdate(currentVersionCode: Int): UpdateInfo? = withContext(Dispatchers.IO) {
         var lastException: Exception? = null
+        val updateManager = this@UpdateManager
         
         // Retry automático com backoff exponencial em caso de falha de rede
         repeat(MAX_RETRIES) { attempt ->
@@ -52,7 +54,7 @@ class UpdateManager(private val context: Context) {
                     val release = json.decodeFromString<GitHubRelease>(response)
                     Logger.d("UpdateManager", "Release parsed: tag=${release.tag_name}, assets=${release.assets.size}")
                     
-                    val updateInfo = UpdateInfo.fromGitHubRelease(release, currentVersionCode)
+                    val updateInfo = UpdateInfo.fromGitHubRelease(release, currentVersionCode, updateManager)
                     
                     Logger.d("UpdateManager", "=== Update Check Result ===")
                     Logger.d("UpdateManager", "Current versionCode: $currentVersionCode")
@@ -112,6 +114,128 @@ class UpdateManager(private val context: Context) {
     
     fun cancelDownload() {
         isDownloadCancelled.set(true)
+    }
+    
+    /**
+     * Extrai o versionCode diretamente do APK baixando temporariamente o arquivo.
+     * Usa PackageManager para ler o versionCode sem instalar o APK.
+     * 
+     * @param apkUrl URL do APK para download
+     * @return versionCode do APK ou 0 se houver erro
+     */
+    suspend fun extractVersionCodeFromApk(apkUrl: String): Int = withContext(Dispatchers.IO) {
+        var tempFile: File? = null
+        var connection: HttpURLConnection? = null
+        var inputStream: java.io.InputStream? = null
+        var outputStream: FileOutputStream? = null
+        
+        try {
+            Logger.d("UpdateManager", "Extracting versionCode from APK: $apkUrl")
+            
+            // Criar arquivo temporário
+            val tempDir = File(context.cacheDir, "temp_apk_check")
+            if (!tempDir.exists()) {
+                tempDir.mkdirs()
+            }
+            tempFile = File(tempDir, "temp_check.apk")
+            
+            // Se já existe, deletar
+            if (tempFile.exists()) {
+                tempFile.delete()
+            }
+            
+            // Fazer download do APK
+            val url = URL(apkUrl)
+            connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+            connection.setRequestProperty("User-Agent", "MinhasCompras-Android")
+            connection.connectTimeout = CONNECT_TIMEOUT_MS
+            connection.readTimeout = READ_TIMEOUT_MS
+            connection.connect()
+            
+            if (connection.responseCode != HttpURLConnection.HTTP_OK) {
+                Logger.e("UpdateManager", "Failed to download APK for versionCode check: ${connection.responseCode}")
+                return@withContext 0
+            }
+            
+            inputStream = connection.inputStream
+            outputStream = FileOutputStream(tempFile)
+            
+            val buffer = ByteArray(8192)
+            var bytesRead: Int
+            var totalRead = 0L
+            val totalSize = connection.contentLength
+            
+            // Limitar download a 50MB para verificação (APKs geralmente são menores)
+            val maxSizeForCheck = 50 * 1024 * 1024L // 50MB
+            
+            while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                if (totalRead > maxSizeForCheck) {
+                    Logger.w("UpdateManager", "APK too large for versionCode check, stopping download")
+                    break
+                }
+                outputStream.write(buffer, 0, bytesRead)
+                totalRead += bytesRead
+            }
+            
+            outputStream.flush()
+            outputStream.close()
+            inputStream.close()
+            outputStream = null
+            inputStream = null
+            
+            // Verificar se o arquivo foi baixado (pelo menos parcialmente)
+            if (!tempFile.exists() || tempFile.length() == 0L) {
+                Logger.e("UpdateManager", "Failed to download APK for versionCode check")
+                return@withContext 0
+            }
+            
+            Logger.d("UpdateManager", "APK downloaded for check: ${tempFile.length()} bytes")
+            
+            // Usar PackageManager para ler o versionCode do APK
+            val packageManager = context.packageManager
+            val packageInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                packageManager.getPackageArchiveInfo(
+                    tempFile.absolutePath,
+                    PackageManager.PackageInfoFlags.of(0)
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                packageManager.getPackageArchiveInfo(tempFile.absolutePath, 0)
+            }
+            
+            if (packageInfo == null) {
+                Logger.e("UpdateManager", "Failed to read package info from APK")
+                return@withContext 0
+            }
+            
+            val versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                packageInfo.longVersionCode.toInt()
+            } else {
+                @Suppress("DEPRECATION")
+                packageInfo.versionCode
+            }
+            
+            Logger.d("UpdateManager", "Extracted versionCode from APK: $versionCode")
+            Logger.d("UpdateManager", "APK versionName: ${packageInfo.versionName}")
+            
+            versionCode
+        } catch (e: Exception) {
+            Logger.e("UpdateManager", "Error extracting versionCode from APK", e)
+            0
+        } finally {
+            // Limpar recursos
+            try {
+                outputStream?.close()
+                inputStream?.close()
+                connection?.disconnect()
+                
+                // Deletar arquivo temporário
+                tempFile?.delete()
+            } catch (e: Exception) {
+                Logger.e("UpdateManager", "Error cleaning up temp APK file", e)
+            }
+        }
     }
     
     private fun cleanupOldDownloads() {

@@ -30,7 +30,13 @@ data class SyncUiState(
 class AuthViewModel(
     private val repository: ItemCompraRepository
 ) : ViewModel() {
-    private val authService = AuthService.getInstance()
+    // AuthService inicializado de forma segura para evitar crashes
+    private val authService: AuthService? = try {
+        AuthService.getInstance()
+    } catch (e: Exception) {
+        android.util.Log.e("AuthViewModel", "Erro ao inicializar AuthService", e)
+        null
+    }
 
     private val _authState = MutableStateFlow(AuthUiState())
     val authState: StateFlow<AuthUiState> = _authState.asStateFlow()
@@ -39,23 +45,41 @@ class AuthViewModel(
     val syncState: StateFlow<SyncUiState> = _syncState.asStateFlow()
 
     init {
-        // Observar estado de autenticação
-        viewModelScope.launch {
-            authService.currentUser.collect { user ->
-                _authState.value = _authState.value.copy(
-                    isAuthenticated = user != null,
-                    currentUser = user
-                )
-                _syncState.value = _syncState.value.copy(
-                    isSyncAvailable = repository.isSyncAvailable()
-                )
+        // Observar estado de autenticação apenas se AuthService estiver disponível
+        if (authService != null) {
+            viewModelScope.launch {
+                try {
+                    authService.currentUser.collect { user ->
+                        _authState.value = _authState.value.copy(
+                            isAuthenticated = user != null,
+                            currentUser = user
+                        )
+                        _syncState.value = _syncState.value.copy(
+                            isSyncAvailable = repository.isSyncAvailable()
+                        )
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("AuthViewModel", "Erro ao observar estado de autenticação", e)
+                }
             }
+        } else {
+            // Se AuthService não estiver disponível, definir estado padrão
+            _syncState.value = _syncState.value.copy(
+                isSyncAvailable = false
+            )
         }
     }
 
     fun signUp(email: String, password: String) {
         viewModelScope.launch {
             _authState.value = _authState.value.copy(isLoading = true, errorMessage = null)
+            if (authService == null) {
+                _authState.value = _authState.value.copy(
+                    isLoading = false,
+                    errorMessage = "Serviço de autenticação não disponível"
+                )
+                return@launch
+            }
             authService.signUp(email, password)
                 .onSuccess { user ->
                     _authState.value = _authState.value.copy(
@@ -79,6 +103,13 @@ class AuthViewModel(
     fun signIn(email: String, password: String) {
         viewModelScope.launch {
             _authState.value = _authState.value.copy(isLoading = true, errorMessage = null)
+            if (authService == null) {
+                _authState.value = _authState.value.copy(
+                    isLoading = false,
+                    errorMessage = "Serviço de autenticação não disponível"
+                )
+                return@launch
+            }
             authService.signIn(email, password)
                 .onSuccess { user ->
                     _authState.value = _authState.value.copy(
@@ -104,6 +135,14 @@ class AuthViewModel(
     fun signOut() {
         viewModelScope.launch {
             _authState.value = _authState.value.copy(isLoading = true)
+            if (authService == null) {
+                _authState.value = _authState.value.copy(
+                    isLoading = false,
+                    isAuthenticated = false,
+                    currentUser = null
+                )
+                return@launch
+            }
             authService.signOut()
                 .onSuccess {
                     _authState.value = _authState.value.copy(

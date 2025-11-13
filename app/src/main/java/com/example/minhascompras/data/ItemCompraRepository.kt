@@ -11,7 +11,16 @@ class ItemCompraRepository(
     private val historyDao: HistoryDao
 ) {
     private val syncService = SupabaseSyncService(itemCompraDao, historyDao)
-    private val authService = AuthService.getInstance()
+    // AuthService inicializado de forma lazy para evitar crashes na inicialização
+    private val authService: AuthService by lazy { 
+        try {
+            AuthService.getInstance()
+        } catch (e: Exception) {
+            android.util.Log.e("ItemCompraRepository", "Erro ao inicializar AuthService", e)
+            // Retornar uma instância mesmo em caso de erro
+            AuthService.getInstance()
+        }
+    }
     val allItens: Flow<List<ItemCompra>> = itemCompraDao.getAllItens()
 
     suspend fun getAllItensList(): List<ItemCompra> {

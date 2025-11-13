@@ -48,12 +48,15 @@ object SupabaseConfig {
      * Verifica se a configuração do Supabase está completa.
      * 
      * @return true se a URL e a chave foram configuradas corretamente
+     * TEMPORARIAMENTE DESABILITADO: Retorna sempre false para evitar crashes
      */
     fun isConfigured(): Boolean {
-        return SUPABASE_URL != "https://seu-projeto.supabase.co" &&
-               SUPABASE_ANON_KEY != "sua-chave-anonima-aqui" &&
-               SUPABASE_URL.isNotBlank() &&
-               SUPABASE_ANON_KEY.isNotBlank()
+        // TEMPORARIAMENTE DESABILITADO: Supabase desabilitado para evitar crashes
+        return false
+        // return SUPABASE_URL != "https://seu-projeto.supabase.co" &&
+        //        SUPABASE_ANON_KEY != "sua-chave-anonima-aqui" &&
+        //        SUPABASE_URL.isNotBlank() &&
+        //        SUPABASE_ANON_KEY.isNotBlank()
     }
 }
 

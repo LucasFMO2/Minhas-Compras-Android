@@ -1,11 +1,13 @@
 package com.example.minhascompras.ui.components
 
 import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -34,20 +36,20 @@ fun ItemCompraCard(
     modifier: Modifier = Modifier
 ) {
     val formatador = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
+    
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .animateContentSize(),
         colors = CardDefaults.cardColors(
             containerColor = if (item.comprado) {
-                MaterialTheme.colorScheme.surfaceVariant
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
             } else {
                 MaterialTheme.colorScheme.surface
             }
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = if (item.comprado) 
-                ResponsiveUtils.getCardElevation() 
-            else 
-                ResponsiveUtils.getCardElevation()
+            defaultElevation = ResponsiveUtils.getCardElevation()
         ),
         shape = RoundedCornerShape(ResponsiveUtils.getCardCornerRadius())
     ) {
@@ -56,102 +58,126 @@ fun ItemCompraCard(
                 .fillMaxWidth()
                 .padding(ResponsiveUtils.getCardPadding()),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSpacing())
         ) {
-            Row(
-                modifier = Modifier.weight(1f),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSpacing())
-            ) {
-                // Ícone visual
-                val iconSize = if (ResponsiveUtils.isSmallScreen()) 36.dp else if (ResponsiveUtils.isMediumScreen()) 40.dp else 48.dp
+            // Checkbox com animação
+            AnimatedContent(
+                targetState = item.comprado,
+                transitionSpec = {
+                    fadeIn(animationSpec = tween(200)) + scaleIn(
+                        initialScale = 0.8f,
+                        animationSpec = tween(200)
+                    ) togetherWith fadeOut(animationSpec = tween(200)) + scaleOut(
+                        targetScale = 0.8f,
+                        animationSpec = tween(200)
+                    )
+                },
+                label = "checkbox"
+            ) { comprado ->
                 Box(
                     modifier = Modifier
-                        .size(iconSize)
-                        .clip(CircleShape)
-                        .background(
-                            if (item.comprado) {
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
-                            } else {
-                                MaterialTheme.colorScheme.primaryContainer
-                            }
-                        ),
+                        .size(ResponsiveUtils.getMinimumTouchTarget())
+                        .clip(CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.ShoppingCart,
-                        contentDescription = "Ícone de item de compra",
-                        modifier = Modifier.size(if (ResponsiveUtils.isSmallScreen()) 18.dp else ResponsiveUtils.getIconSize()),
-                        tint = if (item.comprado) {
-                            MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f)
-                        } else {
-                            MaterialTheme.colorScheme.onPrimaryContainer
+                    if (comprado) {
+                        IconButton(
+                            onClick = { onToggleComprado() },
+                            modifier = Modifier.size(ResponsiveUtils.getMinimumTouchTarget())
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = "Item comprado",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(ResponsiveUtils.getIconSize())
+                            )
                         }
-                    )
+                    } else {
+                        Checkbox(
+                            checked = false,
+                            onCheckedChange = { onToggleComprado() },
+                            colors = CheckboxDefaults.colors(
+                                uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                checkedColor = MaterialTheme.colorScheme.primary
+                            )
+                        )
+                    }
                 }
+            }
+            
+            // Conteúdo principal
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = ResponsiveUtils.getSmallSpacing()),
+                verticalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSmallSpacing())
+            ) {
+                // Nome do item
+                Text(
+                    text = item.nome,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontSize = ResponsiveUtils.getBodyFontSize()
+                    ),
+                    fontWeight = FontWeight.SemiBold,
+                    textDecoration = if (item.comprado) {
+                        TextDecoration.LineThrough
+                    } else {
+                        TextDecoration.None
+                    },
+                    color = if (item.comprado) {
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    },
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
                 
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = item.nome,
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontSize = ResponsiveUtils.getBodyFontSize()
-                        ),
-                        fontWeight = FontWeight.SemiBold,
-                        textDecoration = if (item.comprado) {
-                            TextDecoration.LineThrough
-                        } else {
-                            TextDecoration.None
-                        },
-                        color = if (item.comprado) {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        } else {
-                            MaterialTheme.colorScheme.onSurface
-                        },
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    
-                    Spacer(modifier = Modifier.height(ResponsiveUtils.getSmallSpacing()))
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSmallSpacing())
-                    ) {
-                        if (item.quantidade > 1) {
-                            Surface(
-                                shape = RoundedCornerShape(8.dp),
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                                modifier = Modifier.padding(top = 4.dp)
+                // Informações adicionais (quantidade e preço)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSmallSpacing()),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (item.quantidade > 1) {
+                        Surface(
+                            shape = RoundedCornerShape(ResponsiveUtils.getSmallSpacing()),
+                            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f),
+                            modifier = Modifier.height(24.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
                                 Text(
-                                    text = "Qtd: ${item.quantidade}",
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontSize = ResponsiveUtils.getLabelFontSize()
-                                    ),
-                                    fontWeight = FontWeight.Medium,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                    modifier = Modifier.padding(
-                                        horizontal = if (ResponsiveUtils.isSmallScreen()) 6.dp else 8.dp,
-                                        vertical = if (ResponsiveUtils.isSmallScreen()) 3.dp else 4.dp
-                                    )
-                                )
-                            }
-                        }
-                        if (item.preco != null && item.preco > 0) {
-                            Surface(
-                                shape = RoundedCornerShape(8.dp),
-                                color = MaterialTheme.colorScheme.tertiaryContainer,
-                                modifier = Modifier.padding(top = 4.dp)
-                            ) {
-                                Text(
-                                    text = formatador.format(item.preco),
-                                    style = MaterialTheme.typography.labelSmall.copy(
+                                    text = "×${item.quantidade}",
+                                    style = MaterialTheme.typography.labelMedium.copy(
                                         fontSize = ResponsiveUtils.getLabelFontSize()
                                     ),
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onTertiaryContainer,
-                                    modifier = Modifier.padding(
-                                        horizontal = if (ResponsiveUtils.isSmallScreen()) 6.dp else 8.dp,
-                                        vertical = if (ResponsiveUtils.isSmallScreen()) 3.dp else 4.dp
-                                    )
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
+                            }
+                        }
+                    }
+                    
+                    if (item.preco != null && item.preco > 0) {
+                        Surface(
+                            shape = RoundedCornerShape(ResponsiveUtils.getSmallSpacing()),
+                            color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.7f),
+                            modifier = Modifier.height(24.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = formatador.format(item.preco),
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontSize = ResponsiveUtils.getLabelFontSize()
+                                    ),
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer
                                 )
                             }
                         }
@@ -159,49 +185,38 @@ fun ItemCompraCard(
                 }
             }
             
-            // Checkbox e botões de ação
+            // Botões de ação
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSmallSpacing())
             ) {
-                AnimatedContent(
-                    targetState = item.comprado,
-                    transitionSpec = {
-                        fadeIn() + scaleIn() togetherWith fadeOut() + scaleOut()
-                    },
-                    label = "checkbox"
-                ) { comprado ->
-                    Checkbox(
-                        checked = comprado,
-                        onCheckedChange = { onToggleComprado() },
-                        colors = CheckboxDefaults.colors(
-                            checkedColor = MaterialTheme.colorScheme.primary
-                        )
-                    )
-                }
-                
                 val buttonSize = ResponsiveUtils.getMinimumTouchTarget()
                 val iconButtonSize = if (ResponsiveUtils.isSmallScreen()) 18.dp else 20.dp
+                
                 IconButton(
                     onClick = onEdit,
-                    modifier = Modifier.size(buttonSize)
+                    modifier = Modifier.size(buttonSize),
+                    colors = IconButtonDefaults.iconButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = "Editar",
-                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
                         modifier = Modifier.size(iconButtonSize)
                     )
                 }
                 
                 IconButton(
                     onClick = onDelete,
-                    modifier = Modifier.size(buttonSize)
+                    modifier = Modifier.size(buttonSize),
+                    colors = IconButtonDefaults.iconButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Deletar",
-                        tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
                         modifier = Modifier.size(iconButtonSize)
                     )
                 }

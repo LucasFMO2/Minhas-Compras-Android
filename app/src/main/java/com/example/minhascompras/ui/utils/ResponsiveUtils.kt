@@ -10,8 +10,15 @@ import androidx.compose.ui.unit.sp
 
 /**
  * Utilitários para criar layouts responsivos baseados no tamanho da tela
+ * Sistema baseado em múltiplos de 4dp para consistência
  */
 object ResponsiveUtils {
+    
+    // Breakpoints precisos para diferentes tamanhos de tela
+    private const val BREAKPOINT_SMALL = 360    // Telefones pequenos
+    private const val BREAKPOINT_MEDIUM = 600    // Telefones grandes / Tablets pequenos
+    private const val BREAKPOINT_LARGE = 840     // Tablets médios
+    private const val BREAKPOINT_XLARGE = 1200   // Tablets grandes / Desktops
     
     /**
      * Retorna o tamanho da tela em dp
@@ -32,131 +39,160 @@ object ResponsiveUtils {
     }
     
     /**
-     * Retorna padding horizontal baseado no tamanho da tela
+     * Retorna padding horizontal baseado no tamanho da tela (múltiplos de 4dp)
      */
     @Composable
     fun getHorizontalPadding(): Dp {
         val screenWidth = getScreenWidth().value
         return when {
-            screenWidth < 360 -> 12.dp  // Telas muito pequenas
-            screenWidth < 600 -> 16.dp  // Telas pequenas/médias
-            screenWidth < 840 -> 20.dp  // Telas médias/grandes
-            else -> 24.dp              // Telas grandes/tablets
+            screenWidth < BREAKPOINT_SMALL -> 12.dp   // 3 * 4dp
+            screenWidth < BREAKPOINT_MEDIUM -> 16.dp  // 4 * 4dp
+            screenWidth < BREAKPOINT_LARGE -> 20.dp  // 5 * 4dp
+            screenWidth < BREAKPOINT_XLARGE -> 24.dp  // 6 * 4dp
+            else -> 32.dp                             // 8 * 4dp (tablets grandes)
         }
     }
     
     /**
-     * Retorna padding vertical baseado no tamanho da tela
+     * Retorna padding vertical baseado no tamanho da tela (múltiplos de 4dp)
      */
     @Composable
     fun getVerticalPadding(): Dp {
         val screenWidth = getScreenWidth().value
         return when {
-            screenWidth < 360 -> 8.dp
-            screenWidth < 600 -> 12.dp
-            screenWidth < 840 -> 16.dp
-            else -> 20.dp
+            screenWidth < BREAKPOINT_SMALL -> 8.dp    // 2 * 4dp
+            screenWidth < BREAKPOINT_MEDIUM -> 12.dp // 3 * 4dp
+            screenWidth < BREAKPOINT_LARGE -> 16.dp  // 4 * 4dp
+            else -> 20.dp                            // 5 * 4dp
         }
     }
     
     /**
-     * Retorna espaçamento entre elementos baseado no tamanho da tela
+     * Retorna espaçamento entre elementos baseado no tamanho da tela (múltiplos de 4dp)
      */
     @Composable
     fun getSpacing(): Dp {
         val screenWidth = getScreenWidth().value
         return when {
-            screenWidth < 360 -> 8.dp
-            screenWidth < 600 -> 12.dp
-            screenWidth < 840 -> 16.dp
-            else -> 20.dp
+            screenWidth < BREAKPOINT_SMALL -> 8.dp    // 2 * 4dp
+            screenWidth < BREAKPOINT_MEDIUM -> 12.dp  // 3 * 4dp
+            screenWidth < BREAKPOINT_LARGE -> 16.dp   // 4 * 4dp
+            else -> 20.dp                             // 5 * 4dp
         }
     }
     
     /**
-     * Retorna espaçamento pequeno baseado no tamanho da tela
+     * Retorna espaçamento pequeno baseado no tamanho da tela (múltiplos de 4dp)
      */
     @Composable
     fun getSmallSpacing(): Dp {
         val screenWidth = getScreenWidth().value
         return when {
-            screenWidth < 360 -> 4.dp
-            screenWidth < 600 -> 6.dp
-            screenWidth < 840 -> 8.dp
-            else -> 10.dp
+            screenWidth < BREAKPOINT_SMALL -> 4.dp    // 1 * 4dp
+            screenWidth < BREAKPOINT_MEDIUM -> 6.dp   // 1.5 * 4dp (permitido para espaçamento fino)
+            screenWidth < BREAKPOINT_LARGE -> 8.dp    // 2 * 4dp
+            else -> 10.dp                             // 2.5 * 4dp
         }
     }
     
     /**
-     * Retorna tamanho de ícone baseado no tamanho da tela
+     * Retorna espaçamento médio baseado no tamanho da tela (múltiplos de 4dp)
+     */
+    @Composable
+    fun getMediumSpacing(): Dp {
+        val screenWidth = getScreenWidth().value
+        return when {
+            screenWidth < BREAKPOINT_SMALL -> 12.dp   // 3 * 4dp
+            screenWidth < BREAKPOINT_MEDIUM -> 16.dp  // 4 * 4dp
+            screenWidth < BREAKPOINT_LARGE -> 20.dp   // 5 * 4dp
+            else -> 24.dp                             // 6 * 4dp
+        }
+    }
+    
+    /**
+     * Retorna espaçamento grande baseado no tamanho da tela (múltiplos de 4dp)
+     */
+    @Composable
+    fun getLargeSpacing(): Dp {
+        val screenWidth = getScreenWidth().value
+        return when {
+            screenWidth < BREAKPOINT_SMALL -> 16.dp   // 4 * 4dp
+            screenWidth < BREAKPOINT_MEDIUM -> 24.dp  // 6 * 4dp
+            screenWidth < BREAKPOINT_LARGE -> 32.dp   // 8 * 4dp
+            else -> 40.dp                             // 10 * 4dp
+        }
+    }
+    
+    /**
+     * Retorna tamanho de ícone baseado no tamanho da tela (múltiplos de 4dp)
      */
     @Composable
     fun getIconSize(): Dp {
         val screenWidth = getScreenWidth().value
         return when {
-            screenWidth < 360 -> 20.dp
-            screenWidth < 600 -> 24.dp
-            screenWidth < 840 -> 28.dp
-            else -> 32.dp
+            screenWidth < BREAKPOINT_SMALL -> 20.dp   // 5 * 4dp
+            screenWidth < BREAKPOINT_MEDIUM -> 24.dp  // 6 * 4dp
+            screenWidth < BREAKPOINT_LARGE -> 28.dp   // 7 * 4dp
+            else -> 32.dp                             // 8 * 4dp
         }
     }
     
     /**
-     * Retorna padding de card baseado no tamanho da tela
+     * Retorna padding de card baseado no tamanho da tela (múltiplos de 4dp)
      */
     @Composable
     fun getCardPadding(): Dp {
         val screenWidth = getScreenWidth().value
         return when {
-            screenWidth < 360 -> 12.dp
-            screenWidth < 600 -> 16.dp
-            screenWidth < 840 -> 20.dp
-            else -> 24.dp
+            screenWidth < BREAKPOINT_SMALL -> 12.dp   // 3 * 4dp
+            screenWidth < BREAKPOINT_MEDIUM -> 16.dp  // 4 * 4dp
+            screenWidth < BREAKPOINT_LARGE -> 20.dp   // 5 * 4dp
+            else -> 24.dp                             // 6 * 4dp
         }
     }
     
     /**
-     * Retorna espaçamento entre cards de estatísticas baseado no tamanho da tela
+     * Retorna espaçamento entre cards de estatísticas baseado no tamanho da tela (múltiplos de 4dp)
      */
     @Composable
     fun getStatisticCardSpacing(): Dp {
         val screenWidth = getScreenWidth().value
         return when {
-            screenWidth < 360 -> 2.dp
-            screenWidth < 480 -> 4.dp
-            screenWidth < 600 -> 6.dp
-            screenWidth < 840 -> 8.dp
-            else -> 12.dp
+            screenWidth < BREAKPOINT_SMALL -> 4.dp    // 1 * 4dp
+            screenWidth < 480 -> 6.dp                 // 1.5 * 4dp
+            screenWidth < BREAKPOINT_MEDIUM -> 8.dp   // 2 * 4dp
+            screenWidth < BREAKPOINT_LARGE -> 12.dp   // 3 * 4dp
+            else -> 16.dp                             // 4 * 4dp
         }
     }
     
     /**
-     * Retorna padding horizontal de card de estatística baseado no tamanho da tela
+     * Retorna padding horizontal de card de estatística baseado no tamanho da tela (múltiplos de 4dp)
      */
     @Composable
     fun getStatisticCardHorizontalPadding(): Dp {
         val screenWidth = getScreenWidth().value
         return when {
-            screenWidth < 360 -> 2.dp
-            screenWidth < 480 -> 4.dp
-            screenWidth < 600 -> 6.dp
-            screenWidth < 840 -> 8.dp
-            else -> 12.dp
+            screenWidth < BREAKPOINT_SMALL -> 8.dp     // 2 * 4dp
+            screenWidth < 480 -> 10.dp                 // 2.5 * 4dp
+            screenWidth < BREAKPOINT_MEDIUM -> 12.dp  // 3 * 4dp
+            screenWidth < BREAKPOINT_LARGE -> 16.dp   // 4 * 4dp
+            else -> 20.dp                             // 5 * 4dp
         }
     }
 
     /**
-     * Retorna padding horizontal aplicado ao container das estatísticas
+     * Retorna padding horizontal aplicado ao container das estatísticas (múltiplos de 4dp)
      */
     @Composable
     fun getStatisticRowHorizontalPadding(): Dp {
         val screenWidth = getScreenWidth().value
         return when {
-            screenWidth < 360 -> 0.dp
-            screenWidth < 480 -> 4.dp
-            screenWidth < 600 -> 8.dp
-            screenWidth < 840 -> 12.dp
-            else -> 16.dp
+            screenWidth < BREAKPOINT_SMALL -> 0.dp
+            screenWidth < 480 -> 4.dp                  // 1 * 4dp
+            screenWidth < BREAKPOINT_MEDIUM -> 8.dp   // 2 * 4dp
+            screenWidth < BREAKPOINT_LARGE -> 12.dp   // 3 * 4dp
+            else -> 16.dp                             // 4 * 4dp
         }
     }
     
@@ -165,7 +201,7 @@ object ResponsiveUtils {
      */
     @Composable
     fun isSmallScreen(): Boolean {
-        return getScreenWidth().value < 360
+        return getScreenWidth().value < BREAKPOINT_SMALL
     }
     
     /**
@@ -174,7 +210,7 @@ object ResponsiveUtils {
     @Composable
     fun isMediumScreen(): Boolean {
         val width = getScreenWidth().value
-        return width >= 360 && width < 600
+        return width >= BREAKPOINT_SMALL && width < BREAKPOINT_MEDIUM
     }
     
     /**
@@ -182,7 +218,15 @@ object ResponsiveUtils {
      */
     @Composable
     fun isLargeScreen(): Boolean {
-        return getScreenWidth().value >= 600
+        return getScreenWidth().value >= BREAKPOINT_MEDIUM
+    }
+    
+    /**
+     * Verifica se a tela é extra grande (tablet grande)
+     */
+    @Composable
+    fun isXLargeScreen(): Boolean {
+        return getScreenWidth().value >= BREAKPOINT_XLARGE
     }
     
     /**
@@ -192,9 +236,9 @@ object ResponsiveUtils {
     fun getTitleFontSize(): TextUnit {
         val screenWidth = getScreenWidth().value
         return when {
-            screenWidth < 360 -> 18.sp
-            screenWidth < 600 -> 20.sp
-            screenWidth < 840 -> 22.sp
+            screenWidth < BREAKPOINT_SMALL -> 18.sp
+            screenWidth < BREAKPOINT_MEDIUM -> 20.sp
+            screenWidth < BREAKPOINT_LARGE -> 22.sp
             else -> 24.sp
         }
     }
@@ -206,8 +250,8 @@ object ResponsiveUtils {
     fun getBodyFontSize(): TextUnit {
         val screenWidth = getScreenWidth().value
         return when {
-            screenWidth < 360 -> 14.sp
-            screenWidth < 600 -> 16.sp
+            screenWidth < BREAKPOINT_SMALL -> 14.sp
+            screenWidth < BREAKPOINT_MEDIUM -> 16.sp
             else -> 16.sp
         }
     }
@@ -219,87 +263,87 @@ object ResponsiveUtils {
     fun getLabelFontSize(): TextUnit {
         val screenWidth = getScreenWidth().value
         return when {
-            screenWidth < 360 -> 11.sp
-            screenWidth < 600 -> 12.sp
+            screenWidth < BREAKPOINT_SMALL -> 11.sp
+            screenWidth < BREAKPOINT_MEDIUM -> 12.sp
             else -> 12.sp
         }
     }
     
     /**
-     * Retorna tamanho mínimo de toque (acessibilidade) baseado no tamanho da tela
+     * Retorna tamanho mínimo de toque (acessibilidade) baseado no tamanho da tela (múltiplos de 4dp)
      */
     @Composable
     fun getMinimumTouchTarget(): Dp {
         val screenWidth = getScreenWidth().value
         return when {
-            screenWidth < 360 -> 40.dp  // Mínimo para telas pequenas
-            else -> 48.dp  // Padrão Material Design
+            screenWidth < BREAKPOINT_SMALL -> 40.dp   // 10 * 4dp (mínimo para telas pequenas)
+            else -> 48.dp                             // 12 * 4dp (padrão Material Design)
         }
     }
     
     /**
-     * Retorna tamanho de botão baseado no tamanho da tela
+     * Retorna tamanho de botão baseado no tamanho da tela (múltiplos de 4dp)
      */
     @Composable
     fun getButtonHeight(): Dp {
         val screenWidth = getScreenWidth().value
         return when {
-            screenWidth < 360 -> 36.dp
-            screenWidth < 600 -> 40.dp
-            else -> 48.dp
+            screenWidth < BREAKPOINT_SMALL -> 40.dp   // 10 * 4dp
+            screenWidth < BREAKPOINT_MEDIUM -> 44.dp  // 11 * 4dp
+            else -> 48.dp                             // 12 * 4dp
         }
     }
     
     /**
-     * Retorna padding de botão baseado no tamanho da tela
+     * Retorna padding de botão baseado no tamanho da tela (múltiplos de 4dp)
      */
     @Composable
     fun getButtonPadding(): PaddingValues {
         val screenWidth = getScreenWidth().value
         return when {
-            screenWidth < 360 -> PaddingValues(horizontal = 12.dp, vertical = 8.dp)
-            screenWidth < 600 -> PaddingValues(horizontal = 16.dp, vertical = 10.dp)
-            else -> PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+            screenWidth < BREAKPOINT_SMALL -> PaddingValues(horizontal = 12.dp, vertical = 8.dp)   // 3*4dp, 2*4dp
+            screenWidth < BREAKPOINT_MEDIUM -> PaddingValues(horizontal = 16.dp, vertical = 10.dp) // 4*4dp, 2.5*4dp
+            else -> PaddingValues(horizontal = 24.dp, vertical = 12.dp)                            // 6*4dp, 3*4dp
         }
     }
     
     /**
-     * Retorna tamanho de card baseado no tamanho da tela
+     * Retorna elevação de card baseado no tamanho da tela
      */
     @Composable
     fun getCardElevation(): Dp {
         val screenWidth = getScreenWidth().value
         return when {
-            screenWidth < 360 -> 1.dp
-            screenWidth < 600 -> 2.dp
+            screenWidth < BREAKPOINT_SMALL -> 1.dp
+            screenWidth < BREAKPOINT_MEDIUM -> 2.dp
             else -> 3.dp
         }
     }
     
     /**
-     * Retorna raio de borda de card baseado no tamanho da tela
+     * Retorna raio de borda de card baseado no tamanho da tela (múltiplos de 4dp)
      */
     @Composable
     fun getCardCornerRadius(): Dp {
         val screenWidth = getScreenWidth().value
         return when {
-            screenWidth < 360 -> 12.dp
-            screenWidth < 600 -> 16.dp
-            else -> 16.dp
+            screenWidth < BREAKPOINT_SMALL -> 12.dp   // 3 * 4dp
+            screenWidth < BREAKPOINT_MEDIUM -> 16.dp  // 4 * 4dp
+            else -> 20.dp                             // 5 * 4dp
         }
     }
     
     /**
-     * Retorna espaçamento vertical entre seções baseado no tamanho da tela
+     * Retorna espaçamento vertical entre seções baseado no tamanho da tela (múltiplos de 4dp)
      */
     @Composable
     fun getSectionSpacing(): Dp {
         val screenWidth = getScreenWidth().value
         return when {
-            screenWidth < 360 -> 12.dp
-            screenWidth < 600 -> 16.dp
-            screenWidth < 840 -> 20.dp
-            else -> 24.dp
+            screenWidth < BREAKPOINT_SMALL -> 12.dp   // 3 * 4dp
+            screenWidth < BREAKPOINT_MEDIUM -> 16.dp  // 4 * 4dp
+            screenWidth < BREAKPOINT_LARGE -> 20.dp   // 5 * 4dp
+            else -> 24.dp                             // 6 * 4dp
         }
     }
 }

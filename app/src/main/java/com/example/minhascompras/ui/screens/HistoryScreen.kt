@@ -119,7 +119,10 @@ fun HistoryItemCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(ResponsiveUtils.getCardCornerRadius()),
-        elevation = CardDefaults.cardElevation(defaultElevation = ResponsiveUtils.getCardElevation())
+        elevation = CardDefaults.cardElevation(defaultElevation = ResponsiveUtils.getCardElevation()),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Column(
             modifier = Modifier
@@ -138,7 +141,8 @@ fun HistoryItemCard(
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontSize = ResponsiveUtils.getBodyFontSize()
                         ),
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 2,
                         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
@@ -153,12 +157,14 @@ fun HistoryItemCard(
                 }
                 IconButton(
                     onClick = onDelete,
-                    modifier = Modifier.size(ResponsiveUtils.getMinimumTouchTarget())
+                    modifier = Modifier.size(ResponsiveUtils.getMinimumTouchTarget()),
+                    colors = IconButtonDefaults.iconButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Deletar",
-                        tint = MaterialTheme.colorScheme.error,
                         modifier = Modifier.size(
                             if (ResponsiveUtils.isSmallScreen()) 18.dp else 20.dp
                         )
@@ -170,10 +176,11 @@ fun HistoryItemCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                Button(
+                FilledTonalButton(
                     onClick = onReuse,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
+                    colors = ButtonDefaults.filledTonalButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     ),
                     modifier = Modifier.height(ResponsiveUtils.getButtonHeight()),
                     contentPadding = ResponsiveUtils.getButtonPadding()
@@ -192,7 +199,8 @@ fun HistoryItemCard(
                         "Reutilizar",
                         style = MaterialTheme.typography.labelLarge.copy(
                             fontSize = ResponsiveUtils.getBodyFontSize()
-                        )
+                        ),
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
             }

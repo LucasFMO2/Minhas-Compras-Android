@@ -6,6 +6,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -280,22 +281,30 @@ fun SettingsScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(ResponsiveUtils.getHorizontalPadding()),
+            verticalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSectionSpacing())
         ) {
             // Seção de Tema
             Text(
                 "Aparência",
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontSize = ResponsiveUtils.getTitleFontSize()
+                ),
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = ResponsiveUtils.getSmallSpacing())
             )
 
             val themeMode by themeViewModel.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
             
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = { themeViewModel.toggleThemeMode() }
+                onClick = { themeViewModel.toggleThemeMode() },
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = ResponsiveUtils.getCardElevation()),
+                shape = RoundedCornerShape(ResponsiveUtils.getCardCornerRadius())
             ) {
                 Row(
                     modifier = Modifier
@@ -332,14 +341,15 @@ fun SettingsScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
             // Seção de Atualizações
             Text(
                 "Atualizações",
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontSize = ResponsiveUtils.getTitleFontSize()
+                ),
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = ResponsiveUtils.getSmallSpacing())
             )
 
             val updateState by updateViewModel.updateState.collectAsState()
@@ -368,7 +378,12 @@ fun SettingsScreen(
                         }
                     }
                 },
-                enabled = updateState !is UpdateState.Checking && updateState !is UpdateState.Downloading
+                enabled = updateState !is UpdateState.Checking && updateState !is UpdateState.Downloading,
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = ResponsiveUtils.getCardElevation()),
+                shape = RoundedCornerShape(ResponsiveUtils.getCardCornerRadius())
             ) {
                 Row(
                     modifier = Modifier
@@ -653,18 +668,24 @@ fun SettingsScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
             Text(
                 "Backup e Restauração",
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontSize = ResponsiveUtils.getTitleFontSize()
+                ),
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = ResponsiveUtils.getSmallSpacing())
             )
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = { exportLauncher.launch(exportFileName) }
+                onClick = { exportLauncher.launch(exportFileName) },
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = ResponsiveUtils.getCardElevation()),
+                shape = RoundedCornerShape(ResponsiveUtils.getCardCornerRadius())
             ) {
                 Row(
                     modifier = Modifier
@@ -695,7 +716,12 @@ fun SettingsScreen(
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = { importLauncher.launch("application/json") }
+                onClick = { importLauncher.launch("application/json") },
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = ResponsiveUtils.getCardElevation()),
+                shape = RoundedCornerShape(ResponsiveUtils.getCardCornerRadius())
             ) {
                 Row(
                     modifier = Modifier
@@ -740,7 +766,12 @@ fun SettingsScreen(
                             // Tratar erro silenciosamente ou mostrar mensagem
                         }
                     }
-                }
+                },
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = ResponsiveUtils.getCardElevation()),
+                shape = RoundedCornerShape(ResponsiveUtils.getCardCornerRadius())
             ) {
                 Row(
                     modifier = Modifier

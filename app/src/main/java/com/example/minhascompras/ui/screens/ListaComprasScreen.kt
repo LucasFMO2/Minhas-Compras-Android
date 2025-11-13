@@ -1,11 +1,13 @@
 package com.example.minhascompras.ui.screens
 
 import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
@@ -349,15 +351,28 @@ fun ListaComprasScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = ResponsiveUtils.getSmallSpacing()),
-                        placeholder = { Text("Pesquisar itens...") },
+                        placeholder = { 
+                            Text(
+                                "Pesquisar itens...",
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontSize = ResponsiveUtils.getBodyFontSize()
+                                )
+                            ) 
+                        },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Search,
-                                contentDescription = "Buscar"
+                                contentDescription = "Buscar",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         },
                         singleLine = true,
-                        shape = MaterialTheme.shapes.medium
+                        shape = MaterialTheme.shapes.medium,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                        )
                     )
                     
                     // Chips de filtro
@@ -418,7 +433,8 @@ fun ListaComprasScreen(
                         StatisticCard(
                             label = "Total",
                             value = totalItens.toString(),
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
+                            color = MaterialTheme.colorScheme.secondary
                         )
                         StatisticCard(
                             label = "Pendentes",
@@ -599,10 +615,21 @@ fun ListaComprasScreen(
                         ),
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        items(
+                        itemsIndexed(
                             items = itens,
-                            key = { it.id }
-                        ) { item ->
+                            key = { _, item -> item.id },
+                            contentType = { _, _ -> "item" }
+                        ) { index, item ->
+                            AnimatedVisibility(
+                                visible = true,
+                                enter = fadeIn(
+                                    animationSpec = tween(300, delayMillis = index * 50)
+                                ) + slideInVertically(
+                                    initialOffsetY = { it / 2 },
+                                    animationSpec = tween(300, delayMillis = index * 50)
+                                ),
+                                exit = fadeOut() + slideOutVertically()
+                            ) {
                             val dismissState = rememberSwipeToDismissBoxState(
                                 confirmValueChange = { dismissValue ->
                                     when (dismissValue) {
@@ -674,6 +701,7 @@ fun ListaComprasScreen(
                                     onDelete = { viewModel.deletarItem(item) },
                                     onEdit = { itemParaEditar = item }
                                 )
+                            }
                             }
                         }
                     }

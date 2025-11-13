@@ -57,16 +57,29 @@ fun AdicionarItemDialog(
         },
         text = {
             Column(
-                verticalArrangement = Arrangement.spacedBy(
-                    if (ResponsiveUtils.isSmallScreen()) 16.dp else 20.dp
-                ),
+                verticalArrangement = Arrangement.spacedBy(ResponsiveUtils.getMediumSpacing()),
                 modifier = modifier.fillMaxWidth()
             ) {
+                // Campo Nome
                 OutlinedTextField(
                     value = nomeItem,
                     onValueChange = { nomeItem = it },
-                    label = { Text("Nome do item") },
-                    placeholder = { Text("Ex: Leite, Pão, Arroz...") },
+                    label = { 
+                        Text(
+                            "Nome do item",
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontSize = ResponsiveUtils.getLabelFontSize()
+                            )
+                        ) 
+                    },
+                    placeholder = { 
+                        Text(
+                            "Ex: Leite, Pão, Arroz...",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontSize = ResponsiveUtils.getBodyFontSize()
+                            )
+                        ) 
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     leadingIcon = {
@@ -78,9 +91,12 @@ fun AdicionarItemDialog(
                     },
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        focusedLabelColor = MaterialTheme.colorScheme.primary
-                    )
+                        focusedLabelColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                    ),
+                    shape = MaterialTheme.shapes.medium
                 )
+                
                 // Dropdown de Categoria
                 ExposedDropdownMenuBox(
                     expanded = expanded,
@@ -91,7 +107,14 @@ fun AdicionarItemDialog(
                         value = categoriaSelecionada,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Categoria *") },
+                        label = { 
+                            Text(
+                                "Categoria *",
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    fontSize = ResponsiveUtils.getLabelFontSize()
+                                )
+                            ) 
+                        },
                         trailingIcon = {
                             ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
                         },
@@ -100,22 +123,34 @@ fun AdicionarItemDialog(
                             .menuAnchor(),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            focusedLabelColor = MaterialTheme.colorScheme.primary
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
                         ),
                         supportingText = {
                             Text(
                                 "Selecione uma categoria",
-                                style = MaterialTheme.typography.bodySmall
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontSize = ResponsiveUtils.getLabelFontSize()
+                                )
                             )
-                        }
+                        },
+                        shape = MaterialTheme.shapes.medium
                     )
                     ExposedDropdownMenu(
                         expanded = expanded,
-                        onDismissRequest = { expanded = false }
+                        onDismissRequest = { expanded = false },
+                        modifier = Modifier.heightIn(max = 300.dp)
                     ) {
                         ItemCategory.values().forEach { category ->
                             DropdownMenuItem(
-                                text = { Text(category.displayName) },
+                                text = { 
+                                    Text(
+                                        category.displayName,
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            fontSize = ResponsiveUtils.getBodyFontSize()
+                                        )
+                                    ) 
+                                },
                                 onClick = {
                                     categoriaSelecionada = category.displayName
                                     expanded = false
@@ -125,29 +160,46 @@ fun AdicionarItemDialog(
                     }
                 }
 
+                // Quantidade e Preço em linha
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(
-                        if (ResponsiveUtils.isSmallScreen()) 8.dp else 12.dp
-                    )
+                    horizontalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSpacing())
                 ) {
                     OutlinedTextField(
                         value = quantidade,
                         onValueChange = { if (it.all { char -> char.isDigit() && it.length <= 3 }) quantidade = it },
-                        label = { Text("Quantidade") },
-                        placeholder = { Text("1") },
+                        label = { 
+                            Text(
+                                "Quantidade",
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    fontSize = ResponsiveUtils.getLabelFontSize()
+                                )
+                            ) 
+                        },
+                        placeholder = { 
+                            Text(
+                                "1",
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontSize = ResponsiveUtils.getBodyFontSize()
+                                )
+                            ) 
+                        },
                         modifier = Modifier.weight(1f),
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            focusedLabelColor = MaterialTheme.colorScheme.primary
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
                         ),
                         supportingText = {
                             Text(
                                 "Digite a quantidade",
-                                style = MaterialTheme.typography.bodySmall
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontSize = ResponsiveUtils.getLabelFontSize()
+                                )
                             )
-                        }
+                        },
+                        shape = MaterialTheme.shapes.medium
                     )
                     OutlinedTextField(
                         value = preco,
@@ -163,20 +215,38 @@ fun AdicionarItemDialog(
                             }
                             preco = withSingleDecimal.replace(',', '.')
                         },
-                        label = { Text("Preço (R$)") },
-                        placeholder = { Text("0.00") },
+                        label = { 
+                            Text(
+                                "Preço (R$)",
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    fontSize = ResponsiveUtils.getLabelFontSize()
+                                )
+                            ) 
+                        },
+                        placeholder = { 
+                            Text(
+                                "0.00",
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontSize = ResponsiveUtils.getBodyFontSize()
+                                )
+                            ) 
+                        },
                         modifier = Modifier.weight(1f),
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            focusedLabelColor = MaterialTheme.colorScheme.primary
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
                         ),
                         supportingText = {
                             Text(
                                 "Opcional",
-                                style = MaterialTheme.typography.bodySmall
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontSize = ResponsiveUtils.getLabelFontSize()
+                                )
                             )
-                        }
+                        },
+                        shape = MaterialTheme.shapes.medium
                     )
                 }
             }
@@ -198,13 +268,20 @@ fun AdicionarItemDialog(
                 },
                 enabled = nomeItem.isNotBlank() && categoriaSelecionada.isNotBlank(),
                 modifier = Modifier.height(ResponsiveUtils.getButtonHeight()),
-                contentPadding = ResponsiveUtils.getButtonPadding()
+                contentPadding = ResponsiveUtils.getButtonPadding(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                )
             ) {
                 Text(
                     if (itemEdicao != null) "Salvar" else "Adicionar",
                     style = MaterialTheme.typography.labelLarge.copy(
                         fontSize = ResponsiveUtils.getBodyFontSize()
-                    )
+                    ),
+                    fontWeight = FontWeight.SemiBold
                 )
             }
         },

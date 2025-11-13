@@ -129,6 +129,8 @@ class UpdateViewModel(private val context: Context) : ViewModel() {
                     preferencesManager.setUpdateAvailable(false)
                     
                     // Garantir que o estado UpToDate seja definido para mostrar o diálogo
+                    // Usar um pequeno delay para garantir que a mudança de Checking para UpToDate seja observada
+                    delay(100) // Pequeno delay para garantir que a UI tenha tempo de processar a mudança
                     _updateState.value = UpdateState.UpToDate
                     Logger.d("UpdateViewModel", "State set to UpToDate - dialog should appear")
                 }
@@ -299,10 +301,19 @@ class UpdateViewModel(private val context: Context) : ViewModel() {
     
     /**
      * Força o estado para UpToDate para mostrar o diálogo de aviso
-     * quando o usuário já está na última versão
+     * quando o usuário já está na última versão.
+     * Usa um pequeno delay para garantir que a mudança de estado seja observada.
      */
     fun showUpToDateDialog() {
-        _updateState.value = UpdateState.UpToDate
+        viewModelScope.launch {
+            // Se já está em UpToDate, forçar uma mudança temporária para disparar recomposição
+            if (_updateState.value is UpdateState.UpToDate) {
+                _updateState.value = UpdateState.Idle
+                delay(50) // Pequeno delay para garantir que a mudança seja observada
+            }
+            _updateState.value = UpdateState.UpToDate
+            Logger.d("UpdateViewModel", "showUpToDateDialog called - state set to UpToDate")
+        }
     }
 }
 

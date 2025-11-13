@@ -453,41 +453,47 @@ fun SettingsScreen(
             }
 
             // Diálogos de atualização
-            when (val state = updateState) {
-                is UpdateState.UpToDate -> {
-                    AlertDialog(
-                        onDismissRequest = { updateViewModel.resetState() },
-                        icon = {
-                            Icon(
-                                imageVector = Icons.Default.CheckCircle,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(48.dp)
+            // Renderizar diálogo UpToDate separadamente para garantir que seja exibido
+            if (updateState is UpdateState.UpToDate) {
+                AlertDialog(
+                    onDismissRequest = { updateViewModel.resetState() },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(48.dp)
+                        )
+                    },
+                    title = { 
+                        Text("Você já está na versão mais recente!")
+                    },
+                    text = {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text("Não há atualizações disponíveis no momento. Você já está usando a versão mais recente do aplicativo.")
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                "Versão atual instalada: $currentVersion",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontWeight = FontWeight.SemiBold
                             )
-                        },
-                        title = { 
-                            Text("Você já está na versão mais recente!")
-                        },
-                        text = {
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Text("Não há atualizações disponíveis no momento. Você já está usando a versão mais recente do aplicativo.")
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    "Versão atual instalada: $currentVersion",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            }
-                        },
-                        confirmButton = {
-                            TextButton(onClick = { updateViewModel.resetState() }) {
-                                Text("Entendi")
-                            }
                         }
-                    )
+                    },
+                    confirmButton = {
+                        TextButton(onClick = { updateViewModel.resetState() }) {
+                            Text("Entendi")
+                        }
+                    }
+                )
+            }
+            
+            when (val state = updateState) {
+                // UpToDate é tratado acima separadamente
+                is UpdateState.UpToDate -> {
+                    // Já renderizado acima
                 }
                 is UpdateState.UpdateAvailable -> {
                     // Verificar se a versão é realmente maior que a atual

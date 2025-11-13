@@ -67,13 +67,31 @@ abstract class AppDatabase : RoomDatabase() {
 
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
-                val instance = Room.databaseBuilder(
-                    context.applicationContext,
-                    AppDatabase::class.java,
-                    "compras_database"
-                )
-                .addMigrations(MIGRATION_2_3, MIGRATION_3_4)
-                .build()
+                val instance = try {
+                    Room.databaseBuilder(
+                        context.applicationContext,
+                        AppDatabase::class.java,
+                        "compras_database"
+                    )
+                    .addMigrations(MIGRATION_2_3, MIGRATION_3_4)
+                    .fallbackToDestructiveMigration() // Fallback seguro em caso de erro de migração
+                    .build()
+                } catch (e: Exception) {
+                    android.util.Log.e("AppDatabase", "Erro ao criar banco de dados", e)
+                    // Tentar criar sem migrações como último recurso
+                    try {
+                        Room.databaseBuilder(
+                            context.applicationContext,
+                            AppDatabase::class.java,
+                            "compras_database"
+                        )
+                        .fallbackToDestructiveMigration()
+                        .build()
+                    } catch (e2: Exception) {
+                        android.util.Log.e("AppDatabase", "Erro crítico ao criar banco de dados", e2)
+                        throw RuntimeException("Não foi possível inicializar o banco de dados", e2)
+                    }
+                }
                 INSTANCE = instance
                 instance
             }

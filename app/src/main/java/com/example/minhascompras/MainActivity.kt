@@ -49,23 +49,59 @@ sealed class Screen(val route: String) {
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         
-        val database = AppDatabase.getDatabase(applicationContext)
-        val repository = ItemCompraRepository(database.itemCompraDao(), database.historyDao())
+        try {
+            enableEdgeToEdge()
+        } catch (e: Exception) {
+            // Ignorar erro se enableEdgeToEdge falhar
+            android.util.Log.e("MainActivity", "Erro ao habilitar EdgeToEdge", e)
+        }
         
-        val themePreferencesManager = ThemePreferencesManager(applicationContext)
+        // Inicializar componentes com tratamento de erro
+        val database = try {
+            AppDatabase.getDatabase(applicationContext)
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Erro ao inicializar banco de dados", e)
+            // Tentar criar uma instância básica ou falhar graciosamente
+            throw RuntimeException("Erro crítico: não foi possível inicializar o banco de dados", e)
+        }
+        
+        val repository = try {
+            ItemCompraRepository(database.itemCompraDao(), database.historyDao())
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Erro ao criar repository", e)
+            throw RuntimeException("Erro crítico: não foi possível criar o repository", e)
+        }
+        
+        val themePreferencesManager = try {
+            ThemePreferencesManager(applicationContext)
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Erro ao criar ThemePreferencesManager", e)
+            throw RuntimeException("Erro crítico: não foi possível inicializar preferências de tema", e)
+        }
+        
         val themeViewModelFactory = ThemeViewModelFactory(themePreferencesManager)
         
-        val userPreferencesManager = UserPreferencesManager(applicationContext)
+        val userPreferencesManager = try {
+            UserPreferencesManager(applicationContext)
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Erro ao criar UserPreferencesManager", e)
+            throw RuntimeException("Erro crítico: não foi possível inicializar preferências do usuário", e)
+        }
+        
         val viewModelFactory = ListaComprasViewModelFactory(repository, userPreferencesManager)
         val historyViewModelFactory = HistoryViewModelFactory(repository)
         
-        // Verificar atualizações automaticamente após um delay
+        // Verificar atualizações automaticamente após um delay (com tratamento de erro)
         lifecycleScope.launch {
-            delay(3000) // Aguardar 3 segundos após abrir o app
-            val updateViewModel = UpdateViewModel(applicationContext)
-            updateViewModel.checkForUpdateInBackground()
+            try {
+                delay(3000) // Aguardar 3 segundos após abrir o app
+                val updateViewModel = UpdateViewModel(applicationContext)
+                updateViewModel.checkForUpdateInBackground()
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Erro ao verificar atualizações", e)
+                // Não falhar a inicialização se a verificação de atualização falhar
+            }
         }
         
         setContent {

@@ -88,7 +88,9 @@ class UpdateViewModel(private val context: Context) : ViewModel() {
                     }
                 } else {
                     Logger.d("UpdateViewModel", "No update available - already up to date")
+                    // Garantir que o estado UpToDate seja definido para mostrar o diálogo
                     _updateState.value = UpdateState.UpToDate
+                    Logger.d("UpdateViewModel", "State set to UpToDate - dialog should appear")
                 }
             } catch (e: java.net.SocketTimeoutException) {
                 Logger.e("UpdateViewModel", "Timeout checking for update", e)

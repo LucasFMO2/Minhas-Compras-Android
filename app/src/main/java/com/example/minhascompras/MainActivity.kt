@@ -6,14 +6,17 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -104,78 +107,109 @@ class MainActivity : ComponentActivity() {
             }
         }
         
-        setContent {
-            val themeViewModel: ThemeViewModel = viewModel(factory = themeViewModelFactory)
-            val themeMode by themeViewModel.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
-            val systemDarkTheme = isSystemInDarkTheme()
-            
-            val darkTheme = when (themeMode) {
-                ThemeMode.LIGHT -> false
-                ThemeMode.DARK -> true
-                ThemeMode.SYSTEM -> systemDarkTheme
-            }
-            
-            MinhasComprasTheme(darkTheme = darkTheme) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    val navController = rememberNavController()
-                    val viewModel: ListaComprasViewModel = viewModel(factory = viewModelFactory)
-                    
-                    // Verificar se deve abrir configurações (vindo da notificação)
-                    val shouldOpenSettings = intent?.getBooleanExtra("open_settings", false) ?: false
-                    LaunchedEffect(shouldOpenSettings) {
-                        if (shouldOpenSettings) {
-                            navController.navigate(Screen.Settings.route)
-                        }
-                    }
-                    
-                    NavHost(
-                        navController = navController,
-                        startDestination = Screen.ListaCompras.route
+        try {
+            setContent {
+                val themeViewModel: ThemeViewModel = viewModel(factory = themeViewModelFactory)
+                val themeMode by themeViewModel.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
+                val systemDarkTheme = isSystemInDarkTheme()
+                
+                val darkTheme = when (themeMode) {
+                    ThemeMode.LIGHT -> false
+                    ThemeMode.DARK -> true
+                    ThemeMode.SYSTEM -> systemDarkTheme
+                }
+                
+                MinhasComprasTheme(darkTheme = darkTheme) {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background
                     ) {
-                        composable(Screen.ListaCompras.route) {
-                            ListaComprasScreen(
-                                viewModel = viewModel,
-                                onNavigateToSettings = {
+                        val navController = rememberNavController()
+                        val viewModel: ListaComprasViewModel = viewModel(factory = viewModelFactory)
+                        
+                        // Verificar se deve abrir configurações (vindo da notificação)
+                        val shouldOpenSettings = intent?.getBooleanExtra("open_settings", false) ?: false
+                        LaunchedEffect(shouldOpenSettings) {
+                            if (shouldOpenSettings) {
+                                try {
                                     navController.navigate(Screen.Settings.route)
-                                },
-                                onNavigateToHistory = {
-                                    navController.navigate(Screen.History.route)
+                                } catch (e: Exception) {
+                                    android.util.Log.e("MainActivity", "Erro ao navegar para settings", e)
                                 }
-                            )
+                            }
                         }
-                        composable(Screen.Settings.route) {
-                            val updateViewModel: UpdateViewModel = viewModel(
-                                factory = UpdateViewModelFactory(LocalContext.current)
-                            )
-                            SettingsScreen(
-                                viewModel = viewModel,
-                                themeViewModel = themeViewModel,
-                                updateViewModel = updateViewModel,
-                                onNavigateBack = {
-                                    navController.popBackStack()
-                                }
-                            )
-                        }
-                        composable(Screen.History.route) {
-                            val historyViewModel: HistoryViewModel = viewModel(
-                                factory = historyViewModelFactory
-                            )
-                            HistoryScreen(
-                                viewModel = historyViewModel,
-                                onNavigateBack = {
-                                    navController.popBackStack()
-                                },
-                                onReuseList = {
-                                    navController.popBackStack()
-                                }
-                            )
+                        
+                        NavHost(
+                            navController = navController,
+                            startDestination = Screen.ListaCompras.route
+                        ) {
+                            composable(Screen.ListaCompras.route) {
+                                ListaComprasScreen(
+                                    viewModel = viewModel,
+                                    onNavigateToSettings = {
+                                        try {
+                                            navController.navigate(Screen.Settings.route)
+                                        } catch (e: Exception) {
+                                            android.util.Log.e("MainActivity", "Erro ao navegar", e)
+                                        }
+                                    },
+                                    onNavigateToHistory = {
+                                        try {
+                                            navController.navigate(Screen.History.route)
+                                        } catch (e: Exception) {
+                                            android.util.Log.e("MainActivity", "Erro ao navegar", e)
+                                        }
+                                    }
+                                )
+                            }
+                            composable(Screen.Settings.route) {
+                                val updateViewModel: UpdateViewModel = viewModel(
+                                    factory = UpdateViewModelFactory(LocalContext.current)
+                                )
+                                SettingsScreen(
+                                    viewModel = viewModel,
+                                    themeViewModel = themeViewModel,
+                                    updateViewModel = updateViewModel,
+                                    onNavigateBack = {
+                                        try {
+                                            navController.popBackStack()
+                                        } catch (e: Exception) {
+                                            android.util.Log.e("MainActivity", "Erro ao voltar", e)
+                                        }
+                                    }
+                                )
+                            }
+                            composable(Screen.History.route) {
+                                val historyViewModel: HistoryViewModel = viewModel(
+                                    factory = historyViewModelFactory
+                                )
+                                HistoryScreen(
+                                    viewModel = historyViewModel,
+                                    onNavigateBack = {
+                                        try {
+                                            navController.popBackStack()
+                                        } catch (e: Exception) {
+                                            android.util.Log.e("MainActivity", "Erro ao voltar", e)
+                                        }
+                                    },
+                                    onReuseList = {
+                                        try {
+                                            navController.popBackStack()
+                                        } catch (e: Exception) {
+                                            android.util.Log.e("MainActivity", "Erro ao voltar", e)
+                                        }
+                                    }
+                                )
+                            }
                         }
                     }
                 }
             }
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Erro fatal no setContent", e)
+            e.printStackTrace()
+            // Se tudo falhar, pelo menos logar o erro
+            finish()
         }
     }
 }

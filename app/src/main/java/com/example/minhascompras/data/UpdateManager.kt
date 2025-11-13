@@ -144,8 +144,14 @@ class UpdateManager(private val context: Context) {
         }
     }
     
-    suspend fun downloadUpdate(updateInfo: UpdateInfo, onProgress: (Int) -> Unit): File? = withContext(Dispatchers.IO) {
+    suspend fun downloadUpdate(updateInfo: UpdateInfo, currentVersionCode: Int, onProgress: (Int) -> Unit): File? = withContext(Dispatchers.IO) {
         isDownloadCancelled.set(false)
+        
+        // Validação adicional: verificar se a versão é maior que a atual
+        if (updateInfo.versionCode <= currentVersionCode) {
+            Logger.e("UpdateManager", "Tentativa de baixar versão igual ou inferior. Atual: $currentVersionCode, Tentativa: ${updateInfo.versionCode}")
+            return@withContext null
+        }
         
         // Limpar downloads antigos antes de baixar
         cleanupOldDownloads()

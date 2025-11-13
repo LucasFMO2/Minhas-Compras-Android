@@ -491,6 +491,11 @@ fun SettingsScreen(
             // Diálogo de atualização disponível
             when (val state = updateState) {
                 is UpdateState.UpdateAvailable -> {
+                    // Verificar se a versão é realmente maior que a atual
+                    val currentVersionCode = updateViewModel.getCurrentVersionCode()
+                    val currentVersionName = updateViewModel.getCurrentVersionName()
+                    val canDownload = state.updateInfo.versionCode > currentVersionCode
+                    
                     AlertDialog(
                         onDismissRequest = { updateViewModel.resetState() },
                         title = { Text("Atualização Disponível") },
@@ -499,10 +504,17 @@ fun SettingsScreen(
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Text("Nova versão: ${state.updateInfo.versionName}")
-                                if (state.updateInfo.fileSize > 0) {
-                                    val fileSizeMB = state.updateInfo.fileSize / (1024.0 * 1024.0)
+                                if (!canDownload) {
+                                    Spacer(modifier = Modifier.height(4.dp))
                                     Text(
-                                        "Tamanho: ${String.format("%.1f", fileSizeMB)} MB",
+                                        "⚠️ Você já está usando a versão ${currentVersionName} ou uma versão mais recente.",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                                if (state.updateInfo.fileSize > 0) {
+                                    Text(
+                                        "Tamanho: ${String.format("%.1f", state.updateInfo.fileSize / (1024.0 * 1024.0))} MB",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -523,10 +535,15 @@ fun SettingsScreen(
                         confirmButton = {
                             Button(
                                 onClick = {
-                                    updateViewModel.downloadUpdate(state.updateInfo)
-                                }
+                                    if (canDownload) {
+                                        updateViewModel.downloadUpdate(state.updateInfo)
+                                    } else {
+                                        updateViewModel.resetState()
+                                    }
+                                },
+                                enabled = canDownload
                             ) {
-                                Text("Baixar e Instalar")
+                                Text(if (canDownload) "Baixar e Instalar" else "Fechar")
                             }
                         },
                         dismissButton = {

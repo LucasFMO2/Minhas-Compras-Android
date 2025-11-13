@@ -141,11 +141,24 @@ class UpdateViewModel(private val context: Context) : ViewModel() {
     fun downloadUpdate(updateInfo: UpdateInfo) {
         downloadJob?.cancel()
         downloadJob = viewModelScope.launch {
+            // Validação: verificar se a versão é maior que a atual antes de iniciar o download
+            val currentVersionCode = getCurrentVersionCode()
+            val currentVersionName = getCurrentVersionName()
+            
+            if (updateInfo.versionCode <= currentVersionCode) {
+                Logger.w("UpdateViewModel", "Tentativa de baixar versão igual ou inferior. Atual: $currentVersionName ($currentVersionCode), Tentativa: ${updateInfo.versionName} (${updateInfo.versionCode})")
+                _updateState.value = UpdateState.Error(
+                    "Não é possível baixar esta versão. Você já está usando a versão ${updateInfo.versionName} ou uma versão mais recente (${currentVersionName}).",
+                    isRetryable = false
+                )
+                return@launch
+            }
+            
             _updateState.value = UpdateState.Downloading(0, 0, 0)
             
             try {
                 val totalBytes = updateInfo.fileSize ?: 0L
-                val apkFile = updateManager.downloadUpdate(updateInfo) { progress ->
+                val apkFile = updateManager.downloadUpdate(updateInfo, currentVersionCode) { progress ->
                     // Calcular bytes baixados baseado no progresso apenas se totalBytes for conhecido
                     val downloadedBytes = if (totalBytes > 0) {
                         (totalBytes * progress / 100)

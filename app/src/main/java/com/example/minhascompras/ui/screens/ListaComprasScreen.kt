@@ -3,6 +3,7 @@ package com.example.minhascompras.ui.screens
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,7 +39,7 @@ import kotlinx.coroutines.flow.collectLatest
 import java.text.NumberFormat
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ListaComprasScreen(
     viewModel: ListaComprasViewModel,
@@ -341,51 +342,48 @@ fun ListaComprasScreen(
                     
                     // Chips de filtro
                     if (isSmallScreen) {
-                        // Layout vertical para telas pequenas
-                        Column(
+                        FlowRow(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(bottom = ResponsiveUtils.getSmallSpacing()),
-                        verticalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSmallSpacing())
+                            horizontalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSmallSpacing()),
+                            verticalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSmallSpacing())
                         ) {
                             FilterChip(
                                 selected = filterStatus == FilterStatus.ALL,
                                 onClick = { viewModel.onFilterStatusChanged(FilterStatus.ALL) },
-                                label = { 
+                                label = {
                                     Text(
                                         FilterStatus.ALL.displayName,
                                         style = MaterialTheme.typography.labelMedium,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Visible
-                                    ) 
+                                        maxLines = 1
+                                    )
                                 },
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.wrapContentWidth()
                             )
                             FilterChip(
                                 selected = filterStatus == FilterStatus.PENDING,
                                 onClick = { viewModel.onFilterStatusChanged(FilterStatus.PENDING) },
-                                label = { 
+                                label = {
                                     Text(
                                         FilterStatus.PENDING.displayName,
                                         style = MaterialTheme.typography.labelMedium,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Visible
-                                    ) 
+                                        maxLines = 1
+                                    )
                                 },
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.wrapContentWidth()
                             )
                             FilterChip(
                                 selected = filterStatus == FilterStatus.PURCHASED,
                                 onClick = { viewModel.onFilterStatusChanged(FilterStatus.PURCHASED) },
-                                label = { 
+                                label = {
                                     Text(
                                         FilterStatus.PURCHASED.displayName,
                                         style = MaterialTheme.typography.labelMedium,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Visible
-                                    ) 
+                                        maxLines = 1
+                                    )
                                 },
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.wrapContentWidth()
                             )
                         }
                     } else {

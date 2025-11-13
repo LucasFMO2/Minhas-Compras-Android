@@ -34,6 +34,7 @@ import com.example.minhascompras.ui.components.ItemCompraCard
 import com.example.minhascompras.ui.components.StatisticCard
 import com.example.minhascompras.ui.utils.ResponsiveUtils
 import com.example.minhascompras.ui.viewmodel.ListaComprasViewModel
+import kotlinx.coroutines.flow.collectLatest
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -49,6 +50,7 @@ fun ListaComprasScreen(
     val allItens by viewModel.allItens.collectAsState() // Lista completa para estatísticas
     var showDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showArchiveDialog by remember { mutableStateOf(false) }
     var itemParaEditar by remember { mutableStateOf<ItemCompra?>(null) }
 
     val formatador = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
@@ -68,6 +70,7 @@ fun ListaComprasScreen(
     val searchQuery by viewModel.searchQuery.collectAsState()
     val filterStatus by viewModel.filterStatus.collectAsState()
     val lastDeletedItem by viewModel.lastDeletedItem.collectAsState()
+    val isArchiving by viewModel.isArchiving.collectAsState()
     var showSortMenu by remember { mutableStateOf(false) }
     
     val snackbarHostState = remember { SnackbarHostState() }
@@ -83,6 +86,23 @@ fun ListaComprasScreen(
             if (result == SnackbarResult.ActionPerformed) {
                 viewModel.undoDeleteItem()
             }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.uiMessages.collectLatest { uiMessage ->
+            val duration = when (uiMessage) {
+                is ListaComprasViewModel.UiMessage.Success -> SnackbarDuration.Short
+                is ListaComprasViewModel.UiMessage.Info -> SnackbarDuration.Short
+                is ListaComprasViewModel.UiMessage.Error -> SnackbarDuration.Long
+            }
+            val actionLabel = if (uiMessage is ListaComprasViewModel.UiMessage.Error) "OK" else null
+            snackbarHostState.showSnackbar(
+                message = uiMessage.message,
+                actionLabel = actionLabel,
+                withDismissAction = uiMessage is ListaComprasViewModel.UiMessage.Error,
+                duration = duration
+            )
         }
     }
 
@@ -510,6 +530,37 @@ fun ListaComprasScreen(
                         }
                     }
 
+                    // Botão arquivar lista
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        FilledTonalButton(
+                            onClick = { showArchiveDialog = true },
+                            enabled = allItens.isNotEmpty() && !isArchiving
+                        ) {
+                            if (isArchiving) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .size(18.dp),
+                                    strokeWidth = 2.dp
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Arquivando...")
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "Arquivar lista",
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Arquivar Lista")
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     // Botão deletar comprados
                     AnimatedVisibility(
                         visible = temItensComprados,
@@ -679,6 +730,29 @@ fun ListaComprasScreen(
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) {
                     Text("Não")
+                }
+            }
+        )
+    }
+
+    if (showArchiveDialog) {
+        AlertDialog(
+            onDismissRequest = { showArchiveDialog = false },
+            title = { Text("Arquivar lista atual") },
+            text = { Text("Isso move todos os itens para o histórico e limpa a lista atual. Deseja continuar?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.arquivarLista()
+                        showArchiveDialog = false
+                    }
+                ) {
+                    Text("Arquivar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showArchiveDialog = false }) {
+                    Text("Cancelar")
                 }
             }
         )

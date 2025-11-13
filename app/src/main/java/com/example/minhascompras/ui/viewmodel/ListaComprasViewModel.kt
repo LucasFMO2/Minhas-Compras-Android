@@ -9,11 +9,13 @@ import com.example.minhascompras.data.ItemCompraRepository
 import com.example.minhascompras.data.SortOrder
 import com.example.minhascompras.data.UserPreferencesManager
 import com.example.minhascompras.utils.Logger
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
@@ -34,6 +36,20 @@ class ListaComprasViewModel(
     // Estado para undo de exclusão
     private val _lastDeletedItem = MutableStateFlow<ItemCompra?>(null)
     val lastDeletedItem: StateFlow<ItemCompra?> = _lastDeletedItem.asStateFlow()
+
+    private val _isArchiving = MutableStateFlow(false)
+    val isArchiving: StateFlow<Boolean> = _isArchiving.asStateFlow()
+
+    sealed interface UiMessage {
+        val message: String
+
+        data class Success(override val message: String) : UiMessage
+        data class Info(override val message: String) : UiMessage
+        data class Error(override val message: String) : UiMessage
+    }
+
+    private val _uiMessages = MutableSharedFlow<UiMessage>(extraBufferCapacity = 1)
+    val uiMessages: SharedFlow<UiMessage> = _uiMessages.asSharedFlow()
 
     // SortOrder do DataStore
     val sortOrder: StateFlow<SortOrder> = userPreferencesManager.sortOrder
@@ -65,35 +81,6 @@ class ListaComprasViewModel(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
-
-    // Observar quando todos os itens estão comprados para arquivar automaticamente
-    // Usar uma flag para evitar arquivamento múltiplo durante a transação
-    private var isArchiving = false
-    
-    init {
-        viewModelScope.launch {
-            try {
-                repository.allItens.collect { items ->
-                    // Só arquivar se houver itens, todos estiverem comprados e não estiver arquivando
-                    if (!isArchiving && items.isNotEmpty() && items.all { it.comprado }) {
-                        isArchiving = true
-                        try {
-                            // Todos os itens estão comprados, arquivar a lista
-                            repository.archiveCurrentList(items)
-                        } finally {
-                            // Resetar flag após um pequeno delay para evitar re-trigger imediato
-                            delay(100)
-                            isArchiving = false
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                // Log do erro mas não crashar o app
-                Logger.e("ListaComprasViewModel", "Erro ao observar itens para arquivamento", e)
-                isArchiving = false
-            }
-        }
-    }
 
     fun onSearchQueryChanged(query: String) {
         _searchQuery.value = query
@@ -143,6 +130,27 @@ class ListaComprasViewModel(
     fun toggleComprado(item: ItemCompra) {
         viewModelScope.launch {
             repository.update(item.copy(comprado = !item.comprado))
+        }
+    }
+
+    fun arquivarLista() {
+        viewModelScope.launch {
+            if (_isArchiving.value) return@launch
+            _isArchiving.value = true
+            try {
+                val itensAtuais = allItens.value
+                if (itensAtuais.isNotEmpty()) {
+                    repository.archiveCurrentList(itensAtuais)
+                    _uiMessages.emit(UiMessage.Success("Lista arquivada com sucesso!"))
+                } else {
+                    _uiMessages.emit(UiMessage.Info("Não há itens para arquivar."))
+                }
+            } catch (e: Exception) {
+                Logger.e("ListaComprasViewModel", "Erro ao arquivar lista manualmente", e)
+                _uiMessages.emit(UiMessage.Error("Erro ao arquivar lista. Tente novamente."))
+            } finally {
+                _isArchiving.value = false
+            }
         }
     }
 

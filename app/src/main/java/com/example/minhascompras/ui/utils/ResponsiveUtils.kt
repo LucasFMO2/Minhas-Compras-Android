@@ -1,9 +1,12 @@
 package com.example.minhascompras.ui.utils
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 /**
  * Utilitários para criar layouts responsivos baseados no tamanho da tela
@@ -180,6 +183,124 @@ object ResponsiveUtils {
     @Composable
     fun isLargeScreen(): Boolean {
         return getScreenWidth().value >= 600
+    }
+    
+    /**
+     * Retorna tamanho de fonte para títulos baseado no tamanho da tela
+     */
+    @Composable
+    fun getTitleFontSize(): TextUnit {
+        val screenWidth = getScreenWidth().value
+        return when {
+            screenWidth < 360 -> 18.sp
+            screenWidth < 600 -> 20.sp
+            screenWidth < 840 -> 22.sp
+            else -> 24.sp
+        }
+    }
+    
+    /**
+     * Retorna tamanho de fonte para corpo de texto baseado no tamanho da tela
+     */
+    @Composable
+    fun getBodyFontSize(): TextUnit {
+        val screenWidth = getScreenWidth().value
+        return when {
+            screenWidth < 360 -> 14.sp
+            screenWidth < 600 -> 16.sp
+            else -> 16.sp
+        }
+    }
+    
+    /**
+     * Retorna tamanho de fonte para labels baseado no tamanho da tela
+     */
+    @Composable
+    fun getLabelFontSize(): TextUnit {
+        val screenWidth = getScreenWidth().value
+        return when {
+            screenWidth < 360 -> 11.sp
+            screenWidth < 600 -> 12.sp
+            else -> 12.sp
+        }
+    }
+    
+    /**
+     * Retorna tamanho mínimo de toque (acessibilidade) baseado no tamanho da tela
+     */
+    @Composable
+    fun getMinimumTouchTarget(): Dp {
+        val screenWidth = getScreenWidth().value
+        return when {
+            screenWidth < 360 -> 40.dp  // Mínimo para telas pequenas
+            else -> 48.dp  // Padrão Material Design
+        }
+    }
+    
+    /**
+     * Retorna tamanho de botão baseado no tamanho da tela
+     */
+    @Composable
+    fun getButtonHeight(): Dp {
+        val screenWidth = getScreenWidth().value
+        return when {
+            screenWidth < 360 -> 36.dp
+            screenWidth < 600 -> 40.dp
+            else -> 48.dp
+        }
+    }
+    
+    /**
+     * Retorna padding de botão baseado no tamanho da tela
+     */
+    @Composable
+    fun getButtonPadding(): PaddingValues {
+        val screenWidth = getScreenWidth().value
+        return when {
+            screenWidth < 360 -> PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+            screenWidth < 600 -> PaddingValues(horizontal = 16.dp, vertical = 10.dp)
+            else -> PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+        }
+    }
+    
+    /**
+     * Retorna tamanho de card baseado no tamanho da tela
+     */
+    @Composable
+    fun getCardElevation(): Dp {
+        val screenWidth = getScreenWidth().value
+        return when {
+            screenWidth < 360 -> 1.dp
+            screenWidth < 600 -> 2.dp
+            else -> 3.dp
+        }
+    }
+    
+    /**
+     * Retorna raio de borda de card baseado no tamanho da tela
+     */
+    @Composable
+    fun getCardCornerRadius(): Dp {
+        val screenWidth = getScreenWidth().value
+        return when {
+            screenWidth < 360 -> 12.dp
+            screenWidth < 600 -> 16.dp
+            else -> 16.dp
+        }
+    }
+    
+    /**
+     * Retorna espaçamento vertical entre seções baseado no tamanho da tela
+     */
+    @Composable
+    fun getSectionSpacing(): Dp {
+        val screenWidth = getScreenWidth().value
+        return when {
+            screenWidth < 360 -> 12.dp
+            screenWidth < 600 -> 16.dp
+            screenWidth < 840 -> 20.dp
+            else -> 24.dp
+        }
     }
 }
 

@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.minhascompras.data.ShoppingListHistory
+import com.example.minhascompras.ui.utils.ResponsiveUtils
 import com.example.minhascompras.ui.viewmodel.HistoryViewModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -33,7 +34,14 @@ fun HistoryScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Histórico de Compras") },
+                title = { 
+                    Text(
+                        "Histórico de Compras",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontSize = ResponsiveUtils.getTitleFontSize()
+                        )
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -78,8 +86,8 @@ fun HistoryScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                contentPadding = PaddingValues(ResponsiveUtils.getHorizontalPadding()),
+                verticalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSpacing())
             ) {
                 items(
                     items = historyLists,
@@ -110,14 +118,14 @@ fun HistoryItemCard(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(ResponsiveUtils.getCardCornerRadius()),
+        elevation = CardDefaults.cardElevation(defaultElevation = ResponsiveUtils.getCardElevation())
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(ResponsiveUtils.getCardPadding()),
+            verticalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSpacing())
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -127,21 +135,33 @@ fun HistoryItemCard(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = history.listName,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontSize = ResponsiveUtils.getBodyFontSize()
+                        ),
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 2,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(ResponsiveUtils.getSmallSpacing()))
                     Text(
                         text = dateFormat.format(Date(history.completionDate)),
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontSize = ResponsiveUtils.getLabelFontSize()
+                        ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                IconButton(onClick = onDelete) {
+                IconButton(
+                    onClick = onDelete,
+                    modifier = Modifier.size(ResponsiveUtils.getMinimumTouchTarget())
+                ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Deletar",
-                        tint = MaterialTheme.colorScheme.error
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(
+                            if (ResponsiveUtils.isSmallScreen()) 18.dp else 20.dp
+                        )
                     )
                 }
             }
@@ -154,15 +174,26 @@ fun HistoryItemCard(
                     onClick = onReuse,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary
-                    )
+                    ),
+                    modifier = Modifier.height(ResponsiveUtils.getButtonHeight()),
+                    contentPadding = ResponsiveUtils.getButtonPadding()
                 ) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
                         contentDescription = "Reutilizar lista",
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(
+                            if (ResponsiveUtils.isSmallScreen()) 16.dp else 18.dp
+                        )
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Reutilizar")
+                    Spacer(modifier = Modifier.width(
+                        if (ResponsiveUtils.isSmallScreen()) 6.dp else 8.dp
+                    ))
+                    Text(
+                        "Reutilizar",
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontSize = ResponsiveUtils.getBodyFontSize()
+                        )
+                    )
                 }
             }
         }

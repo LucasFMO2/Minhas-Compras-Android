@@ -86,3 +86,18 @@ Write-Host "  1. Reiniciar o Cursor após configurar o mcp.json" -ForegroundColo
 Write-Host "  2. Verificar se o servidor MCP aparece na lista de servidores conectados" -ForegroundColor Gray
 Write-Host "  3. As ferramentas do Supabase estarão disponíveis quando o servidor estiver ativo" -ForegroundColor Gray
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

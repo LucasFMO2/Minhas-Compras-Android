@@ -11,6 +11,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.minhascompras.data.ItemCategory
 import com.example.minhascompras.data.ItemCompra
+import com.example.minhascompras.ui.utils.ResponsiveUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,18 +41,25 @@ fun AdicionarItemDialog(
                 imageVector = Icons.Default.ShoppingCart,
                 contentDescription = "Ícone de carrinho de compras",
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(
+                    if (ResponsiveUtils.isSmallScreen()) 28.dp else 32.dp
+                )
             )
         },
         title = { 
             Text(
                 if (itemEdicao != null) "Editar Item" else "Adicionar Item",
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontSize = ResponsiveUtils.getTitleFontSize()
+                )
             ) 
         },
         text = {
             Column(
-                verticalArrangement = Arrangement.spacedBy(20.dp),
+                verticalArrangement = Arrangement.spacedBy(
+                    if (ResponsiveUtils.isSmallScreen()) 16.dp else 20.dp
+                ),
                 modifier = modifier.fillMaxWidth()
             ) {
                 OutlinedTextField(
@@ -119,7 +127,9 @@ fun AdicionarItemDialog(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(
+                        if (ResponsiveUtils.isSmallScreen()) 8.dp else 12.dp
+                    )
                 ) {
                     OutlinedTextField(
                         value = quantidade,
@@ -186,9 +196,16 @@ fun AdicionarItemDialog(
                         }
                     }
                 },
-                enabled = nomeItem.isNotBlank() && categoriaSelecionada.isNotBlank()
+                enabled = nomeItem.isNotBlank() && categoriaSelecionada.isNotBlank(),
+                modifier = Modifier.height(ResponsiveUtils.getButtonHeight()),
+                contentPadding = ResponsiveUtils.getButtonPadding()
             ) {
-                Text(if (itemEdicao != null) "Salvar" else "Adicionar")
+                Text(
+                    if (itemEdicao != null) "Salvar" else "Adicionar",
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontSize = ResponsiveUtils.getBodyFontSize()
+                    )
+                )
             }
         },
         dismissButton = {

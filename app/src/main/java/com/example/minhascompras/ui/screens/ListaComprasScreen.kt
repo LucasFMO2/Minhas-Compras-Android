@@ -115,17 +115,25 @@ fun ListaComprasScreen(
                 title = { 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(
+                            if (ResponsiveUtils.isSmallScreen()) 6.dp else 8.dp
+                        )
                     ) {
                         Icon(
                             imageVector = Icons.Default.ShoppingCart,
                             contentDescription = "Ícone de carrinho de compras",
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(
+                                if (ResponsiveUtils.isSmallScreen()) 20.dp else 24.dp
+                            )
                         )
                         Text(
                             "Minhas Compras",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontSize = ResponsiveUtils.getTitleFontSize()
+                            ),
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 },
@@ -236,17 +244,29 @@ fun ListaComprasScreen(
             )
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = { showDialog = true },
-                containerColor = MaterialTheme.colorScheme.primary,
-                icon = {
+            if (ResponsiveUtils.isSmallScreen()) {
+                FloatingActionButton(
+                    onClick = { showDialog = true },
+                    containerColor = MaterialTheme.colorScheme.primary
+                ) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Adicionar item"
                     )
-                },
-                text = { Text("Adicionar") }
-            )
+                }
+            } else {
+                ExtendedFloatingActionButton(
+                    onClick = { showDialog = true },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Adicionar item"
+                        )
+                    },
+                    text = { Text("Adicionar") }
+                )
+            }
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
@@ -485,24 +505,43 @@ fun ListaComprasScreen(
                     ) {
                         FilledTonalButton(
                             onClick = { showArchiveDialog = true },
-                            enabled = allItens.isNotEmpty() && !isArchiving
+                            enabled = allItens.isNotEmpty() && !isArchiving,
+                            modifier = Modifier.height(ResponsiveUtils.getButtonHeight()),
+                            contentPadding = ResponsiveUtils.getButtonPadding()
                         ) {
                             if (isArchiving) {
                                 CircularProgressIndicator(
-                                    modifier = Modifier
-                                        .size(18.dp),
+                                    modifier = Modifier.size(
+                                        if (ResponsiveUtils.isSmallScreen()) 16.dp else 18.dp
+                                    ),
                                     strokeWidth = 2.dp
                                 )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Arquivando...")
+                                Spacer(modifier = Modifier.width(
+                                    if (ResponsiveUtils.isSmallScreen()) 6.dp else 8.dp
+                                ))
+                                Text(
+                                    "Arquivando...",
+                                    style = MaterialTheme.typography.labelLarge.copy(
+                                        fontSize = ResponsiveUtils.getBodyFontSize()
+                                    )
+                                )
                             } else {
                                 Icon(
                                     imageVector = Icons.Default.Check,
                                     contentDescription = "Arquivar lista",
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(
+                                        if (ResponsiveUtils.isSmallScreen()) 16.dp else 18.dp
+                                    )
                                 )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Arquivar Lista")
+                                Spacer(modifier = Modifier.width(
+                                    if (ResponsiveUtils.isSmallScreen()) 6.dp else 8.dp
+                                ))
+                                Text(
+                                    if (ResponsiveUtils.isSmallScreen()) "Arquivar" else "Arquivar Lista",
+                                    style = MaterialTheme.typography.labelLarge.copy(
+                                        fontSize = ResponsiveUtils.getBodyFontSize()
+                                    )
+                                )
                             }
                         }
                     }
@@ -525,15 +564,26 @@ fun ListaComprasScreen(
                                     onClick = { showDeleteDialog = true },
                                     colors = ButtonDefaults.outlinedButtonColors(
                                         contentColor = MaterialTheme.colorScheme.error
-                                    )
+                                    ),
+                                    modifier = Modifier.height(ResponsiveUtils.getButtonHeight()),
+                                    contentPadding = ResponsiveUtils.getButtonPadding()
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Delete,
                                         contentDescription = "Deletar itens comprados",
-                                        modifier = Modifier.size(18.dp)
+                                        modifier = Modifier.size(
+                                            if (ResponsiveUtils.isSmallScreen()) 16.dp else 18.dp
+                                        )
                                     )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text("Limpar Comprados")
+                                    Spacer(modifier = Modifier.width(
+                                        if (ResponsiveUtils.isSmallScreen()) 6.dp else 8.dp
+                                    ))
+                                    Text(
+                                        if (ResponsiveUtils.isSmallScreen()) "Limpar" else "Limpar Comprados",
+                                        style = MaterialTheme.typography.labelLarge.copy(
+                                            fontSize = ResponsiveUtils.getBodyFontSize()
+                                        )
+                                    )
                                 }
                             }
                         }

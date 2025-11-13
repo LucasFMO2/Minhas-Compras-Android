@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.minhascompras.data.ThemeMode
+import com.example.minhascompras.ui.utils.ResponsiveUtils
 import com.example.minhascompras.ui.viewmodel.ListaComprasViewModel
 import com.example.minhascompras.ui.viewmodel.ThemeViewModel
 import com.example.minhascompras.ui.viewmodel.UpdateViewModel
@@ -246,11 +247,15 @@ fun SettingsScreen(
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = null,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(
+                                if (ResponsiveUtils.isSmallScreen()) 20.dp else 24.dp
+                            )
                         )
                         Text(
                             "Configurações",
-                            style = MaterialTheme.typography.titleLarge,
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontSize = ResponsiveUtils.getTitleFontSize()
+                            ),
                             fontWeight = FontWeight.Bold
                         )
                     }

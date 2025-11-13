@@ -27,8 +27,8 @@ fun StatisticCard(
         colors = CardDefaults.cardColors(
             containerColor = color.copy(alpha = 0.1f)
         ),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(ResponsiveUtils.getCardCornerRadius()),
+        elevation = CardDefaults.cardElevation(defaultElevation = ResponsiveUtils.getCardElevation())
     ) {
         Column(
             modifier = Modifier
@@ -42,20 +42,24 @@ fun StatisticCard(
         ) {
             Text(
                 text = value,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontSize = if (ResponsiveUtils.isSmallScreen()) ResponsiveUtils.getBodyFontSize() else MaterialTheme.typography.titleMedium.fontSize
+                ),
                 fontWeight = FontWeight.Bold,
                 color = color,
                 textAlign = TextAlign.Center,
                 maxLines = 2,
-                overflow = TextOverflow.Visible
+                overflow = TextOverflow.Ellipsis
             )
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = ResponsiveUtils.getLabelFontSize()
+                ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 maxLines = 2,
-                overflow = TextOverflow.Visible,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.fillMaxWidth()
             )
         }

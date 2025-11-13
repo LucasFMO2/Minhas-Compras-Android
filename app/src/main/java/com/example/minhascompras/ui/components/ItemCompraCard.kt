@@ -17,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.minhascompras.data.ItemCompra
 import com.example.minhascompras.ui.utils.ResponsiveUtils
@@ -43,9 +44,12 @@ fun ItemCompraCard(
             }
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = if (item.comprado) 1.dp else 3.dp
+            defaultElevation = if (item.comprado) 
+                ResponsiveUtils.getCardElevation() 
+            else 
+                ResponsiveUtils.getCardElevation()
         ),
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(ResponsiveUtils.getCardCornerRadius())
     ) {
         Row(
             modifier = Modifier
@@ -60,7 +64,7 @@ fun ItemCompraCard(
                 horizontalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSpacing())
             ) {
                 // Ícone visual
-                val iconSize = if (ResponsiveUtils.isSmallScreen()) 40.dp else 48.dp
+                val iconSize = if (ResponsiveUtils.isSmallScreen()) 36.dp else if (ResponsiveUtils.isMediumScreen()) 40.dp else 48.dp
                 Box(
                     modifier = Modifier
                         .size(iconSize)
@@ -77,7 +81,7 @@ fun ItemCompraCard(
                     Icon(
                         imageVector = Icons.Default.ShoppingCart,
                         contentDescription = "Ícone de item de compra",
-                        modifier = Modifier.size(ResponsiveUtils.getIconSize()),
+                        modifier = Modifier.size(if (ResponsiveUtils.isSmallScreen()) 18.dp else ResponsiveUtils.getIconSize()),
                         tint = if (item.comprado) {
                             MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f)
                         } else {
@@ -89,7 +93,9 @@ fun ItemCompraCard(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = item.nome,
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontSize = ResponsiveUtils.getBodyFontSize()
+                        ),
                         fontWeight = FontWeight.SemiBold,
                         textDecoration = if (item.comprado) {
                             TextDecoration.LineThrough
@@ -100,7 +106,9 @@ fun ItemCompraCard(
                             MaterialTheme.colorScheme.onSurfaceVariant
                         } else {
                             MaterialTheme.colorScheme.onSurface
-                        }
+                        },
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
                     
                     Spacer(modifier = Modifier.height(ResponsiveUtils.getSmallSpacing()))
@@ -115,10 +123,15 @@ fun ItemCompraCard(
                             ) {
                                 Text(
                                     text = "Qtd: ${item.quantidade}",
-                                    style = MaterialTheme.typography.labelSmall,
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontSize = ResponsiveUtils.getLabelFontSize()
+                                    ),
                                     fontWeight = FontWeight.Medium,
                                     color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                    modifier = Modifier.padding(
+                                        horizontal = if (ResponsiveUtils.isSmallScreen()) 6.dp else 8.dp,
+                                        vertical = if (ResponsiveUtils.isSmallScreen()) 3.dp else 4.dp
+                                    )
                                 )
                             }
                         }
@@ -130,10 +143,15 @@ fun ItemCompraCard(
                             ) {
                                 Text(
                                     text = formatador.format(item.preco),
-                                    style = MaterialTheme.typography.labelSmall,
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontSize = ResponsiveUtils.getLabelFontSize()
+                                    ),
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onTertiaryContainer,
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                    modifier = Modifier.padding(
+                                        horizontal = if (ResponsiveUtils.isSmallScreen()) 6.dp else 8.dp,
+                                        vertical = if (ResponsiveUtils.isSmallScreen()) 3.dp else 4.dp
+                                    )
                                 )
                             }
                         }
@@ -162,7 +180,7 @@ fun ItemCompraCard(
                     )
                 }
                 
-                val buttonSize = if (ResponsiveUtils.isSmallScreen()) 36.dp else 40.dp
+                val buttonSize = ResponsiveUtils.getMinimumTouchTarget()
                 val iconButtonSize = if (ResponsiveUtils.isSmallScreen()) 18.dp else 20.dp
                 IconButton(
                     onClick = onEdit,

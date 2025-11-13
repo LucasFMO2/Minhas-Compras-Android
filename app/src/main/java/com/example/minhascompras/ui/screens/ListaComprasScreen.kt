@@ -74,6 +74,8 @@ fun ListaComprasScreen(
     var showSortMenu by remember { mutableStateOf(false) }
     
     val snackbarHostState = remember { SnackbarHostState() }
+    val isSmallScreen = ResponsiveUtils.isSmallScreen()
+    val contentHorizontalPadding = if (isSmallScreen) 8.dp else ResponsiveUtils.getHorizontalPadding()
 
     // Mostrar Snackbar quando um item for deletado
     LaunchedEffect(lastDeletedItem) {
@@ -316,7 +318,7 @@ fun ListaComprasScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = ResponsiveUtils.getHorizontalPadding())
+                        .padding(horizontal = contentHorizontalPadding)
                         .padding(top = ResponsiveUtils.getVerticalPadding())
                 ) {
                     // Barra de busca
@@ -338,13 +340,13 @@ fun ListaComprasScreen(
                     )
                     
                     // Chips de filtro
-                    if (ResponsiveUtils.isSmallScreen()) {
+                    if (isSmallScreen) {
                         // Layout vertical para telas pequenas
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(bottom = ResponsiveUtils.getSmallSpacing()),
-                            verticalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSmallSpacing())
+                        verticalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSmallSpacing())
                         ) {
                             FilterChip(
                                 selected = filterStatus == FilterStatus.ALL,
@@ -597,7 +599,7 @@ fun ListaComprasScreen(
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSpacing()),
                         contentPadding = PaddingValues(
-                            bottom = if (ResponsiveUtils.isSmallScreen()) 100.dp else 120.dp
+                            bottom = if (isSmallScreen) 100.dp else 120.dp
                         ),
                         modifier = Modifier.fillMaxSize()
                     ) {

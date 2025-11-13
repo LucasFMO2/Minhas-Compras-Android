@@ -390,7 +390,9 @@ fun ListaComprasScreen(
                     
                     // Estatísticas
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = ResponsiveUtils.getStatisticRowHorizontalPadding()),
                         horizontalArrangement = Arrangement.spacedBy(ResponsiveUtils.getStatisticCardSpacing())
                     ) {
                         StatisticCard(
@@ -416,7 +418,9 @@ fun ListaComprasScreen(
                     if (temPrecos) {
                         Spacer(modifier = Modifier.height(ResponsiveUtils.getSpacing()))
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = ResponsiveUtils.getStatisticRowHorizontalPadding()),
                             horizontalArrangement = Arrangement.spacedBy(ResponsiveUtils.getStatisticCardSpacing())
                         ) {
                             StatisticCard(

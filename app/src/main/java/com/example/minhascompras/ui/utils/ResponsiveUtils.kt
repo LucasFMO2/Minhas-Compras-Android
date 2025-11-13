@@ -119,7 +119,8 @@ object ResponsiveUtils {
     fun getStatisticCardSpacing(): Dp {
         val screenWidth = getScreenWidth().value
         return when {
-            screenWidth < 360 -> 4.dp
+            screenWidth < 360 -> 2.dp
+            screenWidth < 480 -> 4.dp
             screenWidth < 600 -> 6.dp
             screenWidth < 840 -> 8.dp
             else -> 12.dp
@@ -133,10 +134,26 @@ object ResponsiveUtils {
     fun getStatisticCardHorizontalPadding(): Dp {
         val screenWidth = getScreenWidth().value
         return when {
-            screenWidth < 360 -> 4.dp
+            screenWidth < 360 -> 2.dp
+            screenWidth < 480 -> 4.dp
             screenWidth < 600 -> 6.dp
             screenWidth < 840 -> 8.dp
             else -> 12.dp
+        }
+    }
+
+    /**
+     * Retorna padding horizontal aplicado ao container das estatísticas
+     */
+    @Composable
+    fun getStatisticRowHorizontalPadding(): Dp {
+        val screenWidth = getScreenWidth().value
+        return when {
+            screenWidth < 360 -> 0.dp
+            screenWidth < 480 -> 4.dp
+            screenWidth < 600 -> 8.dp
+            screenWidth < 840 -> 12.dp
+            else -> 16.dp
         }
     }
     

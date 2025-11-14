@@ -52,6 +52,7 @@ fun ListaComprasScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showArchiveDialog by remember { mutableStateOf(false) }
     var itemParaEditar by remember { mutableStateOf<ItemCompra?>(null) }
+    var itemParaDeletar by remember { mutableStateOf<ItemCompra?>(null) }
 
     // Usar allItens para estatísticas (lista completa, sem filtro)
     val totalItens = allItens.size
@@ -523,8 +524,8 @@ fun ListaComprasScreen(
                                 confirmValueChange = { dismissValue ->
                                     when (dismissValue) {
                                         SwipeToDismissBoxValue.EndToStart -> {
-                                            // Swipe left - deletar
-                                            viewModel.deletarItem(item)
+                                            // Swipe left - deletar (mostrar confirmação)
+                                            itemParaDeletar = item
                                             false // Deixa o composable animar
                                         }
                                         SwipeToDismissBoxValue.StartToEnd -> {
@@ -587,7 +588,7 @@ fun ListaComprasScreen(
                                 ItemCompraCard(
                                     item = item,
                                     onToggleComprado = { viewModel.toggleComprado(item) },
-                                    onDelete = { viewModel.deletarItem(item) },
+                                    onDelete = { itemParaDeletar = item },
                                     onEdit = { itemParaEditar = item }
                                 )
                             }
@@ -666,6 +667,30 @@ fun ListaComprasScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showArchiveDialog = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    // Diálogo de confirmação para deletar item individual
+    itemParaDeletar?.let { item ->
+        AlertDialog(
+            onDismissRequest = { itemParaDeletar = null },
+            title = { Text("Confirmar exclusão") },
+            text = { Text("Deseja deletar \"${item.nome}\"?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deletarItem(item)
+                        itemParaDeletar = null
+                    }
+                ) {
+                    Text("Deletar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { itemParaDeletar = null }) {
                     Text("Cancelar")
                 }
             }

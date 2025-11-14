@@ -400,13 +400,13 @@ fun ListaComprasScreen(
                         ) {
                             Text(
                                 text = "Total a Pagar",
-                                style = MaterialTheme.typography.bodyLarge,
+                                style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 text = formatador.format(totalAPagar),
-                                style = MaterialTheme.typography.bodyLarge,
+                                style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
                             )

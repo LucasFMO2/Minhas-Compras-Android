@@ -254,7 +254,9 @@ fun SettingsScreen(
                         )
                         Text(
                             "Configurações",
-                            style = MaterialTheme.typography.bodyLarge,
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontSize = ResponsiveUtils.getTitleFontSize()
+                            ),
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -285,7 +287,9 @@ fun SettingsScreen(
             // Seção de Tema
             Text(
                 "Aparência",
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontSize = ResponsiveUtils.getTitleFontSize()
+                ),
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(bottom = ResponsiveUtils.getSmallSpacing())
@@ -312,8 +316,8 @@ fun SettingsScreen(
                     Column {
                         Text(
                             "Modo de Tema",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Medium
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold
                         )
                         Text(
                             when (themeMode) {
@@ -321,7 +325,7 @@ fun SettingsScreen(
                                 ThemeMode.DARK -> "Tema Escuro"
                                 ThemeMode.SYSTEM -> "Seguir Sistema"
                             },
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -340,7 +344,9 @@ fun SettingsScreen(
             // Seção de Atualizações
             Text(
                 "Atualizações",
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontSize = ResponsiveUtils.getTitleFontSize()
+                ),
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(bottom = ResponsiveUtils.getSmallSpacing())
@@ -389,8 +395,8 @@ fun SettingsScreen(
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             "Verificar Atualizações",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Medium
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold
                         )
                         Column {
                             Text(
@@ -411,7 +417,7 @@ fun SettingsScreen(
                                     is UpdateState.DownloadComplete -> "Download concluído! Toque para instalar"
                                     is UpdateState.Error -> state.message
                                 },
-                                style = MaterialTheme.typography.bodySmall,
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = when (updateState) {
                                     is UpdateState.UpToDate -> MaterialTheme.colorScheme.primary
                                     else -> MaterialTheme.colorScheme.onSurfaceVariant
@@ -664,7 +670,9 @@ fun SettingsScreen(
 
             Text(
                 "Backup e Restauração",
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontSize = ResponsiveUtils.getTitleFontSize()
+                ),
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(bottom = ResponsiveUtils.getSmallSpacing())
@@ -689,12 +697,12 @@ fun SettingsScreen(
                     Column {
                         Text(
                             "Exportar Dados",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Medium
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold
                         )
                         Text(
                             "Salvar sua lista de compras em um arquivo JSON",
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -725,12 +733,12 @@ fun SettingsScreen(
                     Column {
                         Text(
                             "Importar Dados",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Medium
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold
                         )
                         Text(
                             "Restaurar sua lista de compras de um arquivo JSON",
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -775,12 +783,12 @@ fun SettingsScreen(
                     Column {
                         Text(
                             "Compartilhar Lista",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Medium
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold
                         )
                         Text(
                             "Compartilhar sua lista de compras como texto",
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }

@@ -4,6 +4,7 @@ import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -378,7 +379,9 @@ fun ListaComprasScreen(
         bottomBar = {
             if (allItens.isNotEmpty() && totalAPagar > 0) {
                 Surface(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding(),
                     color = MaterialTheme.colorScheme.surface,
                     shadowElevation = 8.dp
                 ) {

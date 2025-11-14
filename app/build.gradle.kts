@@ -13,8 +13,8 @@ android {
         applicationId = "com.example.minhascompras"
         minSdk = 24
         targetSdk = 34
-        versionCode = 57
-        versionName = "2.12.4"
+        versionCode = 58
+        versionName = "2.12.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -62,6 +62,8 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    // Material Icons Extended - versão compatível com Compose BOM 2024.05.00
+    implementation("androidx.compose.material:material-icons-extended:1.5.4")
     
     // Room
     implementation(libs.androidx.room.runtime)

@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -190,13 +191,14 @@ fun ListaComprasScreen(
                     
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                     
-                    // Ordenar (com submenu) - usando ícone de lista com linhas horizontais (MoreVert rotacionado visualmente)
+                    // Ordenar (com submenu)
                     NavigationDrawerItem(
                         icon = {
                             Icon(
-                                imageVector = Icons.Default.MoreVert,
+                                imageVector = Icons.Default.Sort,
                                 contentDescription = null
                             )
+                            
                         },
                         label = { Text("Ordenar") },
                         selected = showSortSubMenu,

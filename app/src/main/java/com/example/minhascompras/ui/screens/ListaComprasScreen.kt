@@ -382,28 +382,35 @@ fun ListaComprasScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .navigationBarsPadding(),
-                    color = MaterialTheme.colorScheme.surface,
-                    shadowElevation = 8.dp
+                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
+                    shadowElevation = 12.dp
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Total a Pagar",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
+                    Column {
+                        // Borda superior azul
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.primary,
+                            thickness = 2.dp
                         )
-                        Text(
-                            text = formatador.format(totalAPagar),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Total a Pagar",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = formatador.format(totalAPagar),
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 }
             }

@@ -1,0 +1,18 @@
+---
+description: Regras para execução de comandos no terminal - garantir que comandos terminem completamente
+globs: **/*
+alwaysApply: true
+---
+
+- **Finalização de Comandos do Terminal**
+  - **Sempre garantir que comandos terminem completamente** - Todos os comandos executados via terminal devem finalizar completamente antes de prosseguir
+  - **Não deixar processos pendentes** - Verificar que cada comando retornou (exit code) e não deixou processos em background
+  - **Verificar conclusão** - Confirmar que cada comando terminou corretamente antes de executar o próximo
+  - **Sair dos prompts** - Sempre sair dos prompts de comandos do Cursor quando eles terminarem
+  - **Aguardar finalização** - Não prosseguir enquanto houver comandos ainda em execução
+
+- **Boas Práticas**
+  - Verificar exit codes dos comandos
+  - Não executar múltiplos comandos longos simultaneamente sem verificar conclusão
+  - Limpar processos em background quando necessário
+  - Confirmar que builds, testes e outras operações longas terminaram antes de continuar

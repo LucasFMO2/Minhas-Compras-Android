@@ -4,8 +4,20 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 
 ## 📥 Download
 
-### 🆕 Versão 2.11.0 (Mais Recente)
+### 🆕 Versão 2.11.1 (Mais Recente)
 
+**[⬇️ Baixar APK v2.11.1](https://github.com/nerddescoladofmo-cmyk/Minhas-Compras-Android/releases/download/v2.11.1/app-release-v2.11.1.apk)**
+
+✨ **Interface Minimalista e Limpa:**
+- 🧹 **Interface completamente limpa** - Removidas estatísticas, foco total na lista de itens
+- 📱 **Cards simplificados** - Design minimalista, menos elevação visual, informações discretas
+- 🎯 **Elementos mais discretos** - Filtros e busca aparecem apenas quando necessário
+- ⚡ **Performance otimizada** - Menos animações, mais fluidez e responsividade
+- 🎨 **Design inspirado nos melhores apps** - Interface limpa e funcional como os apps de referência
+
+### 📦 Versões Anteriores
+
+**Versão 2.11.0:**
 **[⬇️ Baixar APK v2.11.0](https://github.com/nerddescoladofmo-cmyk/Minhas-Compras-Android/releases/download/v2.11.0/app-release-v2.11.0.apk)**
 
 ✨ **Redesign Completo da Interface:**

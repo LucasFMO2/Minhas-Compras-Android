@@ -13,7 +13,9 @@ import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -53,6 +55,7 @@ fun ListaComprasScreen(
     var showArchiveDialog by remember { mutableStateOf(false) }
     var itemParaEditar by remember { mutableStateOf<ItemCompra?>(null) }
     var itemParaDeletar by remember { mutableStateOf<ItemCompra?>(null) }
+    var itemSelecionado by remember { mutableStateOf<ItemCompra?>(null) }
 
     // Usar allItens para estatísticas (lista completa, sem filtro)
     val totalItens = allItens.size
@@ -119,7 +122,7 @@ fun ListaComprasScreen(
                             )
                         )
                         Text(
-                            "Minhas Compras",
+                            itemSelecionado?.nome ?: "Minhas Compras",
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontSize = ResponsiveUtils.getTitleFontSize()
                             ),
@@ -130,181 +133,215 @@ fun ListaComprasScreen(
                     }
                 },
                 actions = {
-                    // Botão de busca
-                    IconButton(onClick = { searchExpanded = !searchExpanded }) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Buscar"
-                        )
-                    }
-                    
-                    // Menu de ações
-                    Box {
-                        IconButton(onClick = { showActionMenu = true }) {
+                    if (itemSelecionado != null) {
+                        // Modo de seleção - mostrar ações do item selecionado
+                        IconButton(onClick = { itemSelecionado = null }) {
                             Icon(
-                                imageVector = Icons.Default.MoreVert,
-                                contentDescription = "Mais opções"
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Cancelar"
                             )
                         }
-                        DropdownMenu(
-                            expanded = showActionMenu,
-                            onDismissRequest = { showActionMenu = false }
+                        IconButton(
+                            onClick = {
+                                itemParaEditar = itemSelecionado
+                                itemSelecionado = null
+                            }
                         ) {
-                            // Menu de Ordenação
-                            DropdownMenuItem(
-                                text = { Text("Ordenar") },
-                                onClick = {
-                                    showSortMenu = true
-                                    showActionMenu = false
-                                },
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = Icons.Default.Settings,
-                                        contentDescription = null
-                                    )
-                                }
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Editar"
                             )
-                            
-                            HorizontalDivider()
-                            
-                            // Arquivar lista
-                            DropdownMenuItem(
-                                text = { Text("Arquivar Lista") },
-                                onClick = {
-                                    showArchiveDialog = true
-                                    showActionMenu = false
-                                },
-                                enabled = allItens.isNotEmpty() && !isArchiving,
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = null
-                                    )
-                                }
+                        }
+                        IconButton(
+                            onClick = {
+                                itemParaDeletar = itemSelecionado
+                                itemSelecionado = null
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Excluir",
+                                tint = MaterialTheme.colorScheme.error
                             )
-                            
-                            // Deletar comprados
-                            if (temItensComprados) {
+                        }
+                    } else {
+                        // Modo normal - mostrar botões padrão
+                        // Botão de busca
+                        IconButton(onClick = { searchExpanded = !searchExpanded }) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Buscar"
+                            )
+                        }
+                        
+                        // Menu de ações
+                        Box {
+                            IconButton(onClick = { showActionMenu = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.MoreVert,
+                                    contentDescription = "Mais opções"
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = showActionMenu,
+                                onDismissRequest = { showActionMenu = false }
+                            ) {
+                                // Menu de Ordenação
                                 DropdownMenuItem(
-                                    text = { Text("Limpar Comprados") },
+                                    text = { Text("Ordenar") },
                                     onClick = {
-                                        showDeleteDialog = true
+                                        showSortMenu = true
                                         showActionMenu = false
                                     },
                                     leadingIcon = {
                                         Icon(
-                                            imageVector = Icons.Default.Delete,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.error
+                                            imageVector = Icons.Default.Settings,
+                                            contentDescription = null
+                                        )
+                                    }
+                                )
+                                
+                                HorizontalDivider()
+                                
+                                // Arquivar lista
+                                DropdownMenuItem(
+                                    text = { Text("Arquivar Lista") },
+                                    onClick = {
+                                        showArchiveDialog = true
+                                        showActionMenu = false
+                                    },
+                                    enabled = allItens.isNotEmpty() && !isArchiving,
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.Check,
+                                            contentDescription = null
+                                        )
+                                    }
+                                )
+                                
+                                // Deletar comprados
+                                if (temItensComprados) {
+                                    DropdownMenuItem(
+                                        text = { Text("Limpar Comprados") },
+                                        onClick = {
+                                            showDeleteDialog = true
+                                            showActionMenu = false
+                                        },
+                                        leadingIcon = {
+                                            Icon(
+                                                imageVector = Icons.Default.Delete,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.error
+                                            )
+                                        }
+                                    )
+                                }
+                                
+                                HorizontalDivider()
+                                
+                                // Configurações
+                                DropdownMenuItem(
+                                    text = { Text("Configurações") },
+                                    onClick = {
+                                        onNavigateToSettings()
+                                        showActionMenu = false
+                                    },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.Settings,
+                                            contentDescription = null
                                         )
                                     }
                                 )
                             }
-                            
-                            HorizontalDivider()
-                            
-                            // Configurações
-                            DropdownMenuItem(
-                                text = { Text("Configurações") },
-                                onClick = {
-                                    onNavigateToSettings()
-                                    showActionMenu = false
-                                },
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = Icons.Default.Settings,
-                                        contentDescription = null
-                                    )
-                                }
+                        }
+                        
+                        // Menu de Ordenação (separado)
+                        Box {
+                            DropdownMenu(
+                                expanded = showSortMenu,
+                                onDismissRequest = { showSortMenu = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Nome (A-Z)") },
+                                    onClick = {
+                                        viewModel.setSortOrder(SortOrder.BY_NAME_ASC)
+                                        showSortMenu = false
+                                    },
+                                    leadingIcon = {
+                                        if (sortOrder == SortOrder.BY_NAME_ASC) {
+                                            Icon(Icons.Default.Check, contentDescription = "Selecionado", modifier = Modifier.size(16.dp))
+                                        }
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Nome (Z-A)") },
+                                    onClick = {
+                                        viewModel.setSortOrder(SortOrder.BY_NAME_DESC)
+                                        showSortMenu = false
+                                    },
+                                    leadingIcon = {
+                                        if (sortOrder == SortOrder.BY_NAME_DESC) {
+                                            Icon(Icons.Default.Check, contentDescription = "Selecionado", modifier = Modifier.size(16.dp))
+                                        }
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Data (Mais Recente)") },
+                                    onClick = {
+                                        viewModel.setSortOrder(SortOrder.BY_DATE_DESC)
+                                        showSortMenu = false
+                                    },
+                                    leadingIcon = {
+                                        if (sortOrder == SortOrder.BY_DATE_DESC) {
+                                            Icon(Icons.Default.Check, contentDescription = "Selecionado", modifier = Modifier.size(16.dp))
+                                        }
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Data (Mais Antiga)") },
+                                    onClick = {
+                                        viewModel.setSortOrder(SortOrder.BY_DATE_ASC)
+                                        showSortMenu = false
+                                    },
+                                    leadingIcon = {
+                                        if (sortOrder == SortOrder.BY_DATE_ASC) {
+                                            Icon(Icons.Default.Check, contentDescription = "Selecionado", modifier = Modifier.size(16.dp))
+                                        }
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Preço (Menor)") },
+                                    onClick = {
+                                        viewModel.setSortOrder(SortOrder.BY_PRICE_ASC)
+                                        showSortMenu = false
+                                    },
+                                    leadingIcon = {
+                                        if (sortOrder == SortOrder.BY_PRICE_ASC) {
+                                            Icon(Icons.Default.Check, contentDescription = "Selecionado", modifier = Modifier.size(16.dp))
+                                        }
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Preço (Maior)") },
+                                    onClick = {
+                                        viewModel.setSortOrder(SortOrder.BY_PRICE_DESC)
+                                        showSortMenu = false
+                                    },
+                                    leadingIcon = {
+                                        if (sortOrder == SortOrder.BY_PRICE_DESC) {
+                                            Icon(Icons.Default.Check, contentDescription = "Selecionado", modifier = Modifier.size(16.dp))
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                        IconButton(onClick = onNavigateToHistory) {
+                            Icon(
+                                imageVector = Icons.Default.ShoppingCart,
+                                contentDescription = "Histórico"
                             )
                         }
-                    }
-                    
-                    // Menu de Ordenação (separado)
-                    Box {
-                        DropdownMenu(
-                            expanded = showSortMenu,
-                            onDismissRequest = { showSortMenu = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text("Nome (A-Z)") },
-                                onClick = {
-                                    viewModel.setSortOrder(SortOrder.BY_NAME_ASC)
-                                    showSortMenu = false
-                                },
-                                leadingIcon = {
-                                    if (sortOrder == SortOrder.BY_NAME_ASC) {
-                                        Icon(Icons.Default.Check, contentDescription = "Selecionado", modifier = Modifier.size(16.dp))
-                                    }
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Nome (Z-A)") },
-                                onClick = {
-                                    viewModel.setSortOrder(SortOrder.BY_NAME_DESC)
-                                    showSortMenu = false
-                                },
-                                leadingIcon = {
-                                    if (sortOrder == SortOrder.BY_NAME_DESC) {
-                                        Icon(Icons.Default.Check, contentDescription = "Selecionado", modifier = Modifier.size(16.dp))
-                                    }
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Data (Mais Recente)") },
-                                onClick = {
-                                    viewModel.setSortOrder(SortOrder.BY_DATE_DESC)
-                                    showSortMenu = false
-                                },
-                                leadingIcon = {
-                                    if (sortOrder == SortOrder.BY_DATE_DESC) {
-                                        Icon(Icons.Default.Check, contentDescription = "Selecionado", modifier = Modifier.size(16.dp))
-                                    }
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Data (Mais Antiga)") },
-                                onClick = {
-                                    viewModel.setSortOrder(SortOrder.BY_DATE_ASC)
-                                    showSortMenu = false
-                                },
-                                leadingIcon = {
-                                    if (sortOrder == SortOrder.BY_DATE_ASC) {
-                                        Icon(Icons.Default.Check, contentDescription = "Selecionado", modifier = Modifier.size(16.dp))
-                                    }
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Preço (Menor)") },
-                                onClick = {
-                                    viewModel.setSortOrder(SortOrder.BY_PRICE_ASC)
-                                    showSortMenu = false
-                                },
-                                leadingIcon = {
-                                    if (sortOrder == SortOrder.BY_PRICE_ASC) {
-                                        Icon(Icons.Default.Check, contentDescription = "Selecionado", modifier = Modifier.size(16.dp))
-                                    }
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Preço (Maior)") },
-                                onClick = {
-                                    viewModel.setSortOrder(SortOrder.BY_PRICE_DESC)
-                                    showSortMenu = false
-                                },
-                                leadingIcon = {
-                                    if (sortOrder == SortOrder.BY_PRICE_DESC) {
-                                        Icon(Icons.Default.Check, contentDescription = "Selecionado", modifier = Modifier.size(16.dp))
-                                    }
-                                }
-                            )
-                        }
-                    }
-                    IconButton(onClick = onNavigateToHistory) {
-                        Icon(
-                            imageVector = Icons.Default.ShoppingCart,
-                            contentDescription = "Histórico"
-                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -589,7 +626,9 @@ fun ListaComprasScreen(
                                     item = item,
                                     onToggleComprado = { viewModel.toggleComprado(item) },
                                     onDelete = { itemParaDeletar = item },
-                                    onEdit = { itemParaEditar = item }
+                                    onEdit = { itemParaEditar = item },
+                                    onSelect = { itemSelecionado = item },
+                                    isSelected = itemSelecionado?.id == item.id
                                 )
                             }
                         }
@@ -604,6 +643,7 @@ fun ListaComprasScreen(
             onDismiss = { 
                 showDialog = false
                 itemParaEditar = null
+                itemSelecionado = null
             },
             onConfirm = { nome, quantidade, preco, categoria ->
                 itemParaEditar?.let { item ->
@@ -617,6 +657,7 @@ fun ListaComprasScreen(
                         )
                     )
                     itemParaEditar = null
+                    itemSelecionado = null
                 } ?: run {
                     // Adicionar novo item
                     viewModel.inserirItem(nome, quantidade, preco, categoria)
@@ -676,7 +717,10 @@ fun ListaComprasScreen(
     // Diálogo de confirmação para deletar item individual
     itemParaDeletar?.let { item ->
         AlertDialog(
-            onDismissRequest = { itemParaDeletar = null },
+            onDismissRequest = { 
+                itemParaDeletar = null
+                itemSelecionado = null
+            },
             title = { Text("Confirmar exclusão") },
             text = { Text("Deseja deletar \"${item.nome}\"?") },
             confirmButton = {
@@ -684,13 +728,17 @@ fun ListaComprasScreen(
                     onClick = {
                         viewModel.deletarItem(item)
                         itemParaDeletar = null
+                        itemSelecionado = null
                     }
                 ) {
                     Text("Deletar")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { itemParaDeletar = null }) {
+                TextButton(onClick = { 
+                    itemParaDeletar = null
+                    itemSelecionado = null
+                }) {
                     Text("Cancelar")
                 }
             }

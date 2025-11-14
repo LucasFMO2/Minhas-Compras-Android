@@ -1,13 +1,11 @@
 package com.example.minhascompras.ui.screens
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
@@ -16,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -38,8 +37,6 @@ import com.example.minhascompras.ui.components.StatisticCard
 import com.example.minhascompras.ui.utils.ResponsiveUtils
 import com.example.minhascompras.ui.viewmodel.ListaComprasViewModel
 import kotlinx.coroutines.flow.collectLatest
-import java.text.NumberFormat
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -56,29 +53,21 @@ fun ListaComprasScreen(
     var showArchiveDialog by remember { mutableStateOf(false) }
     var itemParaEditar by remember { mutableStateOf<ItemCompra?>(null) }
 
-    val formatador = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
     // Usar allItens para estatísticas (lista completa, sem filtro)
     val totalItens = allItens.size
     val itensComprados = allItens.count { it.comprado }
-    val itensPendentes = totalItens - itensComprados
     val temItensComprados = itensComprados > 0
-    val progresso = if (totalItens > 0) itensComprados.toFloat() / totalItens else 0f
-    
-    // Calcular totais de preços usando allItens (lista completa)
-    val totalGeral = allItens.sumOf { (it.preco ?: 0.0) * it.quantidade }
-    val totalComprados = allItens.filter { it.comprado }.sumOf { (it.preco ?: 0.0) * it.quantidade }
-    val totalPendentes = allItens.filter { !it.comprado }.sumOf { (it.preco ?: 0.0) * it.quantidade }
-    val temPrecos = allItens.any { it.preco != null && it.preco > 0 }
     val sortOrder by viewModel.sortOrder.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val filterStatus by viewModel.filterStatus.collectAsState()
     val lastDeletedItem by viewModel.lastDeletedItem.collectAsState()
     val isArchiving by viewModel.isArchiving.collectAsState()
     var showSortMenu by remember { mutableStateOf(false) }
+    var showActionMenu by remember { mutableStateOf(false) }
+    var searchExpanded by remember { mutableStateOf(false) }
     
     val snackbarHostState = remember { SnackbarHostState() }
     val isSmallScreen = ResponsiveUtils.isSmallScreen()
-    val contentHorizontalPadding = if (isSmallScreen) 8.dp else ResponsiveUtils.getHorizontalPadding()
 
     // Mostrar Snackbar quando um item for deletado
     LaunchedEffect(lastDeletedItem) {
@@ -140,14 +129,98 @@ fun ListaComprasScreen(
                     }
                 },
                 actions = {
-                    // Menu de Ordenação
+                    // Botão de busca
+                    IconButton(onClick = { searchExpanded = !searchExpanded }) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Buscar"
+                        )
+                    }
+                    
+                    // Menu de ações
                     Box {
-                        IconButton(onClick = { showSortMenu = true }) {
+                        IconButton(onClick = { showActionMenu = true }) {
                             Icon(
-                                imageVector = Icons.Default.Settings,
-                                contentDescription = "Ordenar"
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "Mais opções"
                             )
                         }
+                        DropdownMenu(
+                            expanded = showActionMenu,
+                            onDismissRequest = { showActionMenu = false }
+                        ) {
+                            // Menu de Ordenação
+                            DropdownMenuItem(
+                                text = { Text("Ordenar") },
+                                onClick = {
+                                    showSortMenu = true
+                                    showActionMenu = false
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Settings,
+                                        contentDescription = null
+                                    )
+                                }
+                            )
+                            
+                            HorizontalDivider()
+                            
+                            // Arquivar lista
+                            DropdownMenuItem(
+                                text = { Text("Arquivar Lista") },
+                                onClick = {
+                                    showArchiveDialog = true
+                                    showActionMenu = false
+                                },
+                                enabled = allItens.isNotEmpty() && !isArchiving,
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null
+                                    )
+                                }
+                            )
+                            
+                            // Deletar comprados
+                            if (temItensComprados) {
+                                DropdownMenuItem(
+                                    text = { Text("Limpar Comprados") },
+                                    onClick = {
+                                        showDeleteDialog = true
+                                        showActionMenu = false
+                                    },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.error
+                                        )
+                                    }
+                                )
+                            }
+                            
+                            HorizontalDivider()
+                            
+                            // Configurações
+                            DropdownMenuItem(
+                                text = { Text("Configurações") },
+                                onClick = {
+                                    onNavigateToSettings()
+                                    showActionMenu = false
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Settings,
+                                        contentDescription = null
+                                    )
+                                }
+                            )
+                        }
+                    }
+                    
+                    // Menu de Ordenação (separado)
+                    Box {
                         DropdownMenu(
                             expanded = showSortMenu,
                             onDismissRequest = { showSortMenu = false }
@@ -230,12 +303,6 @@ fun ListaComprasScreen(
                         Icon(
                             imageVector = Icons.Default.ShoppingCart,
                             contentDescription = "Histórico"
-                        )
-                    }
-                    IconButton(onClick = onNavigateToSettings) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Configurações"
                         )
                     }
                 },
@@ -341,295 +408,117 @@ fun ListaComprasScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = contentHorizontalPadding)
-                        .padding(top = ResponsiveUtils.getVerticalPadding())
+                        .padding(horizontal = if (isSmallScreen) 12.dp else 16.dp)
+                        .padding(top = 8.dp)
                 ) {
-                    // Barra de busca
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = { viewModel.onSearchQueryChanged(it) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = ResponsiveUtils.getSmallSpacing()),
-                        placeholder = { 
-                            Text(
-                                "Pesquisar itens...",
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontSize = ResponsiveUtils.getBodyFontSize()
-                                )
-                            ) 
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = "Buscar",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        },
-                        singleLine = true,
-                        shape = MaterialTheme.shapes.medium,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            focusedLabelColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-                        )
-                    )
-                    
-                    // Chips de filtro
-                    FlowRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = ResponsiveUtils.getSmallSpacing()),
-                        horizontalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSmallSpacing()),
-                        verticalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSmallSpacing())
-                    ) {
-                        FilterChip(
-                            selected = filterStatus == FilterStatus.ALL,
-                            onClick = { viewModel.onFilterStatusChanged(FilterStatus.ALL) },
-                            label = {
-                                Text(
-                                    FilterStatus.ALL.displayName,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    maxLines = 1
-                                )
-                            },
-                            modifier = Modifier.wrapContentWidth()
-                        )
-                        FilterChip(
-                            selected = filterStatus == FilterStatus.PENDING,
-                            onClick = { viewModel.onFilterStatusChanged(FilterStatus.PENDING) },
-                            label = {
-                                Text(
-                                    FilterStatus.PENDING.displayName,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    maxLines = 1
-                                )
-                            },
-                            modifier = Modifier.wrapContentWidth()
-                        )
-                        FilterChip(
-                            selected = filterStatus == FilterStatus.PURCHASED,
-                            onClick = { viewModel.onFilterStatusChanged(FilterStatus.PURCHASED) },
-                            label = {
-                                Text(
-                                    FilterStatus.PURCHASED.displayName,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    maxLines = 1
-                                )
-                            },
-                            modifier = Modifier.wrapContentWidth()
-                        )
-                    }
-                    
-                    Spacer(modifier = Modifier.height(ResponsiveUtils.getSmallSpacing()))
-                    
-                    // Estatísticas
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = ResponsiveUtils.getStatisticRowHorizontalPadding()),
-                        horizontalArrangement = Arrangement.spacedBy(ResponsiveUtils.getStatisticCardSpacing())
-                    ) {
-                        StatisticCard(
-                            label = "Total",
-                            value = totalItens.toString(),
-                            modifier = Modifier.weight(1f),
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                        StatisticCard(
-                            label = "Pendentes",
-                            value = itensPendentes.toString(),
-                            modifier = Modifier.weight(1f),
-                            color = MaterialTheme.colorScheme.tertiary
-                        )
-                        StatisticCard(
-                            label = "Comprados",
-                            value = itensComprados.toString(),
-                            modifier = Modifier.weight(1f),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    
-                    // Estatísticas de preços (se houver preços)
-                    if (temPrecos) {
-                        Spacer(modifier = Modifier.height(ResponsiveUtils.getSpacing()))
-                        Row(
+                    // Barra de busca simplificada - aparece quando expandida ou quando há busca ativa
+                    if (searchExpanded || searchQuery.isNotEmpty()) {
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { viewModel.onSearchQueryChanged(it) },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = ResponsiveUtils.getStatisticRowHorizontalPadding()),
-                            horizontalArrangement = Arrangement.spacedBy(ResponsiveUtils.getStatisticCardSpacing())
-                        ) {
-                            StatisticCard(
-                                label = "Total Geral",
-                                value = formatador.format(totalGeral),
-                                modifier = Modifier.weight(1f),
-                                color = MaterialTheme.colorScheme.secondary
-                            )
-                            StatisticCard(
-                                label = "Pendentes",
-                                value = formatador.format(totalPendentes),
-                                modifier = Modifier.weight(1f),
-                                color = MaterialTheme.colorScheme.tertiary
-                            )
-                            StatisticCard(
-                                label = "Comprados",
-                                value = formatador.format(totalComprados),
-                                modifier = Modifier.weight(1f),
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-
-                    // Barra de progresso
-                    if (totalItens > 0) {
-                        Spacer(modifier = Modifier.height(ResponsiveUtils.getSpacing()))
-                        Column {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
+                                .padding(bottom = ResponsiveUtils.getSmallSpacing()),
+                            placeholder = { 
                                 Text(
-                                    "Progresso",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Text(
-                                    "${(progresso * 100).toInt()}%",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            LinearProgressIndicator(
-                                progress = { progresso },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(8.dp)
-                                    .clip(RoundedCornerShape(4.dp)),
-                                color = MaterialTheme.colorScheme.primary,
-                                trackColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
-                        }
-                    }
-
-                    // Botão arquivar lista
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        FilledTonalButton(
-                            onClick = { showArchiveDialog = true },
-                            enabled = allItens.isNotEmpty() && !isArchiving,
-                            modifier = Modifier.height(ResponsiveUtils.getButtonHeight()),
-                            contentPadding = ResponsiveUtils.getButtonPadding()
-                        ) {
-                            if (isArchiving) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(
-                                        if (ResponsiveUtils.isSmallScreen()) 16.dp else 18.dp
-                                    ),
-                                    strokeWidth = 2.dp
-                                )
-                                Spacer(modifier = Modifier.width(
-                                    if (ResponsiveUtils.isSmallScreen()) 6.dp else 8.dp
-                                ))
-                                Text(
-                                    "Arquivando...",
-                                    style = MaterialTheme.typography.labelLarge.copy(
+                                    "Pesquisar...",
+                                    style = MaterialTheme.typography.bodyMedium.copy(
                                         fontSize = ResponsiveUtils.getBodyFontSize()
                                     )
-                                )
-                            } else {
+                                ) 
+                            },
+                            leadingIcon = {
                                 Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = "Arquivar lista",
-                                    modifier = Modifier.size(
-                                        if (ResponsiveUtils.isSmallScreen()) 16.dp else 18.dp
-                                    )
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Buscar",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
-                                Spacer(modifier = Modifier.width(
-                                    if (ResponsiveUtils.isSmallScreen()) 6.dp else 8.dp
-                                ))
-                                Text(
-                                    if (ResponsiveUtils.isSmallScreen()) "Arquivar" else "Arquivar Lista",
-                                    style = MaterialTheme.typography.labelLarge.copy(
-                                        fontSize = ResponsiveUtils.getBodyFontSize()
-                                    )
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Botão deletar comprados
-                    AnimatedVisibility(
-                        visible = temItensComprados,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
-                    ) {
-                        Column {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.End
-                            ) {
-                                OutlinedButton(
-                                    onClick = { showDeleteDialog = true },
-                                    colors = ButtonDefaults.outlinedButtonColors(
-                                        contentColor = MaterialTheme.colorScheme.error
-                                    ),
-                                    modifier = Modifier.height(ResponsiveUtils.getButtonHeight()),
-                                    contentPadding = ResponsiveUtils.getButtonPadding()
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Delete,
-                                        contentDescription = "Deletar itens comprados",
-                                        modifier = Modifier.size(
-                                            if (ResponsiveUtils.isSmallScreen()) 16.dp else 18.dp
+                            },
+                            trailingIcon = {
+                                if (searchQuery.isNotEmpty()) {
+                                    IconButton(onClick = { 
+                                        viewModel.onSearchQueryChanged("")
+                                        searchExpanded = false
+                                    }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = "Limpar busca",
+                                            modifier = Modifier.size(20.dp)
                                         )
-                                    )
-                                    Spacer(modifier = Modifier.width(
-                                        if (ResponsiveUtils.isSmallScreen()) 6.dp else 8.dp
-                                    ))
-                                    Text(
-                                        if (ResponsiveUtils.isSmallScreen()) "Limpar" else "Limpar Comprados",
-                                        style = MaterialTheme.typography.labelLarge.copy(
-                                            fontSize = ResponsiveUtils.getBodyFontSize()
-                                        )
-                                    )
+                                    }
                                 }
-                            }
+                            },
+                            singleLine = true,
+                            shape = MaterialTheme.shapes.medium,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                            )
+                        )
+                    }
+                    
+                    // Chips de filtro - apenas quando necessário e de forma mais discreta
+                    if (filterStatus != FilterStatus.ALL || searchQuery.isNotEmpty()) {
+                        FlowRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            FilterChip(
+                                selected = filterStatus == FilterStatus.ALL,
+                                onClick = { viewModel.onFilterStatusChanged(FilterStatus.ALL) },
+                                label = {
+                                    Text(
+                                        FilterStatus.ALL.displayName,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        maxLines = 1
+                                    )
+                                },
+                                modifier = Modifier.wrapContentWidth()
+                            )
+                            FilterChip(
+                                selected = filterStatus == FilterStatus.PENDING,
+                                onClick = { viewModel.onFilterStatusChanged(FilterStatus.PENDING) },
+                                label = {
+                                    Text(
+                                        FilterStatus.PENDING.displayName,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        maxLines = 1
+                                    )
+                                },
+                                modifier = Modifier.wrapContentWidth()
+                            )
+                            FilterChip(
+                                selected = filterStatus == FilterStatus.PURCHASED,
+                                onClick = { viewModel.onFilterStatusChanged(FilterStatus.PURCHASED) },
+                                label = {
+                                    Text(
+                                        FilterStatus.PURCHASED.displayName,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        maxLines = 1
+                                    )
+                                },
+                                modifier = Modifier.wrapContentWidth()
+                            )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Lista de itens
+                    // Lista de itens - interface limpa e focada
                     LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSpacing()),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                         contentPadding = PaddingValues(
+                            top = 4.dp,
                             bottom = if (isSmallScreen) 100.dp else 120.dp
                         ),
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        itemsIndexed(
+                        items(
                             items = itens,
-                            key = { _, item -> item.id },
-                            contentType = { _, _ -> "item" }
-                        ) { index, item ->
-                            AnimatedVisibility(
-                                visible = true,
-                                enter = fadeIn(
-                                    animationSpec = tween(300, delayMillis = index * 50)
-                                ) + slideInVertically(
-                                    initialOffsetY = { it / 2 },
-                                    animationSpec = tween(300, delayMillis = index * 50)
-                                ),
-                                exit = fadeOut() + slideOutVertically()
-                            ) {
+                            key = { it.id }
+                        ) { item ->
                             val dismissState = rememberSwipeToDismissBoxState(
                                 confirmValueChange = { dismissValue ->
                                     when (dismissValue) {
@@ -701,7 +590,6 @@ fun ListaComprasScreen(
                                     onDelete = { viewModel.deletarItem(item) },
                                     onEdit = { itemParaEditar = item }
                                 )
-                            }
                             }
                         }
                     }

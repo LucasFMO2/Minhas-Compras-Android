@@ -39,6 +39,8 @@ import com.example.minhascompras.ui.components.StatisticCard
 import com.example.minhascompras.ui.utils.ResponsiveUtils
 import com.example.minhascompras.ui.viewmodel.ListaComprasViewModel
 import kotlinx.coroutines.flow.collectLatest
+import java.text.NumberFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -61,6 +63,15 @@ fun ListaComprasScreen(
     val totalItens = allItens.size
     val itensComprados = allItens.count { it.comprado }
     val temItensComprados = itensComprados > 0
+    
+    // Calcular total a pagar (itens não comprados)
+    val totalAPagar = remember(allItens) {
+        allItens
+            .filter { !it.comprado }
+            .sumOf { (it.preco ?: 0.0) * it.quantidade }
+    }
+    val formatador = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
+    
     val sortOrder by viewModel.sortOrder.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val filterStatus by viewModel.filterStatus.collectAsState()
@@ -351,32 +362,48 @@ fun ListaComprasScreen(
             )
         },
         floatingActionButton = {
-            if (ResponsiveUtils.isSmallScreen()) {
-                FloatingActionButton(
-                    onClick = { showDialog = true },
-                    containerColor = MaterialTheme.colorScheme.primary
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Adicionar item"
-                    )
-                }
-            } else {
-                ExtendedFloatingActionButton(
-                    onClick = { showDialog = true },
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Adicionar item"
-                        )
-                    },
-                    text = { Text("Adicionar") }
+            FloatingActionButton(
+                onClick = { showDialog = true },
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Adicionar item"
                 )
             }
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
+        },
+        bottomBar = {
+            if (allItens.isNotEmpty() && totalAPagar > 0) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.surface,
+                    shadowElevation = 8.dp
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Total a Pagar",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = formatador.format(totalAPagar),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
         },
         modifier = modifier
     ) { paddingValues ->

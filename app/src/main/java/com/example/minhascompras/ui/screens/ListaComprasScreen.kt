@@ -190,11 +190,11 @@ fun ListaComprasScreen(
                     
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                     
-                    // Ordenar (com submenu)
+                    // Ordenar (com submenu) - usando ícone de lista com linhas horizontais (MoreVert rotacionado visualmente)
                     NavigationDrawerItem(
                         icon = {
                             Icon(
-                                imageVector = Icons.Default.Settings,
+                                imageVector = Icons.Default.MoreVert,
                                 contentDescription = null
                             )
                         },

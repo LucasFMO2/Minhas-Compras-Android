@@ -50,9 +50,7 @@ fun AdicionarItemDialog(
             Text(
                 if (itemEdicao != null) "Editar Item" else "Adicionar Item",
                 fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontSize = ResponsiveUtils.getTitleFontSize()
-                )
+                style = MaterialTheme.typography.bodyLarge
             ) 
         },
         text = {
@@ -75,9 +73,7 @@ fun AdicionarItemDialog(
                     placeholder = { 
                         Text(
                             "Ex: Leite, Pão, Arroz...",
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontSize = ResponsiveUtils.getBodyFontSize()
-                            )
+                            style = MaterialTheme.typography.bodySmall
                         ) 
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -146,9 +142,7 @@ fun AdicionarItemDialog(
                                 text = { 
                                     Text(
                                         category.displayName,
-                                        style = MaterialTheme.typography.bodyMedium.copy(
-                                            fontSize = ResponsiveUtils.getBodyFontSize()
-                                        )
+                                        style = MaterialTheme.typography.bodyLarge
                                     ) 
                                 },
                                 onClick = {
@@ -179,9 +173,7 @@ fun AdicionarItemDialog(
                         placeholder = { 
                             Text(
                                 "1",
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontSize = ResponsiveUtils.getBodyFontSize()
-                                )
+                                style = MaterialTheme.typography.bodySmall
                             ) 
                         },
                         modifier = Modifier.weight(1f),
@@ -226,9 +218,7 @@ fun AdicionarItemDialog(
                         placeholder = { 
                             Text(
                                 "0.00",
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontSize = ResponsiveUtils.getBodyFontSize()
-                                )
+                                style = MaterialTheme.typography.bodySmall
                             ) 
                         },
                         modifier = Modifier.weight(1f),
@@ -278,10 +268,8 @@ fun AdicionarItemDialog(
             ) {
                 Text(
                     if (itemEdicao != null) "Salvar" else "Adicionar",
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        fontSize = ResponsiveUtils.getBodyFontSize()
-                    ),
-                    fontWeight = FontWeight.SemiBold
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium
                 )
             }
         },

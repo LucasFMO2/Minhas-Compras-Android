@@ -37,9 +37,8 @@ fun HistoryScreen(
                 title = { 
                     Text(
                         "Histórico de Compras",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontSize = ResponsiveUtils.getTitleFontSize()
-                        )
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold
                     )
                 },
                 navigationIcon = {
@@ -71,12 +70,13 @@ fun HistoryScreen(
                 ) {
                     Text(
                         "Nenhum histórico encontrado",
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
                         "Listas completas serão arquivadas automaticamente aqui",
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -138,10 +138,8 @@ fun HistoryItemCard(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = history.listName,
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontSize = ResponsiveUtils.getBodyFontSize()
-                        ),
-                        fontWeight = FontWeight.SemiBold,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 2,
                         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
@@ -197,10 +195,8 @@ fun HistoryItemCard(
                     ))
                     Text(
                         "Reutilizar",
-                        style = MaterialTheme.typography.labelLarge.copy(
-                            fontSize = ResponsiveUtils.getBodyFontSize()
-                        ),
-                        fontWeight = FontWeight.SemiBold
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium
                     )
                 }
             }

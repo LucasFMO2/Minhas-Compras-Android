@@ -133,7 +133,7 @@ fun ListaComprasScreen(
                     // Cabeçalho do drawer
                     Text(
                         text = "Menu",
-                        style = MaterialTheme.typography.headlineSmall,
+                        style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(vertical = 16.dp)
                     )
@@ -150,7 +150,12 @@ fun ListaComprasScreen(
                                 contentDescription = null
                             )
                         },
-                        label = { Text("Buscar") },
+                        label = { 
+                            Text(
+                                "Buscar",
+                                style = MaterialTheme.typography.bodyLarge
+                            ) 
+                        },
                         selected = searchExpanded,
                         onClick = {
                             searchExpanded = !searchExpanded
@@ -166,7 +171,12 @@ fun ListaComprasScreen(
                                 contentDescription = null
                             )
                         },
-                        label = { Text("Histórico") },
+                        label = { 
+                            Text(
+                                "Histórico",
+                                style = MaterialTheme.typography.bodyLarge
+                            ) 
+                        },
                         selected = false,
                         onClick = {
                             onNavigateToHistory()
@@ -184,7 +194,12 @@ fun ListaComprasScreen(
                                 contentDescription = null
                             )
                         },
-                        label = { Text("Ordenar") },
+                        label = { 
+                            Text(
+                                "Ordenar",
+                                style = MaterialTheme.typography.bodyLarge
+                            ) 
+                        },
                         selected = showSortSubMenu,
                         onClick = {
                             showSortSubMenu = !showSortSubMenu
@@ -195,7 +210,12 @@ fun ListaComprasScreen(
                     if (showSortSubMenu) {
                         Column(modifier = Modifier.padding(start = 48.dp)) {
                             NavigationDrawerItem(
-                                label = { Text("Nome (A-Z)") },
+                                label = { 
+                                    Text(
+                                        "Nome (A-Z)",
+                                        style = MaterialTheme.typography.bodyLarge
+                                    ) 
+                                },
                                 selected = sortOrder == SortOrder.BY_NAME_ASC,
                                 onClick = {
                                     viewModel.setSortOrder(SortOrder.BY_NAME_ASC)
@@ -204,7 +224,12 @@ fun ListaComprasScreen(
                                 }
                             )
                             NavigationDrawerItem(
-                                label = { Text("Nome (Z-A)") },
+                                label = { 
+                                    Text(
+                                        "Nome (Z-A)",
+                                        style = MaterialTheme.typography.bodyLarge
+                                    ) 
+                                },
                                 selected = sortOrder == SortOrder.BY_NAME_DESC,
                                 onClick = {
                                     viewModel.setSortOrder(SortOrder.BY_NAME_DESC)
@@ -213,7 +238,12 @@ fun ListaComprasScreen(
                                 }
                             )
                             NavigationDrawerItem(
-                                label = { Text("Data (Mais Recente)") },
+                                label = { 
+                                    Text(
+                                        "Data (Mais Recente)",
+                                        style = MaterialTheme.typography.bodyLarge
+                                    ) 
+                                },
                                 selected = sortOrder == SortOrder.BY_DATE_DESC,
                                 onClick = {
                                     viewModel.setSortOrder(SortOrder.BY_DATE_DESC)
@@ -222,7 +252,12 @@ fun ListaComprasScreen(
                                 }
                             )
                             NavigationDrawerItem(
-                                label = { Text("Data (Mais Antiga)") },
+                                label = { 
+                                    Text(
+                                        "Data (Mais Antiga)",
+                                        style = MaterialTheme.typography.bodyLarge
+                                    ) 
+                                },
                                 selected = sortOrder == SortOrder.BY_DATE_ASC,
                                 onClick = {
                                     viewModel.setSortOrder(SortOrder.BY_DATE_ASC)
@@ -231,7 +266,12 @@ fun ListaComprasScreen(
                                 }
                             )
                             NavigationDrawerItem(
-                                label = { Text("Preço (Menor)") },
+                                label = { 
+                                    Text(
+                                        "Preço (Menor)",
+                                        style = MaterialTheme.typography.bodyLarge
+                                    ) 
+                                },
                                 selected = sortOrder == SortOrder.BY_PRICE_ASC,
                                 onClick = {
                                     viewModel.setSortOrder(SortOrder.BY_PRICE_ASC)
@@ -240,7 +280,12 @@ fun ListaComprasScreen(
                                 }
                             )
                             NavigationDrawerItem(
-                                label = { Text("Preço (Maior)") },
+                                label = { 
+                                    Text(
+                                        "Preço (Maior)",
+                                        style = MaterialTheme.typography.bodyLarge
+                                    ) 
+                                },
                                 selected = sortOrder == SortOrder.BY_PRICE_DESC,
                                 onClick = {
                                     viewModel.setSortOrder(SortOrder.BY_PRICE_DESC)
@@ -261,7 +306,12 @@ fun ListaComprasScreen(
                                 contentDescription = null
                             )
                         },
-                        label = { Text("Arquivar Lista") },
+                        label = { 
+                            Text(
+                                "Arquivar Lista",
+                                style = MaterialTheme.typography.bodyLarge
+                            ) 
+                        },
                         selected = false,
                         onClick = {
                             if (allItens.isNotEmpty() && !isArchiving) {
@@ -281,7 +331,12 @@ fun ListaComprasScreen(
                                     tint = MaterialTheme.colorScheme.error
                                 )
                             },
-                            label = { Text("Limpar Comprados") },
+                            label = { 
+                                Text(
+                                    "Limpar Comprados",
+                                    style = MaterialTheme.typography.bodyLarge
+                                ) 
+                            },
                             selected = false,
                             onClick = {
                                 showDeleteDialog = true
@@ -300,7 +355,12 @@ fun ListaComprasScreen(
                                 contentDescription = null
                             )
                         },
-                        label = { Text("Configurações") },
+                        label = { 
+                            Text(
+                                "Configurações",
+                                style = MaterialTheme.typography.bodyLarge
+                            ) 
+                        },
                         selected = false,
                         onClick = {
                             onNavigateToSettings()
@@ -336,15 +396,13 @@ fun ListaComprasScreen(
                                     if (ResponsiveUtils.isSmallScreen()) 20.dp else 24.dp
                                 )
                             )
-                            Text(
-                                itemSelecionado?.nome ?: "Minhas Compras",
-                                style = MaterialTheme.typography.titleLarge.copy(
-                                    fontSize = ResponsiveUtils.getTitleFontSize()
-                                ),
-                                fontWeight = FontWeight.Bold,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                        Text(
+                            itemSelecionado?.nome ?: "Minhas Compras",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                         }
                     },
                     actions = {
@@ -426,13 +484,13 @@ fun ListaComprasScreen(
                         ) {
                             Text(
                                 text = "Total a Pagar:",
-                                style = MaterialTheme.typography.bodySmall,
+                                style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
                                 text = formatador.format(totalAPagar),
-                                style = MaterialTheme.typography.bodySmall,
+                                style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
                             )
@@ -482,7 +540,7 @@ fun ListaComprasScreen(
                                 FilterStatus.PENDING -> "Nenhum item pendente"
                                 else -> "Nenhum item encontrado"
                             },
-                            style = MaterialTheme.typography.titleLarge,
+                            style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -492,7 +550,7 @@ fun ListaComprasScreen(
                                 FilterStatus.PENDING -> "Todos os itens foram marcados como comprados"
                                 else -> "Tente ajustar sua busca ou filtro"
                             },
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center
                         )
@@ -523,9 +581,7 @@ fun ListaComprasScreen(
                             placeholder = { 
                                 Text(
                                     "Pesquisar...",
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        fontSize = ResponsiveUtils.getBodyFontSize()
-                                    )
+                                    style = MaterialTheme.typography.bodySmall
                                 ) 
                             },
                             leadingIcon = {

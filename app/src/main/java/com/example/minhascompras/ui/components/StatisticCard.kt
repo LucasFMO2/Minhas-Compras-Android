@@ -78,12 +78,7 @@ fun StatisticCard(
             // Valor
             Text(
                 text = value,
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    fontSize = if (ResponsiveUtils.isSmallScreen()) 
-                        ResponsiveUtils.getBodyFontSize() * 1.2f 
-                    else 
-                        MaterialTheme.typography.headlineSmall.fontSize
-                ),
+                style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
                 color = color,
                 textAlign = TextAlign.Center,
@@ -94,9 +89,7 @@ fun StatisticCard(
             // Label
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelMedium.copy(
-                    fontSize = ResponsiveUtils.getLabelFontSize()
-                ),
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 maxLines = 2,

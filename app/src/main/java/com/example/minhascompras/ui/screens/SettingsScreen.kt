@@ -13,6 +13,9 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Settings
@@ -331,9 +334,9 @@ fun SettingsScreen(
                     }
                     Icon(
                         imageVector = when (themeMode) {
-                            ThemeMode.LIGHT -> Icons.Default.ShoppingCart
-                            ThemeMode.DARK -> Icons.Default.Settings
-                            ThemeMode.SYSTEM -> Icons.Default.Add
+                            ThemeMode.LIGHT -> Icons.Default.LightMode
+                            ThemeMode.DARK -> Icons.Default.DarkMode
+                            ThemeMode.SYSTEM -> Icons.Default.PhoneAndroid
                         },
                         contentDescription = "Modo de Tema",
                         tint = MaterialTheme.colorScheme.primary

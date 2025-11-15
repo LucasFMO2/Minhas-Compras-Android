@@ -101,3 +101,19 @@ Write-Host "  3. As ferramentas do Supabase estarão disponíveis quando o servi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

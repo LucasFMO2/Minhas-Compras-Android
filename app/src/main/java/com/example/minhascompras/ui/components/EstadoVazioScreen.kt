@@ -58,14 +58,18 @@ fun EstadoVazioScreen(
             ) {
                 Text(
                     text = "Sua lista está vazia!",
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontSize = ResponsiveUtils.getTitleFontSize() * 1.2f
+                    ),
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = "Comece adicionando itens à sua lista de compras e organize suas compras de forma simples e eficiente",
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontSize = ResponsiveUtils.getBodyFontSize()
+                    ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(horizontal = ResponsiveUtils.getHorizontalPadding())
@@ -92,8 +96,10 @@ fun EstadoVazioScreen(
                 Spacer(modifier = Modifier.width(ResponsiveUtils.getSmallSpacing()))
                 Text(
                     if (ResponsiveUtils.isSmallScreen()) "Adicionar Item" else "Adicionar Primeiro Item",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontSize = ResponsiveUtils.getBodyFontSize()
+                    ),
+                    fontWeight = FontWeight.SemiBold
                 )
             }
         }

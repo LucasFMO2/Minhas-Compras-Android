@@ -408,243 +408,175 @@ fun ListaComprasScreen(
                         )
                     )
                     
-                    // Barra de ações fixa abaixo da TopBar
+                    // Barra de ações fixa abaixo da TopBar (sem barra, apenas ícones)
                     if (itemSelecionado == null) {
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            color = MaterialTheme.colorScheme.surface,
-                            shadowElevation = 4.dp
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 4.dp, vertical = 8.dp),
-                                horizontalArrangement = Arrangement.SpaceEvenly,
-                                verticalAlignment = Alignment.CenterVertically
+                            // Limpar (Excluir Comprados) - PRIMEIRO
+                            IconButton(
+                                onClick = { showDeleteDialog = true },
+                                enabled = temItensComprados,
+                                modifier = Modifier.weight(1f)
                             ) {
-                                // Buscar
-                                IconButton(
-                                    onClick = { searchExpanded = !searchExpanded },
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Column(
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Search,
-                                            contentDescription = "Buscar",
-                                            tint = if (searchExpanded) 
-                                                MaterialTheme.colorScheme.primary 
-                                            else 
-                                                MaterialTheme.colorScheme.onSurface,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                        Text(
-                                            text = "Buscar",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = if (searchExpanded) 
-                                                MaterialTheme.colorScheme.primary 
-                                            else 
-                                                MaterialTheme.colorScheme.onSurface
-                                        )
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Excluir Comprados",
+                                    tint = if (temItensComprados) 
+                                        MaterialTheme.colorScheme.error 
+                                    else 
+                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                            
+                            // Arquivar Lista - SEGUNDO
+                            IconButton(
+                                onClick = {
+                                    if (allItens.isNotEmpty() && !isArchiving) {
+                                        showArchiveDialog = true
                                     }
+                                },
+                                enabled = allItens.isNotEmpty() && !isArchiving,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Archive,
+                                    contentDescription = "Arquivar Lista",
+                                    tint = if (allItens.isNotEmpty() && !isArchiving) 
+                                        MaterialTheme.colorScheme.onSurface 
+                                    else 
+                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                            
+                            // Ordenar (com dropdown) - TERCEIRO
+                            Box(modifier = Modifier.weight(1f)) {
+                                IconButton(
+                                    onClick = { showSortDropdown = !showSortDropdown }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Sort,
+                                        contentDescription = "Ordenar",
+                                        tint = if (showSortDropdown) 
+                                            MaterialTheme.colorScheme.primary 
+                                        else 
+                                            MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.size(24.dp)
+                                    )
                                 }
                                 
-                                // Histórico
-                                IconButton(
-                                    onClick = { onNavigateToHistory() },
-                                    modifier = Modifier.weight(1f)
+                                DropdownMenu(
+                                    expanded = showSortDropdown,
+                                    onDismissRequest = { showSortDropdown = false }
                                 ) {
-                                    Column(
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.History,
-                                            contentDescription = "Histórico",
-                                            tint = MaterialTheme.colorScheme.onSurface,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                        Text(
-                                            text = "Histórico",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        )
-                                    }
-                                }
-                                
-                                // Ordenar (com dropdown)
-                                Box(modifier = Modifier.weight(1f)) {
-                                    IconButton(
-                                        onClick = { showSortDropdown = !showSortDropdown }
-                                    ) {
-                                        Column(
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Sort,
-                                                contentDescription = "Ordenar",
-                                                tint = if (showSortDropdown) 
-                                                    MaterialTheme.colorScheme.primary 
-                                                else 
-                                                    MaterialTheme.colorScheme.onSurface,
-                                                modifier = Modifier.size(20.dp)
-                                            )
-                                            Text(
-                                                text = "Ordenar",
-                                                style = MaterialTheme.typography.labelSmall,
-                                                color = if (showSortDropdown) 
-                                                    MaterialTheme.colorScheme.primary 
-                                                else 
-                                                    MaterialTheme.colorScheme.onSurface
-                                            )
+                                    DropdownMenuItem(
+                                        text = { Text("Nome (A-Z)") },
+                                        onClick = {
+                                            viewModel.setSortOrder(SortOrder.BY_NAME_ASC)
+                                            showSortDropdown = false
+                                        },
+                                        leadingIcon = {
+                                            if (sortOrder == SortOrder.BY_NAME_ASC) {
+                                                Icon(Icons.Default.Check, null)
+                                            }
                                         }
-                                    }
-                                    
-                                    DropdownMenu(
-                                        expanded = showSortDropdown,
-                                        onDismissRequest = { showSortDropdown = false }
-                                    ) {
-                                        DropdownMenuItem(
-                                            text = { Text("Nome (A-Z)") },
-                                            onClick = {
-                                                viewModel.setSortOrder(SortOrder.BY_NAME_ASC)
-                                                showSortDropdown = false
-                                            },
-                                            leadingIcon = {
-                                                if (sortOrder == SortOrder.BY_NAME_ASC) {
-                                                    Icon(Icons.Default.Check, null)
-                                                }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text("Nome (Z-A)") },
+                                        onClick = {
+                                            viewModel.setSortOrder(SortOrder.BY_NAME_DESC)
+                                            showSortDropdown = false
+                                        },
+                                        leadingIcon = {
+                                            if (sortOrder == SortOrder.BY_NAME_DESC) {
+                                                Icon(Icons.Default.Check, null)
                                             }
-                                        )
-                                        DropdownMenuItem(
-                                            text = { Text("Nome (Z-A)") },
-                                            onClick = {
-                                                viewModel.setSortOrder(SortOrder.BY_NAME_DESC)
-                                                showSortDropdown = false
-                                            },
-                                            leadingIcon = {
-                                                if (sortOrder == SortOrder.BY_NAME_DESC) {
-                                                    Icon(Icons.Default.Check, null)
-                                                }
-                                            }
-                                        )
-                                        DropdownMenuItem(
-                                            text = { Text("Data (Mais Recente)") },
-                                            onClick = {
-                                                viewModel.setSortOrder(SortOrder.BY_DATE_DESC)
-                                                showSortDropdown = false
-                                            },
-                                            leadingIcon = {
-                                                if (sortOrder == SortOrder.BY_DATE_DESC) {
-                                                    Icon(Icons.Default.Check, null)
-                                                }
-                                            }
-                                        )
-                                        DropdownMenuItem(
-                                            text = { Text("Data (Mais Antiga)") },
-                                            onClick = {
-                                                viewModel.setSortOrder(SortOrder.BY_DATE_ASC)
-                                                showSortDropdown = false
-                                            },
-                                            leadingIcon = {
-                                                if (sortOrder == SortOrder.BY_DATE_ASC) {
-                                                    Icon(Icons.Default.Check, null)
-                                                }
-                                            }
-                                        )
-                                        DropdownMenuItem(
-                                            text = { Text("Preço (Menor)") },
-                                            onClick = {
-                                                viewModel.setSortOrder(SortOrder.BY_PRICE_ASC)
-                                                showSortDropdown = false
-                                            },
-                                            leadingIcon = {
-                                                if (sortOrder == SortOrder.BY_PRICE_ASC) {
-                                                    Icon(Icons.Default.Check, null)
-                                                }
-                                            }
-                                        )
-                                        DropdownMenuItem(
-                                            text = { Text("Preço (Maior)") },
-                                            onClick = {
-                                                viewModel.setSortOrder(SortOrder.BY_PRICE_DESC)
-                                                showSortDropdown = false
-                                            },
-                                            leadingIcon = {
-                                                if (sortOrder == SortOrder.BY_PRICE_DESC) {
-                                                    Icon(Icons.Default.Check, null)
-                                                }
-                                            }
-                                        )
-                                    }
-                                }
-                                
-                                // Arquivar Lista
-                                IconButton(
-                                    onClick = {
-                                        if (allItens.isNotEmpty() && !isArchiving) {
-                                            showArchiveDialog = true
                                         }
-                                    },
-                                    enabled = allItens.isNotEmpty() && !isArchiving,
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Column(
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Archive,
-                                            contentDescription = "Arquivar Lista",
-                                            tint = if (allItens.isNotEmpty() && !isArchiving) 
-                                                MaterialTheme.colorScheme.onSurface 
-                                            else 
-                                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                        Text(
-                                            text = "Arquivar",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = if (allItens.isNotEmpty() && !isArchiving) 
-                                                MaterialTheme.colorScheme.onSurface 
-                                            else 
-                                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                        )
-                                    }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text("Data (Mais Recente)") },
+                                        onClick = {
+                                            viewModel.setSortOrder(SortOrder.BY_DATE_DESC)
+                                            showSortDropdown = false
+                                        },
+                                        leadingIcon = {
+                                            if (sortOrder == SortOrder.BY_DATE_DESC) {
+                                                Icon(Icons.Default.Check, null)
+                                            }
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text("Data (Mais Antiga)") },
+                                        onClick = {
+                                            viewModel.setSortOrder(SortOrder.BY_DATE_ASC)
+                                            showSortDropdown = false
+                                        },
+                                        leadingIcon = {
+                                            if (sortOrder == SortOrder.BY_DATE_ASC) {
+                                                Icon(Icons.Default.Check, null)
+                                            }
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text("Preço (Menor)") },
+                                        onClick = {
+                                            viewModel.setSortOrder(SortOrder.BY_PRICE_ASC)
+                                            showSortDropdown = false
+                                        },
+                                        leadingIcon = {
+                                            if (sortOrder == SortOrder.BY_PRICE_ASC) {
+                                                Icon(Icons.Default.Check, null)
+                                            }
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text("Preço (Maior)") },
+                                        onClick = {
+                                            viewModel.setSortOrder(SortOrder.BY_PRICE_DESC)
+                                            showSortDropdown = false
+                                        },
+                                        leadingIcon = {
+                                            if (sortOrder == SortOrder.BY_PRICE_DESC) {
+                                                Icon(Icons.Default.Check, null)
+                                            }
+                                        }
+                                    )
                                 }
-                                
-                                // Excluir Tudo (Limpar Comprados)
-                                IconButton(
-                                    onClick = { showDeleteDialog = true },
-                                    enabled = temItensComprados,
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Column(
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Delete,
-                                            contentDescription = "Excluir Comprados",
-                                            tint = if (temItensComprados) 
-                                                MaterialTheme.colorScheme.error 
-                                            else 
-                                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                        Text(
-                                            text = "Limpar",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = if (temItensComprados) 
-                                                MaterialTheme.colorScheme.error 
-                                            else 
-                                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                        )
-                                    }
-                                }
+                            }
+                            
+                            // Histórico - QUARTO
+                            IconButton(
+                                onClick = { onNavigateToHistory() },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.History,
+                                    contentDescription = "Histórico",
+                                    tint = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                            
+                            // Buscar - ÚLTIMO
+                            IconButton(
+                                onClick = { searchExpanded = !searchExpanded },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Buscar",
+                                    tint = if (searchExpanded) 
+                                        MaterialTheme.colorScheme.primary 
+                                    else 
+                                        MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.size(24.dp)
+                                )
                             }
                         }
                     }

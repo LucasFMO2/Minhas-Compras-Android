@@ -13,10 +13,12 @@ import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
@@ -177,7 +179,7 @@ fun ListaComprasScreen(
                     NavigationDrawerItem(
                         icon = {
                             Icon(
-                                imageVector = Icons.Default.ShoppingCart,
+                                imageVector = Icons.Default.History,
                                 contentDescription = null
                             )
                         },
@@ -273,7 +275,7 @@ fun ListaComprasScreen(
                     NavigationDrawerItem(
                         icon = {
                             Icon(
-                                imageVector = Icons.Default.Check,
+                                imageVector = Icons.Default.Archive,
                                 contentDescription = null
                             )
                         },

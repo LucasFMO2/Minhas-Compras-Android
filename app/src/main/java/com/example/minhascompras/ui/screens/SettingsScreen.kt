@@ -62,6 +62,7 @@ fun SettingsScreen(
     var importErrorMessage by remember { mutableStateOf("") }
     var pendingImportItems by remember { mutableStateOf<List<ItemCompra>?>(null) }
     var shareText by remember { mutableStateOf("") }
+    var showUpToDateDialog by remember { mutableStateOf(false) }
     
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json")
@@ -366,8 +367,8 @@ fun SettingsScreen(
                             // Não fazer nada durante verificação ou download
                         }
                         is UpdateState.UpToDate -> {
-                            // Se já está atualizado, mostrar o diálogo de aviso imediatamente
-                            updateViewModel.showUpToDateDialog()
+                            // Mostrar o diálogo apenas quando o usuário clicar no card
+                            showUpToDateDialog = true
                         }
                         is UpdateState.Error -> {
                             // Se for erro retryable, tentar novamente
@@ -476,10 +477,13 @@ fun SettingsScreen(
             }
 
             // Diálogos de atualização
-            // Renderizar diálogo UpToDate separadamente para garantir que seja exibido
-            if (updateState is UpdateState.UpToDate) {
+            // Renderizar diálogo UpToDate apenas quando o usuário clicar no card
+            if (showUpToDateDialog && updateState is UpdateState.UpToDate) {
                 AlertDialog(
-                    onDismissRequest = { updateViewModel.resetState() },
+                    onDismissRequest = { 
+                        showUpToDateDialog = false
+                        updateViewModel.resetState()
+                    },
                     icon = {
                         Icon(
                             imageVector = Icons.Default.CheckCircle,
@@ -506,7 +510,10 @@ fun SettingsScreen(
                         }
                     },
                     confirmButton = {
-                        TextButton(onClick = { updateViewModel.resetState() }) {
+                        TextButton(onClick = { 
+                            showUpToDateDialog = false
+                            updateViewModel.resetState()
+                        }) {
                             Text("Entendi")
                         }
                     }

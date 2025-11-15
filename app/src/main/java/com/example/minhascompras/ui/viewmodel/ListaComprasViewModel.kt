@@ -160,6 +160,12 @@ class ListaComprasViewModel(
         }
     }
 
+    fun deletarTodos() {
+        viewModelScope.launch {
+            repository.deleteAll()
+        }
+    }
+
     suspend fun getAllItensForExport(): List<ItemCompra> {
         return repository.getAllItensList()
     }

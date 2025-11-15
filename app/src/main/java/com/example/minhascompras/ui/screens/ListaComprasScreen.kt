@@ -43,6 +43,8 @@ import com.example.minhascompras.ui.components.ItemCompraCard
 import com.example.minhascompras.ui.components.StatisticCard
 import com.example.minhascompras.ui.utils.ResponsiveUtils
 import com.example.minhascompras.ui.viewmodel.ListaComprasViewModel
+import com.example.minhascompras.ui.viewmodel.UpdateViewModel
+import com.example.minhascompras.ui.viewmodel.UpdateState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
@@ -52,6 +54,7 @@ import java.util.Locale
 @Composable
 fun ListaComprasScreen(
     viewModel: ListaComprasViewModel,
+    updateViewModel: UpdateViewModel? = null,
     onNavigateToSettings: () -> Unit = {},
     onNavigateToHistory: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -122,6 +125,16 @@ fun ListaComprasScreen(
                 withDismissAction = uiMessage is ListaComprasViewModel.UiMessage.Error,
                 duration = duration
             )
+        }
+    }
+
+    // Observar estado de atualização e mostrar diálogo automaticamente
+    val updateState by updateViewModel?.updateState?.collectAsState() ?: remember { mutableStateOf<UpdateState?>(null) }
+    var showUpdateDialog by remember { mutableStateOf(false) }
+    
+    LaunchedEffect(updateState) {
+        if (updateState is UpdateState.UpdateAvailable) {
+            showUpdateDialog = true
         }
     }
 
@@ -417,16 +430,16 @@ fun ListaComprasScreen(
                             horizontalArrangement = Arrangement.SpaceEvenly,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Limpar (Excluir Comprados) - PRIMEIRO
+                            // Limpar (Excluir Todos) - PRIMEIRO
                             IconButton(
                                 onClick = { showDeleteDialog = true },
-                                enabled = temItensComprados,
+                                enabled = allItens.isNotEmpty(),
                                 modifier = Modifier.weight(1f)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Delete,
-                                    contentDescription = "Excluir Comprados",
-                                    tint = if (temItensComprados) 
+                                    contentDescription = "Excluir Todos",
+                                    tint = if (allItens.isNotEmpty()) 
                                         MaterialTheme.colorScheme.error 
                                     else 
                                         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
@@ -930,20 +943,20 @@ fun ListaComprasScreen(
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
             title = { Text("Confirmar") },
-            text = { Text("Deseja deletar todos os itens comprados?") },
+            text = { Text("Deseja deletar TODOS os itens da lista? Esta ação não pode ser desfeita.") },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        viewModel.deletarComprados()
+                        viewModel.deletarTodos()
                         showDeleteDialog = false
                     }
                 ) {
-                    Text("Sim")
+                    Text("Deletar Todos")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Não")
+                    Text("Cancelar")
                 }
             }
         )
@@ -998,6 +1011,79 @@ fun ListaComprasScreen(
                     itemSelecionado = null
                 }) {
                     Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    // Diálogo de atualização disponível (mostrado automaticamente)
+    if (showUpdateDialog && updateState is UpdateState.UpdateAvailable && updateViewModel != null) {
+        val state = updateState as UpdateState.UpdateAvailable
+        val currentVersionCode = updateViewModel.getCurrentVersionCode()
+        val currentVersionName = updateViewModel.getCurrentVersionName()
+        val canDownload = state.updateInfo.versionCode > currentVersionCode
+        
+        AlertDialog(
+            onDismissRequest = { 
+                showUpdateDialog = false
+                updateViewModel.resetState()
+            },
+            title = { Text("Atualização Disponível") },
+            text = {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("Nova versão: ${state.updateInfo.versionName}")
+                    if (!canDownload) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            "⚠️ Você já está usando a versão ${currentVersionName} ou uma versão mais recente.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                    if (state.updateInfo.fileSize > 0) {
+                        Text(
+                            "Tamanho: ${String.format("%.1f", state.updateInfo.fileSize / (1024.0 * 1024.0))} MB",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    if (state.updateInfo.releaseNotes.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            "Novidades:",
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            state.updateInfo.releaseNotes,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (canDownload) {
+                            updateViewModel.downloadUpdate(state.updateInfo)
+                            showUpdateDialog = false
+                        } else {
+                            showUpdateDialog = false
+                            updateViewModel.resetState()
+                        }
+                    },
+                    enabled = canDownload
+                ) {
+                    Text(if (canDownload) "Baixar e Instalar" else "Fechar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { 
+                    showUpdateDialog = false
+                    updateViewModel.resetState()
+                }) {
+                    Text("Depois")
                 }
             }
         )

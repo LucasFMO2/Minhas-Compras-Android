@@ -95,20 +95,15 @@ class MainActivity : ComponentActivity() {
         
         val viewModelFactory = ListaComprasViewModelFactory(repository, userPreferencesManager)
         val historyViewModelFactory = HistoryViewModelFactory(repository)
+        val updateViewModelFactory = UpdateViewModelFactory(applicationContext)
         
-        // Rastrear uso do app e verificar atualizações automaticamente
+        // Rastrear uso do app
         lifecycleScope.launch {
             try {
-                // Atualizar timestamp de uso do app
                 val updatePreferencesManager = UpdatePreferencesManager(applicationContext)
                 updatePreferencesManager.updateLastAppUse()
-                
-                delay(3000) // Aguardar 3 segundos após abrir o app
-                val updateViewModel = UpdateViewModel(applicationContext)
-                updateViewModel.checkForUpdateInBackground()
             } catch (e: Exception) {
-                android.util.Log.e("MainActivity", "Erro ao verificar atualizações", e)
-                // Não falhar a inicialização se a verificação de atualização falhar
+                android.util.Log.e("MainActivity", "Erro ao atualizar timestamp de uso", e)
             }
         }
         
@@ -131,6 +126,13 @@ class MainActivity : ComponentActivity() {
                     ) {
                         val navController = rememberNavController()
                         val viewModel: ListaComprasViewModel = viewModel(factory = viewModelFactory)
+                        val updateViewModel: UpdateViewModel = viewModel(factory = updateViewModelFactory)
+                        
+                        // Verificar atualizações automaticamente ao abrir o app
+                        LaunchedEffect(Unit) {
+                            delay(2000) // Aguardar 2 segundos após abrir o app
+                            updateViewModel.checkForUpdate(showNotification = false, force = false)
+                        }
                         
                         // Verificar se deve abrir configurações (vindo da notificação)
                         val shouldOpenSettings = intent?.getBooleanExtra("open_settings", false) ?: false
@@ -151,6 +153,7 @@ class MainActivity : ComponentActivity() {
                             composable(Screen.ListaCompras.route) {
                                 ListaComprasScreen(
                                     viewModel = viewModel,
+                                    updateViewModel = updateViewModel,
                                     onNavigateToSettings = {
                                         try {
                                             navController.navigate(Screen.Settings.route)
@@ -168,9 +171,6 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                             composable(Screen.Settings.route) {
-                                val updateViewModel: UpdateViewModel = viewModel(
-                                    factory = UpdateViewModelFactory(LocalContext.current)
-                                )
                                 SettingsScreen(
                                     viewModel = viewModel,
                                     themeViewModel = themeViewModel,

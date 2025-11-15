@@ -141,6 +141,23 @@ class ItemCompraRepository(
         }
     }
 
+    suspend fun deleteAll() {
+        // Obter todos os itens antes de deletar para sincronizar
+        val todosItens = itemCompraDao.getAllItens().first()
+        itemCompraDao.deleteAll()
+        // Sincronizar deleções com Supabase
+        if (syncService.isAvailable() && authService.isAuthenticated()) {
+            val userId = authService.getCurrentUserId()
+            todosItens.forEach { item ->
+                if (item.id > 0) {
+                    syncService.deleteItemFromSupabase(item.id, userId).onFailure {
+                        // Log do erro, mas não falha a operação local
+                    }
+                }
+            }
+        }
+    }
+
     suspend fun replaceAllItems(items: List<ItemCompra>) {
         itemCompraDao.replaceAllItems(items)
     }

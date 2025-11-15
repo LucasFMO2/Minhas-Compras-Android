@@ -87,6 +87,7 @@ fun ListaComprasScreen(
     var showActionMenu by remember { mutableStateOf(false) } // Pode remover depois
     var searchExpanded by remember { mutableStateOf(false) }
     var showSortSubMenu by remember { mutableStateOf(false) }
+    var showSortDropdown by remember { mutableStateOf(false) }
     
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -331,81 +332,324 @@ fun ListaComprasScreen(
     ) {
         Scaffold(
             topBar = {
-                TopAppBar(
-                    navigationIcon = {
-                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(
-                                imageVector = Icons.Default.Menu,
-                                contentDescription = "Menu"
-                            )
-                        }
-                    },
-                    title = { 
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(
-                                if (ResponsiveUtils.isSmallScreen()) 6.dp else 8.dp
-                            )
+                Column {
+                    TopAppBar(
+                        navigationIcon = {
+                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                                Icon(
+                                    imageVector = Icons.Default.Menu,
+                                    contentDescription = "Menu"
+                                )
+                            }
+                        },
+                        title = { 
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(
+                                    if (ResponsiveUtils.isSmallScreen()) 6.dp else 8.dp
+                                )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ShoppingCart,
+                                    contentDescription = "Ícone de carrinho de compras",
+                                    modifier = Modifier.size(
+                                        if (ResponsiveUtils.isSmallScreen()) 20.dp else 24.dp
+                                    )
+                                )
+                                Text(
+                                    itemSelecionado?.nome ?: "Minhas Compras",
+                                    style = MaterialTheme.typography.titleLarge.copy(
+                                        fontSize = ResponsiveUtils.getTitleFontSize()
+                                    ),
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        },
+                        actions = {
+                            if (itemSelecionado != null) {
+                                // Modo de seleção - mostrar ações do item selecionado
+                                IconButton(onClick = { itemSelecionado = null }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "Cancelar"
+                                    )
+                                }
+                                IconButton(
+                                    onClick = {
+                                        itemParaEditar = itemSelecionado
+                                        itemSelecionado = null
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Edit,
+                                        contentDescription = "Editar"
+                                    )
+                                }
+                                IconButton(
+                                    onClick = {
+                                        itemParaDeletar = itemSelecionado
+                                        itemSelecionado = null
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = "Excluir",
+                                        tint = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            }
+                            // Modo normal - sem botões extras, tudo está na barra abaixo
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    )
+                    
+                    // Barra de ações fixa abaixo da TopBar
+                    if (itemSelecionado == null) {
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            color = MaterialTheme.colorScheme.surface,
+                            shadowElevation = 4.dp
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.ShoppingCart,
-                                contentDescription = "Ícone de carrinho de compras",
-                                modifier = Modifier.size(
-                                    if (ResponsiveUtils.isSmallScreen()) 20.dp else 24.dp
-                                )
-                            )
-                            Text(
-                                itemSelecionado?.nome ?: "Minhas Compras",
-                                style = MaterialTheme.typography.titleLarge.copy(
-                                    fontSize = ResponsiveUtils.getTitleFontSize()
-                                ),
-                                fontWeight = FontWeight.Bold,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    },
-                    actions = {
-                        if (itemSelecionado != null) {
-                            // Modo de seleção - mostrar ações do item selecionado
-                            IconButton(onClick = { itemSelecionado = null }) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = "Cancelar"
-                                )
-                            }
-                            IconButton(
-                                onClick = {
-                                    itemParaEditar = itemSelecionado
-                                    itemSelecionado = null
-                                }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 4.dp, vertical = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceEvenly,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = "Editar"
-                                )
-                            }
-                            IconButton(
-                                onClick = {
-                                    itemParaDeletar = itemSelecionado
-                                    itemSelecionado = null
+                                // Buscar
+                                IconButton(
+                                    onClick = { searchExpanded = !searchExpanded },
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Search,
+                                            contentDescription = "Buscar",
+                                            tint = if (searchExpanded) 
+                                                MaterialTheme.colorScheme.primary 
+                                            else 
+                                                MaterialTheme.colorScheme.onSurface,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Text(
+                                            text = "Buscar",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = if (searchExpanded) 
+                                                MaterialTheme.colorScheme.primary 
+                                            else 
+                                                MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
                                 }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = "Excluir",
-                                    tint = MaterialTheme.colorScheme.error
-                                )
+                                
+                                // Histórico
+                                IconButton(
+                                    onClick = { onNavigateToHistory() },
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.History,
+                                            contentDescription = "Histórico",
+                                            tint = MaterialTheme.colorScheme.onSurface,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Text(
+                                            text = "Histórico",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                }
+                                
+                                // Ordenar (com dropdown)
+                                Box(modifier = Modifier.weight(1f)) {
+                                    IconButton(
+                                        onClick = { showSortDropdown = !showSortDropdown }
+                                    ) {
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Sort,
+                                                contentDescription = "Ordenar",
+                                                tint = if (showSortDropdown) 
+                                                    MaterialTheme.colorScheme.primary 
+                                                else 
+                                                    MaterialTheme.colorScheme.onSurface,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                            Text(
+                                                text = "Ordenar",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = if (showSortDropdown) 
+                                                    MaterialTheme.colorScheme.primary 
+                                                else 
+                                                    MaterialTheme.colorScheme.onSurface
+                                            )
+                                        }
+                                    }
+                                    
+                                    DropdownMenu(
+                                        expanded = showSortDropdown,
+                                        onDismissRequest = { showSortDropdown = false }
+                                    ) {
+                                        DropdownMenuItem(
+                                            text = { Text("Nome (A-Z)") },
+                                            onClick = {
+                                                viewModel.setSortOrder(SortOrder.BY_NAME_ASC)
+                                                showSortDropdown = false
+                                            },
+                                            leadingIcon = {
+                                                if (sortOrder == SortOrder.BY_NAME_ASC) {
+                                                    Icon(Icons.Default.Check, null)
+                                                }
+                                            }
+                                        )
+                                        DropdownMenuItem(
+                                            text = { Text("Nome (Z-A)") },
+                                            onClick = {
+                                                viewModel.setSortOrder(SortOrder.BY_NAME_DESC)
+                                                showSortDropdown = false
+                                            },
+                                            leadingIcon = {
+                                                if (sortOrder == SortOrder.BY_NAME_DESC) {
+                                                    Icon(Icons.Default.Check, null)
+                                                }
+                                            }
+                                        )
+                                        DropdownMenuItem(
+                                            text = { Text("Data (Mais Recente)") },
+                                            onClick = {
+                                                viewModel.setSortOrder(SortOrder.BY_DATE_DESC)
+                                                showSortDropdown = false
+                                            },
+                                            leadingIcon = {
+                                                if (sortOrder == SortOrder.BY_DATE_DESC) {
+                                                    Icon(Icons.Default.Check, null)
+                                                }
+                                            }
+                                        )
+                                        DropdownMenuItem(
+                                            text = { Text("Data (Mais Antiga)") },
+                                            onClick = {
+                                                viewModel.setSortOrder(SortOrder.BY_DATE_ASC)
+                                                showSortDropdown = false
+                                            },
+                                            leadingIcon = {
+                                                if (sortOrder == SortOrder.BY_DATE_ASC) {
+                                                    Icon(Icons.Default.Check, null)
+                                                }
+                                            }
+                                        )
+                                        DropdownMenuItem(
+                                            text = { Text("Preço (Menor)") },
+                                            onClick = {
+                                                viewModel.setSortOrder(SortOrder.BY_PRICE_ASC)
+                                                showSortDropdown = false
+                                            },
+                                            leadingIcon = {
+                                                if (sortOrder == SortOrder.BY_PRICE_ASC) {
+                                                    Icon(Icons.Default.Check, null)
+                                                }
+                                            }
+                                        )
+                                        DropdownMenuItem(
+                                            text = { Text("Preço (Maior)") },
+                                            onClick = {
+                                                viewModel.setSortOrder(SortOrder.BY_PRICE_DESC)
+                                                showSortDropdown = false
+                                            },
+                                            leadingIcon = {
+                                                if (sortOrder == SortOrder.BY_PRICE_DESC) {
+                                                    Icon(Icons.Default.Check, null)
+                                                }
+                                            }
+                                        )
+                                    }
+                                }
+                                
+                                // Arquivar Lista
+                                IconButton(
+                                    onClick = {
+                                        if (allItens.isNotEmpty() && !isArchiving) {
+                                            showArchiveDialog = true
+                                        }
+                                    },
+                                    enabled = allItens.isNotEmpty() && !isArchiving,
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Archive,
+                                            contentDescription = "Arquivar Lista",
+                                            tint = if (allItens.isNotEmpty() && !isArchiving) 
+                                                MaterialTheme.colorScheme.onSurface 
+                                            else 
+                                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Text(
+                                            text = "Arquivar",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = if (allItens.isNotEmpty() && !isArchiving) 
+                                                MaterialTheme.colorScheme.onSurface 
+                                            else 
+                                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                        )
+                                    }
+                                }
+                                
+                                // Excluir Tudo (Limpar Comprados)
+                                IconButton(
+                                    onClick = { showDeleteDialog = true },
+                                    enabled = temItensComprados,
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = "Excluir Comprados",
+                                            tint = if (temItensComprados) 
+                                                MaterialTheme.colorScheme.error 
+                                            else 
+                                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Text(
+                                            text = "Limpar",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = if (temItensComprados) 
+                                                MaterialTheme.colorScheme.error 
+                                            else 
+                                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                        )
+                                    }
+                                }
                             }
                         }
-                        // Modo normal - sem botões extras, tudo está no drawer
-                    },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            )
-        },
+                    }
+                }
+            },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showDialog = true },

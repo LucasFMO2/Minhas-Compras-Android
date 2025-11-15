@@ -57,16 +57,33 @@ data class UpdateInfo(
             Logger.d("UpdateInfo", "APK asset found: ${apkAsset.name}")
             Logger.d("UpdateInfo", "Download URL: ${apkAsset.browser_download_url}")
             
-            // Extrair versionCode diretamente do APK
-            Logger.d("UpdateInfo", "Extracting versionCode from APK...")
-            val versionCode = updateManager.extractVersionCodeFromApk(apkAsset.browser_download_url)
+            // Tentar extrair versionCode do nome do arquivo primeiro (mais rápido)
+            // Formato esperado: minhascompras-v2.14.0-code64.apk ou minhascompras-v2.14.0.apk
+            var versionCode = extractVersionCodeFromFileName(apkAsset.name, release.tag_name)
             
-            Logger.d("UpdateInfo", "Extracted versionCode from APK: $versionCode")
+            // Se não conseguiu extrair do nome, tentar das release notes
+            if (versionCode <= 0) {
+                versionCode = extractVersionCodeFromReleaseNotes(release.body)
+            }
+            
+            // Se ainda não conseguiu, fazer download parcial do APK (mais rápido que completo)
+            if (versionCode <= 0) {
+                Logger.d("UpdateInfo", "Extracting versionCode from APK (partial download)...")
+                versionCode = updateManager.extractVersionCodeFromApkPartial(apkAsset.browser_download_url)
+            }
+            
+            // Último recurso: download completo do APK (lento)
+            if (versionCode <= 0) {
+                Logger.d("UpdateInfo", "Extracting versionCode from APK (full download)...")
+                versionCode = updateManager.extractVersionCodeFromApk(apkAsset.browser_download_url)
+            }
+            
+            Logger.d("UpdateInfo", "Extracted versionCode: $versionCode")
             Logger.d("UpdateInfo", "Comparison: $versionCode > $currentVersionCode = ${versionCode > currentVersionCode}")
             
             // Validação: versionCode deve ser maior que 0
             if (versionCode <= 0) {
-                Logger.e("UpdateInfo", "Invalid versionCode extracted from APK: $versionCode")
+                Logger.e("UpdateInfo", "Invalid versionCode extracted: $versionCode")
                 return null
             }
             
@@ -86,6 +103,75 @@ data class UpdateInfo(
                 fileName = apkAsset.name,
                 fileSize = apkAsset.size
             )
+        }
+        
+        /**
+         * Tenta extrair o versionCode do nome do arquivo APK.
+         * Formatos suportados:
+         * - minhascompras-v2.14.0-code64.apk
+         * - minhascompras-v2.14.0.apk (usa tag_name como fallback)
+         */
+        private fun extractVersionCodeFromFileName(fileName: String, tagName: String): Int {
+            try {
+                // Tentar extrair do padrão "-codeXX" no nome do arquivo
+                val codePattern = Regex("-code(\\d+)", RegexOption.IGNORE_CASE)
+                val match = codePattern.find(fileName)
+                if (match != null) {
+                    val code = match.groupValues[1].toIntOrNull()
+                    if (code != null && code > 0) {
+                        Logger.d("UpdateInfo", "Extracted versionCode from filename: $code")
+                        return code
+                    }
+                }
+                
+                // Se não encontrou, tentar extrair da tag (v2.14.0 -> assumir code baseado na versão)
+                // Isso é menos confiável, mas melhor que nada
+                val versionPattern = Regex("v?(\\d+)\\.(\\d+)\\.(\\d+)")
+                val versionMatch = versionPattern.find(tagName)
+                if (versionMatch != null) {
+                    val major = versionMatch.groupValues[1].toIntOrNull() ?: 0
+                    val minor = versionMatch.groupValues[2].toIntOrNull() ?: 0
+                    val patch = versionMatch.groupValues[3].toIntOrNull() ?: 0
+                    // Estimativa: major * 1000 + minor * 100 + patch (não é exato, mas melhor que 0)
+                    val estimatedCode = major * 1000 + minor * 100 + patch
+                    if (estimatedCode > 0) {
+                        Logger.d("UpdateInfo", "Estimated versionCode from tag: $estimatedCode (may be inaccurate)")
+                        // Retornar 0 para forçar download parcial/completo, pois estimativa não é confiável
+                        return 0
+                    }
+                }
+            } catch (e: Exception) {
+                Logger.e("UpdateInfo", "Error extracting versionCode from filename", e)
+            }
+            return 0
+        }
+        
+        /**
+         * Tenta extrair o versionCode das release notes.
+         * Procura por padrões como "versionCode: 64" ou "code: 64"
+         */
+        private fun extractVersionCodeFromReleaseNotes(releaseNotes: String): Int {
+            try {
+                val patterns = listOf(
+                    Regex("versionCode[\\s:]+(\\d+)", RegexOption.IGNORE_CASE),
+                    Regex("code[\\s:]+(\\d+)", RegexOption.IGNORE_CASE),
+                    Regex("Version Code[\\s:]+(\\d+)", RegexOption.IGNORE_CASE)
+                )
+                
+                for (pattern in patterns) {
+                    val match = pattern.find(releaseNotes)
+                    if (match != null) {
+                        val code = match.groupValues[1].toIntOrNull()
+                        if (code != null && code > 0) {
+                            Logger.d("UpdateInfo", "Extracted versionCode from release notes: $code")
+                            return code
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Logger.e("UpdateInfo", "Error extracting versionCode from release notes", e)
+            }
+            return 0
         }
         
     }

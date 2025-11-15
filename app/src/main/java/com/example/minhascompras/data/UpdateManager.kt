@@ -238,6 +238,124 @@ class UpdateManager(private val context: Context) {
         }
     }
     
+    /**
+     * Extrai o versionCode do APK fazendo download parcial (apenas os primeiros MB).
+     * Mais rápido que download completo, mas ainda requer download de parte do arquivo.
+     * 
+     * @param apkUrl URL do APK para download
+     * @return versionCode do APK ou 0 se houver erro
+     */
+    suspend fun extractVersionCodeFromApkPartial(apkUrl: String): Int = withContext(Dispatchers.IO) {
+        var tempFile: File? = null
+        var connection: HttpURLConnection? = null
+        var inputStream: java.io.InputStream? = null
+        var outputStream: FileOutputStream? = null
+        
+        try {
+            Logger.d("UpdateManager", "Extracting versionCode from APK (partial): $apkUrl")
+            
+            // Criar arquivo temporário
+            val tempDir = File(context.cacheDir, "temp_apk_check")
+            if (!tempDir.exists()) {
+                tempDir.mkdirs()
+            }
+            tempFile = File(tempDir, "temp_check_partial.apk")
+            
+            // Se já existe, deletar
+            if (tempFile.exists()) {
+                tempFile.delete()
+            }
+            
+            // Fazer download parcial do APK (apenas primeiros 5MB - suficiente para metadados)
+            val url = URL(apkUrl)
+            connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+            connection.setRequestProperty("User-Agent", "MinhasCompras-Android")
+            connection.setRequestProperty("Range", "bytes=0-5242880") // Primeiros 5MB
+            connection.connectTimeout = CONNECT_TIMEOUT_MS
+            connection.readTimeout = READ_TIMEOUT_MS
+            connection.connect()
+            
+            val responseCode = connection.responseCode
+            if (responseCode != HttpURLConnection.HTTP_OK && responseCode != HttpURLConnection.HTTP_PARTIAL) {
+                Logger.e("UpdateManager", "Failed to download APK partially: $responseCode")
+                return@withContext 0
+            }
+            
+            inputStream = connection.inputStream
+            outputStream = FileOutputStream(tempFile)
+            
+            val buffer = ByteArray(8192)
+            var bytesRead: Int
+            var totalRead = 0L
+            val maxPartialSize = 5 * 1024 * 1024L // 5MB máximo para download parcial
+            
+            while (inputStream.read(buffer).also { bytesRead = it } != -1 && totalRead < maxPartialSize) {
+                outputStream.write(buffer, 0, bytesRead)
+                totalRead += bytesRead
+            }
+            
+            outputStream.flush()
+            outputStream.close()
+            inputStream.close()
+            outputStream = null
+            inputStream = null
+            
+            // Verificar se o arquivo foi baixado (pelo menos parcialmente)
+            if (!tempFile.exists() || tempFile.length() == 0L) {
+                Logger.e("UpdateManager", "Failed to download APK partially for versionCode check")
+                return@withContext 0
+            }
+            
+            Logger.d("UpdateManager", "APK partially downloaded for check: ${tempFile.length()} bytes")
+            
+            // Tentar usar PackageManager para ler o versionCode do APK parcial
+            // Nota: Pode não funcionar se o APK estiver muito truncado, mas geralmente funciona
+            val packageManager = context.packageManager
+            val packageInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                packageManager.getPackageArchiveInfo(
+                    tempFile.absolutePath,
+                    PackageManager.PackageInfoFlags.of(0)
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                packageManager.getPackageArchiveInfo(tempFile.absolutePath, 0)
+            }
+            
+            if (packageInfo == null) {
+                Logger.d("UpdateManager", "Failed to read package info from partial APK, will try full download")
+                return@withContext 0
+            }
+            
+            val versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                packageInfo.longVersionCode.toInt()
+            } else {
+                @Suppress("DEPRECATION")
+                packageInfo.versionCode
+            }
+            
+            Logger.d("UpdateManager", "Extracted versionCode from partial APK: $versionCode")
+            Logger.d("UpdateManager", "APK versionName: ${packageInfo.versionName}")
+            
+            versionCode
+        } catch (e: Exception) {
+            Logger.e("UpdateManager", "Error extracting versionCode from partial APK", e)
+            0
+        } finally {
+            // Limpar recursos
+            try {
+                outputStream?.close()
+                inputStream?.close()
+                connection?.disconnect()
+                
+                // Deletar arquivo temporário
+                tempFile?.delete()
+            } catch (e: Exception) {
+                Logger.e("UpdateManager", "Error cleaning up temp partial APK file", e)
+            }
+        }
+    }
+    
     private fun cleanupOldDownloads() {
         try {
             val downloadDir = File(context.getExternalFilesDir(null), DOWNLOAD_DIR)

@@ -130,7 +130,7 @@ class MainActivity : ComponentActivity() {
                         
                         // Verificar atualizações automaticamente ao abrir o app
                         LaunchedEffect(Unit) {
-                            delay(2000) // Aguardar 2 segundos após abrir o app
+                            delay(500) // Aguardar 500ms após abrir o app (reduzido para resposta mais rápida)
                             updateViewModel.checkForUpdate(showNotification = false, force = false)
                         }
                         

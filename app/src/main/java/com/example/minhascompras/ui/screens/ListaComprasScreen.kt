@@ -1088,5 +1088,36 @@ fun ListaComprasScreen(
             }
         )
     }
+    
+    // Diálogo de download concluído (mostrado automaticamente)
+    if (updateState is UpdateState.DownloadComplete && updateViewModel != null) {
+        val state = updateState as UpdateState.DownloadComplete
+        
+        AlertDialog(
+            onDismissRequest = { 
+                // Não permitir fechar sem ação explícita
+            },
+            title = { Text("Download Concluído") },
+            text = { 
+                Text("A atualização foi baixada com sucesso. Deseja instalar agora?") 
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        updateViewModel.installUpdate(state.apkFile)
+                    }
+                ) {
+                    Text("Instalar Agora")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { 
+                    updateViewModel.resetState()
+                }) {
+                    Text("Depois")
+                }
+            }
+        )
+    }
 }
 

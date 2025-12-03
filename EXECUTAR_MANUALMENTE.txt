@@ -1,0 +1,30 @@
+INSTRUCOES PARA EXECUTAR MANUALMENTE
+=====================================
+
+O terminal do Cursor esta com problemas de pager do Git.
+Execute estes comandos em um TERMINAL NOVO (PowerShell ou CMD):
+
+1. Abra um novo terminal (nao use o do Cursor)
+2. Navegue ate a pasta:
+   cd C:\Users\nerdd\AndroidStudioProjects\Minhas-Compras-Android
+
+3. Execute os comandos abaixo UM POR VEZ:
+
+   git checkout main
+   
+   git merge revert-to-v2.16.0 -m "revert: Voltar para versao estavel 2.16.0 devido a problemas de instalacao"
+   
+   git add ANALISE_REVERSAO_v2.16.0.md
+   
+   git commit -m "docs: Adicionar analise da reversao para v2.16.0"
+   
+   git push origin main
+   
+   git push origin revert-to-v2.16.0
+
+4. Verifique no GitHub:
+   https://github.com/nerddescoladofmo-cmyk/Minhas-Compras-Android
+
+ALTERNATIVA: Execute o arquivo completar-reversao.bat com duplo clique
+ou abra um terminal novo e execute: completar-reversao.bat
+

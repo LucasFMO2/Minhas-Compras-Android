@@ -6,7 +6,7 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 
 ### 🆕 Versão 2.11.1 (Mais Recente)
 
-**[⬇️ Baixar APK v2.11.1](https://github.com/roseanerosafmo-sketch/Minhas-Compras-Android/releases/download/v2.11.1/app-release-v2.11.1.apk)**
+**[⬇️ Baixar APK v2.11.1](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/download/v2.11.1/app-release-v2.11.1.apk)**
 
 ✨ **Interface Minimalista e Limpa:**
 - 🧹 **Interface completamente limpa** - Removidas estatísticas, foco total na lista de itens
@@ -18,7 +18,7 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 ### 📦 Versões Anteriores
 
 **Versão 2.11.0:**
-**[⬇️ Baixar APK v2.11.0](https://github.com/roseanerosafmo-sketch/Minhas-Compras-Android/releases/download/v2.11.0/app-release-v2.11.0.apk)**
+**[⬇️ Baixar APK v2.11.0](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/download/v2.11.0/app-release-v2.11.0.apk)**
 
 ✨ **Redesign Completo da Interface:**
 - 🎨 **Sistema de design modernizado** - Paleta de cores renovada, tipografia aprimorada, espaçamento consistente
@@ -30,7 +30,7 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 ### 📦 Versões Anteriores
 
 **Versão 2.10.8:**
-**[⬇️ Baixar APK v2.10.8](https://github.com/roseanerosafmo-sketch/Minhas-Compras-Android/releases/download/v2.10.8/app-release-v2.10.8.apk)**
+**[⬇️ Baixar APK v2.10.8](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/download/v2.10.8/app-release-v2.10.8.apk)**
 
 ✨ **Atualizações e Melhorias:**
 - 🎨 **Melhorias na interface** - Componentes de UI aprimorados (ItemCompraCard, StatisticCard)
@@ -41,7 +41,7 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 ### 📦 Versões Anteriores
 
 **Versão 2.10.4:**
-**[⬇️ Baixar APK v2.10.4](https://github.com/roseanerosafmo-sketch/Minhas-Compras-Android/releases/download/v2.10.4/app-release-v2.10.4.apk)**
+**[⬇️ Baixar APK v2.10.4](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/download/v2.10.4/app-release-v2.10.4.apk)**
 
 🎨 **Correção de UI:**
 - ✅ **Correção de quebra de linha** - Texto 'Comprados' não quebra mais em múltiplas linhas nos cards de estatísticas
@@ -51,7 +51,7 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 - 💡 **Melhorias de UX** - Interface mais limpa e organizada
 
 **Versão 2.10.3:**
-**[⬇️ Baixar APK v2.10.3](https://github.com/roseanerosafmo-sketch/Minhas-Compras-Android/releases/download/v2.10.3/app-release-v2.10.3.apk)**
+**[⬇️ Baixar APK v2.10.3](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/download/v2.10.3/app-release-v2.10.3.apk)**
 
 🐛 **Correção de Bug Crítico:**
 - ✅ **Correção crítica** - Filtro 'Comprados' não causa mais crash quando não há itens comprados
@@ -62,7 +62,7 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 - 📱 **Melhorias de UX** - Mensagem específica quando filtro 'Comprados' está ativo sem itens
 
 **Versão 2.10.2:**
-**[⬇️ Baixar APK v2.10.2](https://github.com/roseanerosafmo-sketch/Minhas-Compras-Android/releases/download/v2.10.2/app-release-v2.10.2.apk)**
+**[⬇️ Baixar APK v2.10.2](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/download/v2.10.2/app-release-v2.10.2.apk)**
 
 🔧 **Correção do Sistema OTA:**
 - ✅ **Correção crítica** - Sistema OTA agora reconhece versões com múltiplos pontos
@@ -72,7 +72,7 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 - 📊 Logs de debug melhorados para troubleshooting
 
 **Versão 2.10.1:**
-**[⬇️ Baixar APK v2.10.1](https://github.com/roseanerosafmo-sketch/Minhas-Compras-Android/releases/download/v2.10.1/app-release-v2.10.1.apk)**
+**[⬇️ Baixar APK v2.10.1](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/download/v2.10.1/app-release-v2.10.1.apk)**
 
 🐛 **Correção de Bug:**
 - ✅ **Correção crítica** - Corrige bug onde itens sumiam ao marcar como comprado
@@ -81,7 +81,7 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 - ⚡ Melhora a estabilidade do sistema de arquivamento automático
 
 **Versão 2.10.0:**
-**[⬇️ Baixar APK v2.10.0](https://github.com/roseanerosafmo-sketch/Minhas-Compras-Android/releases/download/v2.10.0/app-release-v2.10.0.apk)**
+**[⬇️ Baixar APK v2.10.0](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/download/v2.10.0/app-release-v2.10.0.apk)**
 
 ✨ **Novidades da v2.10.0:**
 - 🔍 **Sistema de busca** - Pesquise itens rapidamente na sua lista
@@ -95,10 +95,10 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 - ♿ **Melhorias de acessibilidade** - Suporte completo para leitores de tela
 
 **Versão 2.9.4:**
-**[⬇️ Baixar APK v2.9.4](https://github.com/roseanerosafmo-sketch/Minhas-Compras-Android/releases/download/v2.9.4/app-release-v2.9.4.apk)**
+**[⬇️ Baixar APK v2.9.4](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/download/v2.9.4/app-release-v2.9.4.apk)**
 
 **Versão 2.9.3:**
-**[⬇️ Baixar APK v2.9.3](https://github.com/roseanerosafmo-sketch/Minhas-Compras-Android/releases/download/v2.9.3/MinhasCompras-v2.9.3-release.apk)**
+**[⬇️ Baixar APK v2.9.3](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/download/v2.9.3/MinhasCompras-v2.9.3-release.apk)**
 
 ✨ **Novidades da v2.9.3:**
 - 🔧 **Correção definitiva do sistema de atualizações**
@@ -111,7 +111,7 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 ### 📦 Versões Anteriores
 
 **Versão 2.9.2:**
-**[⬇️ Baixar APK v2.9.2](https://github.com/roseanerosafmo-sketch/Minhas-Compras-Android/releases/download/v2.9.2/MinhasCompras-v2.9.2-release.apk)**
+**[⬇️ Baixar APK v2.9.2](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/download/v2.9.2/MinhasCompras-v2.9.2-release.apk)**
 - 🔧 **Correção do sistema de atualizações**
 - 🔔 Notificações automáticas agora funcionam corretamente
 - 🔍 Verificação manual de atualizações corrigida
@@ -120,14 +120,14 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 - ✅ Suporte para versões com patch (ex: 2.9.1, 2.9.2)
 
 **Versão 2.9.1:**
-**[⬇️ Baixar APK v2.9.1](https://github.com/roseanerosafmo-sketch/Minhas-Compras-Android/releases/download/v2.9.1/MinhasCompras-v2.9.1-release.apk)**
+**[⬇️ Baixar APK v2.9.1](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/download/v2.9.1/MinhasCompras-v2.9.1-release.apk)**
 - 🐛 **Correção de bug na tela de configurações**
 - 📜 Adicionado scroll na tela de configurações
 - ✅ Correção do problema de conteúdo cortado
 - 🎯 Agora é possível rolar e ver todos os itens, incluindo "Compartilhar Lista"
 
 **Versão 2.9:**
-**[⬇️ Baixar APK v2.9](https://github.com/roseanerosafmo-sketch/Minhas-Compras-Android/releases/download/v2.9/MinhasCompras-v2.9-release.apk)**
+**[⬇️ Baixar APK v2.9](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/download/v2.9/MinhasCompras-v2.9-release.apk)**
 - 🔔 **Notificações automáticas de atualização**
 - 🔄 Verificação automática de atualizações ao abrir o app
 - 📱 Notificação quando há nova versão disponível
@@ -136,7 +136,7 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 - 📝 Notificação com notas de release e link direto para atualização
 
 **Versão 2.8:**
-**[⬇️ Baixar APK v2.8](https://github.com/roseanerosafmo-sketch/Minhas-Compras-Android/releases/download/v2.8/MinhasCompras-v2.8-release.apk)**
+**[⬇️ Baixar APK v2.8](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/download/v2.8/MinhasCompras-v2.8-release.apk)**
 - 🔀 **Sistema de ordenação de itens**
 - 📊 6 opções de ordenação: Nome (A-Z/Z-A), Data (Mais Recente/Antiga), Preço (Menor/Maior)
 - 💾 Preferência de ordenação salva automaticamente entre sessões
@@ -145,7 +145,7 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 - 🔄 Lista atualiza automaticamente ao mudar a ordenação
 
 **Versão 2.7:**
-**[⬇️ Baixar APK v2.7](https://github.com/roseanerosafmo-sketch/Minhas-Compras-Android/releases/download/v2.7/MinhasCompras-v2.7-release.apk)**
+**[⬇️ Baixar APK v2.7](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/download/v2.7/MinhasCompras-v2.7-release.apk)**
 - 🔄 **Sistema de atualizações automáticas (OTA)**
 - 📥 Verificar e baixar atualizações diretamente pelo app
 - 🚀 Instalação automática de novas versões
@@ -154,7 +154,7 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 - ⚡ Atualizações sem precisar baixar manualmente
 
 **Versão 2.6:**
-**[⬇️ Baixar APK v2.6](https://github.com/roseanerosafmo-sketch/Minhas-Compras-Android/releases/download/v2.6/MinhasCompras-v2.6-release.apk)**
+**[⬇️ Baixar APK v2.6](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/download/v2.6/MinhasCompras-v2.6-release.apk)**
 - 🌓 **Suporte a tema claro/escuro** com persistência de preferência
 - 🎨 Três modos de tema: Claro, Escuro e Seguir Sistema
 - 💾 Preferência de tema salva automaticamente entre sessões
@@ -162,7 +162,7 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 - 🎯 Esquemas de cores Material 3 completos e acessíveis
 
 **Versão 2.5:**
-**[⬇️ Baixar APK v2.5](https://github.com/roseanerosafmo-sketch/Minhas-Compras-Android/releases/download/v2.5/MinhasCompras-v2.5-release.apk)**
+**[⬇️ Baixar APK v2.5](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/download/v2.5/MinhasCompras-v2.5-release.apk)**
 - 💾 Sistema de backup e restauração de dados
 - 📤 Exportar lista de compras para arquivo JSON
 - 📥 Importar lista de compras de arquivo JSON
@@ -171,14 +171,14 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 - 🔍 Backend de busca e filtros implementado (UI em desenvolvimento)
 
 **Versão 2.4:**
-**[⬇️ Baixar APK v2.4](https://github.com/roseanerosafmo-sketch/Minhas-Compras-Android/releases/download/v2.4/MinhasCompras-v2.4-release.apk)**
+**[⬇️ Baixar APK v2.4](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/download/v2.4/MinhasCompras-v2.4-release.apk)**
 - 🏷️ Sistema de categorias para organizar itens (Frutas e Verduras, Laticínios, Carnes, etc.)
 - 📊 Migração automática do banco de dados preservando dados existentes
 - 🎯 Dropdown de categorias no dialog de adicionar/editar item
 - ✨ Melhor organização e classificação dos itens de compra
 
 **Versão 2.3:**
-**[⬇️ Baixar APK v2.3](https://github.com/roseanerosafmo-sketch/Minhas-Compras-Android/releases/download/v2.3/MinhasCompras-v2.3-release.apk)**
+**[⬇️ Baixar APK v2.3](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/download/v2.3/MinhasCompras-v2.3-release.apk)**
 - 🔧 Correção do botão "+ Adicionar" sobrepondo itens da lista
 - 📱 Melhor experiência de navegação na lista de compras
 - ✨ Interface mais polida e funcional
@@ -186,30 +186,30 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 ### 📦 Versões Anteriores
 
 **Versão 2.2:**
-**[⬇️ Baixar APK v2.2](https://github.com/roseanerosafmo-sketch/Minhas-Compras-Android/releases/download/v2.2/MinhasCompras-v2.2-release.apk)**
+**[⬇️ Baixar APK v2.2](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/download/v2.2/MinhasCompras-v2.2-release.apk)**
 - 📐 Ajuste de padding nos cards de estatísticas
 - 💰 Valores monetários cabem melhor sem quebrar
 - 🎨 Melhor aproveitamento do espaço nos cards
 
 **Versão 2.1:**
-**[⬇️ Baixar APK v2.1](https://github.com/roseanerosafmo-sketch/Minhas-Compras-Android/releases/download/v2.1/MinhasCompras-v2.1-release.apk)**
+**[⬇️ Baixar APK v2.1](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/download/v2.1/MinhasCompras-v2.1-release.apk)**
 - 📱 Responsividade aprimorada nos cards de estatísticas
 - 💰 Valores monetários completos (sem cortes)
 - 🎨 Interface otimizada para diferentes tamanhos de tela
 
 **Versão 2.0:**
-**[⬇️ Baixar APK v2.0](https://github.com/roseanerosafmo-sketch/Minhas-Compras-Android/releases/download/v2.0/MinhasCompras-v2.0-release.apk)**
+**[⬇️ Baixar APK v2.0](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/download/v2.0/MinhasCompras-v2.0-release.apk)**
 - 💰 Adicione preços aos itens
 - ✏️ Edite itens da lista
 - 📊 Estatísticas de preços e totais
 
 **Versão 1.0:**
 
-**[⬇️ Baixar APK v1.0](https://github.com/roseanerosafmo-sketch/Minhas-Compras-Android/releases/download/v1.0/MinhasCompras-v1.0-release.apk)**
+**[⬇️ Baixar APK v1.0](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/download/v1.0/MinhasCompras-v1.0-release.apk)**
 
 📱 **Instalação:** Baixe o APK e instale no seu dispositivo Android. Certifique-se de permitir instalação de fontes desconhecidas nas configurações de segurança.
 
-🔗 **[Ver todas as releases](https://github.com/roseanerosafmo-sketch/Minhas-Compras-Android/releases)**
+🔗 **[Ver todas as releases](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases)**
 
 ## ✨ Funcionalidades
 
@@ -248,7 +248,7 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 
 1. Clone o repositório:
 ```bash
-git clone https://github.com/roseanerosafmo-sketch/Minhas-Compras-Android.git
+git clone https://github.com/Lucasfmo1/Minhas-Compras-Android.git
 ```
 
 2. Abra o projeto no Android Studio

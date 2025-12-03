@@ -4,7 +4,7 @@
 $ErrorActionPreference = "Continue"
 $version = "v2.10.8"
 $tag = "v2.10.8"
-$repo = "roseanerosafmo-sketch/Minhas-Compras-Android"
+$repo = "Lucasfmo1/Minhas-Compras-Android"
 $apkPath = "app-release-v2.10.8.apk"
 
 Write-Host "🚀 Criando release $version no GitHub..." -ForegroundColor Cyan

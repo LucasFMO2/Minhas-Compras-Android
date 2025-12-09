@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
@@ -43,6 +44,7 @@ import com.example.minhascompras.ui.components.ItemCompraCard
 import com.example.minhascompras.ui.components.StatisticCard
 import com.example.minhascompras.ui.utils.ResponsiveUtils
 import com.example.minhascompras.ui.viewmodel.ListaComprasViewModel
+import com.example.minhascompras.ui.viewmodel.ShoppingListViewModel
 import com.example.minhascompras.ui.viewmodel.UpdateViewModel
 import com.example.minhascompras.ui.viewmodel.UpdateState
 import kotlinx.coroutines.flow.collectLatest
@@ -54,6 +56,7 @@ import java.util.Locale
 @Composable
 fun ListaComprasScreen(
     viewModel: ListaComprasViewModel,
+    shoppingListViewModel: ShoppingListViewModel,
     updateViewModel: UpdateViewModel? = null,
     onNavigateToSettings: () -> Unit = {},
     onNavigateToHistory: () -> Unit = {},
@@ -73,10 +76,9 @@ fun ListaComprasScreen(
     val itensComprados = allItens.count { it.comprado }
     val temItensComprados = itensComprados > 0
     
-    // Calcular total a pagar (itens não comprados)
+    // Calcular total a pagar (todos os itens - valor fixo)
     val totalAPagar = remember(allItens) {
         allItens
-            .filter { !it.comprado }
             .sumOf { (it.preco ?: 0.0) * it.quantidade }
     }
     val formatador = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
@@ -96,6 +98,19 @@ fun ListaComprasScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val isSmallScreen = ResponsiveUtils.isSmallScreen()
+    
+    // Estados do ShoppingListViewModel
+    val allLists by shoppingListViewModel.allLists.collectAsState()
+    val activeList by shoppingListViewModel.activeList.collectAsState()
+    val activeListId by shoppingListViewModel.activeListId.collectAsState()
+    val nonDefaultListCount by shoppingListViewModel.nonDefaultListCount.collectAsState()
+    val hasUserCreatedLists = nonDefaultListCount > 0
+    var showCreateListDialog by remember { mutableStateOf(false) }
+    var showRenameListDialog by remember { mutableStateOf(false) }
+    var showDeleteListDialog by remember { mutableStateOf(false) }
+    var showNoListDialog by remember { mutableStateOf(false) }
+    var listToRename by remember { mutableStateOf<com.example.minhascompras.data.ShoppingList?>(null) }
+    var listToDelete by remember { mutableStateOf<com.example.minhascompras.data.ShoppingList?>(null) }
 
     // Mostrar Snackbar quando um item for deletado
     LaunchedEffect(lastDeletedItem) {
@@ -172,6 +187,148 @@ fun ListaComprasScreen(
                     HorizontalDivider()
                     
                     Spacer(modifier = Modifier.height(8.dp))
+                    
+                    // Seção de Listas
+                    Text(
+                        text = "Listas de Compras",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    
+                    // Lista de listas disponíveis
+                    allLists.forEach { list ->
+                        var showMenu by remember { mutableStateOf(false) }
+                        
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            NavigationDrawerItem(
+                                icon = {
+                                    if (list.id == activeListId) {
+                                        Icon(
+                                            imageVector = Icons.Default.Check,
+                                            contentDescription = "Lista ativa",
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    } else {
+                                        Icon(
+                                            imageVector = Icons.Default.List,
+                                            contentDescription = null
+                                        )
+                                    }
+                                },
+                                label = { 
+                                    Row(
+                                        modifier = Modifier.weight(1f),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Text(
+                                            list.nome,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            fontWeight = if (list.id == activeListId) FontWeight.Bold else FontWeight.Normal,
+                                            color = if (list.id == activeListId) 
+                                                MaterialTheme.colorScheme.primary 
+                                            else 
+                                                MaterialTheme.colorScheme.onSurface
+                                        )
+                                        if (list.id == activeListId) {
+                                            Surface(
+                                                shape = MaterialTheme.shapes.extraSmall,
+                                                color = MaterialTheme.colorScheme.primaryContainer,
+                                                modifier = Modifier.size(6.dp)
+                                            ) {}
+                                        }
+                                    }
+                                },
+                                selected = list.id == activeListId,
+                                onClick = {
+                                    shoppingListViewModel.setActiveList(list.id)
+                                    scope.launch { drawerState.close() }
+                                },
+                                modifier = Modifier.weight(1f)
+                            )
+                            
+                            // Menu de opções (apenas se não for lista padrão)
+                            if (!list.isDefault) {
+                                Box {
+                                    IconButton(
+                                        onClick = { showMenu = true },
+                                        modifier = Modifier.size(40.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.MoreVert,
+                                            contentDescription = "Opções",
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                    
+                                    DropdownMenu(
+                                        expanded = showMenu,
+                                        onDismissRequest = { showMenu = false }
+                                    ) {
+                                        DropdownMenuItem(
+                                            text = { Text("Renomear") },
+                                            leadingIcon = {
+                                                Icon(
+                                                    imageVector = Icons.Default.Edit,
+                                                    contentDescription = null
+                                                )
+                                            },
+                                            onClick = {
+                                                listToRename = list
+                                                showRenameListDialog = true
+                                                showMenu = false
+                                                scope.launch { drawerState.close() }
+                                            }
+                                        )
+                                        DropdownMenuItem(
+                                            text = { Text("Deletar") },
+                                            leadingIcon = {
+                                                Icon(
+                                                    imageVector = Icons.Default.Delete,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.error
+                                                )
+                                            },
+                                            onClick = {
+                                                listToDelete = list
+                                                showDeleteListDialog = true
+                                                showMenu = false
+                                                scope.launch { drawerState.close() }
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Botão para criar nova lista
+                    NavigationDrawerItem(
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        label = { Text("Criar Nova Lista") },
+                        selected = false,
+                        onClick = {
+                            showCreateListDialog = true
+                            scope.launch { drawerState.close() }
+                        },
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
+                    
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                     
                     // Buscar
                     NavigationDrawerItem(
@@ -370,7 +527,7 @@ fun ListaComprasScreen(
                                     )
                                 )
                                 Text(
-                                    itemSelecionado?.nome ?: "Minhas Compras",
+                                    activeList?.nome ?: "Nenhuma lista selecionada",
                                     style = MaterialTheme.typography.titleLarge.copy(
                                         fontSize = ResponsiveUtils.getTitleFontSize()
                                     ),
@@ -378,6 +535,15 @@ fun ListaComprasScreen(
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
+                                // Indicador visual da lista ativa
+                                if (activeList != null) {
+                                    Surface(
+                                        shape = MaterialTheme.shapes.small,
+                                        color = MaterialTheme.colorScheme.primaryContainer,
+                                        modifier = Modifier
+                                            .size(8.dp)
+                                    ) {}
+                                }
                             }
                         },
                         actions = {
@@ -597,7 +763,13 @@ fun ListaComprasScreen(
             },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { showDialog = true },
+                onClick = { 
+                    if (hasUserCreatedLists) {
+                        showDialog = true
+                    } else {
+                        showNoListDialog = true
+                    }
+                },
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
                 Icon(
@@ -610,7 +782,7 @@ fun ListaComprasScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
         bottomBar = {
-            if (allItens.isNotEmpty() && totalAPagar > 0) {
+            if (allItens.isNotEmpty()) {
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -659,12 +831,26 @@ fun ListaComprasScreen(
             val listaCompletaVazia = allItens.isEmpty()
             val filtroSemResultados = !listaCompletaVazia && itens.isEmpty()
             
+            // Verificar se não há listas criadas pelo usuário
+            val naoTemListas = !hasUserCreatedLists
+            
             if (listaCompletaVazia) {
-                // Lista completamente vazia - mostrar tela de estado vazio padrão
-                EstadoVazioScreen(
-                    onAddClick = { showDialog = true },
-                    modifier = Modifier.fillMaxSize()
-                )
+                // Lista completamente vazia - verificar se precisa criar lista primeiro
+                if (naoTemListas) {
+                    // Não há listas criadas - mostrar opção de criar primeira lista
+                    EstadoVazioScreen(
+                        onAddClick = { showCreateListDialog = true },
+                        showCreateList = true,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    // Há listas mas estão vazias - mostrar opção de adicionar item
+                    EstadoVazioScreen(
+                        onAddClick = { showDialog = true },
+                        showCreateList = false,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
             } else if (filtroSemResultados) {
                 // Filtro ativo mas sem resultados - mostrar mensagem específica
                 Box(
@@ -1084,6 +1270,189 @@ fun ListaComprasScreen(
                     updateViewModel.resetState()
                 }) {
                     Text("Depois")
+                }
+            }
+        )
+    }
+    
+    // Diálogo para avisar que precisa criar uma lista primeiro
+    if (showNoListDialog) {
+        AlertDialog(
+            onDismissRequest = { showNoListDialog = false },
+            title = { Text("Crie uma lista primeiro") },
+            text = {
+                Text("Você precisa criar uma lista de compras antes de adicionar produtos.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showNoListDialog = false
+                        showCreateListDialog = true
+                    }
+                ) {
+                    Text("Criar Lista")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showNoListDialog = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+    
+    // Diálogo para criar nova lista
+    if (showCreateListDialog) {
+        var newListName by remember { mutableStateOf("") }
+        
+        AlertDialog(
+            onDismissRequest = { 
+                showCreateListDialog = false
+                newListName = ""
+            },
+            title = { Text("Criar Nova Lista") },
+            text = {
+                OutlinedTextField(
+                    value = newListName,
+                    onValueChange = { newListName = it },
+                    label = { Text("Nome da lista") },
+                    placeholder = { Text("Ex: Supermercado, Farmácia...") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (newListName.isNotBlank()) {
+                            shoppingListViewModel.createList(newListName.trim())
+                            showCreateListDialog = false
+                            newListName = ""
+                        }
+                    },
+                    enabled = newListName.isNotBlank()
+                ) {
+                    Text("Criar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { 
+                    showCreateListDialog = false
+                    newListName = ""
+                }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+    
+    // Dialog para renomear lista
+    if (showRenameListDialog && listToRename != null) {
+        var newListName by remember(listToRename) { 
+            mutableStateOf(listToRename?.nome ?: "") 
+        }
+        
+        AlertDialog(
+            onDismissRequest = { 
+                showRenameListDialog = false
+                listToRename = null
+                newListName = ""
+            },
+            title = { Text("Renomear Lista") },
+            text = {
+                OutlinedTextField(
+                    value = newListName,
+                    onValueChange = { newListName = it },
+                    label = { Text("Nome da lista") },
+                    placeholder = { Text("Ex: Supermercado, Farmácia...") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (newListName.isNotBlank() && listToRename != null) {
+                            shoppingListViewModel.renameList(
+                                listToRename!!.id,
+                                newListName.trim()
+                            )
+                            showRenameListDialog = false
+                            listToRename = null
+                            newListName = ""
+                        }
+                    },
+                    enabled = newListName.isNotBlank() && newListName.trim() != listToRename?.nome
+                ) {
+                    Text("Renomear")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { 
+                    showRenameListDialog = false
+                    listToRename = null
+                    newListName = ""
+                }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+    
+    // Dialog para deletar lista
+    if (showDeleteListDialog && listToDelete != null) {
+        val list = listToDelete!!
+        var itemCount by remember { mutableStateOf(0) }
+        
+        LaunchedEffect(list.id) {
+            itemCount = shoppingListViewModel.getItemCountForList(list.id)
+        }
+        
+        AlertDialog(
+            onDismissRequest = { 
+                showDeleteListDialog = false
+                listToDelete = null
+            },
+            title = { Text("Deletar Lista") },
+            text = {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("Deseja deletar a lista \"${list.nome}\"?")
+                    if (itemCount > 0) {
+                        Text(
+                            "⚠️ Esta lista contém $itemCount ${if (itemCount == 1) "item" else "itens"}. Todos serão deletados permanentemente.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                    Text(
+                        "Esta ação não pode ser desfeita.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        shoppingListViewModel.deleteList(list.id)
+                        showDeleteListDialog = false
+                        listToDelete = null
+                    }
+                ) {
+                    Text(
+                        "Deletar",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { 
+                    showDeleteListDialog = false
+                    listToDelete = null
+                }) {
+                    Text("Cancelar")
                 }
             }
         )

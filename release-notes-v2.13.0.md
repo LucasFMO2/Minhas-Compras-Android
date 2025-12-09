@@ -17,7 +17,7 @@
 - **Ícone de excluir atualizado**: Agora exclui TODOS os itens da lista (não apenas os comprados)
 - **Diálogo de confirmação**: Mensagem clara informando que a ação não pode ser desfeita
 - **Função `deletarTodos()`**: Nova função no ViewModel para excluir todos os itens
-- **Função `deleteAll()`**: Nova função no Repository com sincronização Supabase
+- **Função `deleteAll()`**: Nova função no Repository
 
 ## 📦 Detalhes Técnicos
 - **Version Code**: 63
@@ -28,5 +28,4 @@
 - Verificação automática de atualizações ao abrir o app
 - Diálogo automático quando há atualização disponível
 - Exclusão de todos os itens com um único clique
-- Sincronização automática com Supabase ao excluir itens
 

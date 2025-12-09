@@ -19,6 +19,7 @@ import com.example.minhascompras.ui.utils.ResponsiveUtils
 @Composable
 fun EstadoVazioScreen(
     onAddClick: () -> Unit,
+    showCreateList: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -57,7 +58,11 @@ fun EstadoVazioScreen(
                 verticalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSmallSpacing())
             ) {
                 Text(
-                    text = "Sua lista está vazia!",
+                    text = if (showCreateList) {
+                        "Crie sua primeira lista!"
+                    } else {
+                        "Sua lista está vazia!"
+                    },
                     style = MaterialTheme.typography.headlineMedium.copy(
                         fontSize = ResponsiveUtils.getTitleFontSize() * 1.2f
                     ),
@@ -66,7 +71,11 @@ fun EstadoVazioScreen(
                     textAlign = TextAlign.Center
                 )
                 Text(
-                    text = "Comece adicionando itens à sua lista de compras e organize suas compras de forma simples e eficiente",
+                    text = if (showCreateList) {
+                        "Comece criando uma lista de compras para organizar seus itens de forma simples e eficiente"
+                    } else {
+                        "Comece adicionando itens à sua lista de compras e organize suas compras de forma simples e eficiente"
+                    },
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontSize = ResponsiveUtils.getBodyFontSize()
                     ),
@@ -95,7 +104,11 @@ fun EstadoVazioScreen(
                 )
                 Spacer(modifier = Modifier.width(ResponsiveUtils.getSmallSpacing()))
                 Text(
-                    if (ResponsiveUtils.isSmallScreen()) "Adicionar Item" else "Adicionar Primeiro Item",
+                    if (showCreateList) {
+                        if (ResponsiveUtils.isSmallScreen()) "Criar Lista" else "Adicionar Primeira Lista"
+                    } else {
+                        if (ResponsiveUtils.isSmallScreen()) "Adicionar Item" else "Adicionar Primeiro Item"
+                    },
                     style = MaterialTheme.typography.labelLarge.copy(
                         fontSize = ResponsiveUtils.getBodyFontSize()
                     ),

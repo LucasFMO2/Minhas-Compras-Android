@@ -1,16 +1,15 @@
 ================================================================================
 PRODUCT REQUIREMENTS DOCUMENT (PRD)
-Minhas Compras - MVP v3.0
+Minhas Compras - Versão 4.0
 ================================================================================
 
-DOCUMENTO: PRD v1.0
-DATA: Novembro 2024
-VERSÃO DO PRODUTO: 3.0 MVP
-PRAZO: 3 semanas (15 dias úteis)
+DOCUMENTO: PRD v2.0
+DATA: Janeiro 2025
+VERSÃO DO PRODUTO: 4.0
 STATUS: Em Planejamento
 
 ================================================================================
-1. VISÃO GERAL DO PRODUTO
+1. OVERVIEW
 ================================================================================
 
 PRODUTO: Minhas Compras
@@ -20,557 +19,986 @@ TECNOLOGIA: Kotlin, Jetpack Compose, Room Database
 
 DESCRIÇÃO:
 Minhas Compras é um aplicativo Android moderno e intuitivo para gerenciar
-listas de compras pessoais. O MVP v3.0 adiciona funcionalidades essenciais
-de busca, filtros, categorias, modo escuro, gestos e backup, transformando
-o app em uma solução completa e profissional.
+listas de compras pessoais. A versão 4.0 expande significativamente as
+funcionalidades do app, adicionando suporte a múltiplas listas, widget na
+tela inicial, estatísticas avançadas, notificações inteligentes e outras
+melhorias que transformam o app em uma solução completa e profissional.
 
-OBJETIVO DO MVP:
-Desenvolver e lançar a versão 3.0 com funcionalidades essenciais que
-aumentem significativamente o valor do produto, mantendo alta qualidade
-e experiência do usuário.
+PROBLEMA QUE RESOLVE:
+- Organização de compras em diferentes contextos (supermercado, farmácia, etc.)
+- Acesso rápido às listas sem abrir o app
+- Controle financeiro e análise de gastos
+- Lembretes e notificações para não esquecer compras
+- Facilidade na adição de itens com autocompletar e scanner
 
-================================================================================
-2. OBJETIVOS DE NEGÓCIO
-================================================================================
-
-OBJETIVOS PRIMÁRIOS:
-- Adicionar funcionalidades essenciais solicitadas pelos usuários
-- Melhorar a organização e usabilidade do aplicativo
-- Preparar o produto para publicação na Play Store
-- Estabelecer base sólida para futuras expansões
-
-OBJETIVOS SECUNDÁRIOS:
-- Manter alta qualidade de código
-- Garantir performance otimizada
-- Assegurar acessibilidade básica
-- Documentar adequadamente o produto
-
-================================================================================
-3. PÚBLICO-ALVO
-================================================================================
-
-USUÁRIOS PRIMÁRIOS:
+PÚBLICO-ALVO:
 - Pessoas que fazem compras regularmente
-- Usuários que precisam organizar listas de compras
+- Usuários que precisam organizar múltiplas listas de compras
 - Pessoas que querem controlar gastos e orçamento
-- Usuários de smartphones Android
+- Famílias que compartilham listas de compras
+- Usuários de smartphones Android (18-65 anos)
 
-PERFIL DO USUÁRIO:
-- Idade: 18-65 anos
-- Experiência técnica: Básica a intermediária
-- Necessidade: Organização e controle de compras
-- Dispositivo: Android 7.0 ou superior
+VALOR DO PRODUTO:
+- Organização completa de compras em múltiplos contextos
+- Acesso rápido via widget
+- Insights financeiros através de estatísticas
+- Experiência moderna com scanner e autocompletar
+- Base sólida para funcionalidades colaborativas futuras
 
 ================================================================================
-4. STATUS ATUAL DO PRODUTO (v2.3)
+2. STATUS ATUAL DO PRODUTO (v3.0 - COMPLETO)
 ================================================================================
 
 FUNCIONALIDADES JÁ IMPLEMENTADAS:
-✓ Adicionar itens com nome, quantidade e preço
-✓ Editar itens existentes
-✓ Deletar itens individuais
+✓ Adicionar/editar/deletar itens com nome, quantidade, preço e categoria
 ✓ Marcar itens como comprado/pendente
-✓ Deletar todos os itens comprados
-✓ Persistência local com Room Database
-✓ Estatísticas básicas (total, pendentes, comprados)
-✓ Estatísticas de preços (total geral, pendentes, comprados)
+✓ Busca em tempo real por nome
+✓ Filtros: Todos, Pendentes, Comprados
+✓ Ordenação por Nome, Data ou Preço
+✓ Sistema de categorias (9 categorias pré-definidas)
+✓ Modo escuro/claro com persistência
+✓ Gestos de swipe (marcar comprado/deletar)
+✓ Desfazer exclusão com Snackbar
+✓ Backup e restauração (JSON)
+✓ Histórico de compras com reutilização
+✓ Estatísticas básicas (total, pendentes, comprados, valores)
 ✓ Barra de progresso visual
 ✓ Interface Material Design 3
-✓ Animações suaves
-✓ Estado vazio com call-to-action
+✓ Sistema de atualizações OTA
 
 ARQUITETURA ATUAL:
 ✓ MVVM com ViewModel
-✓ Room Database com DAO
+✓ Room Database com DAO e migrações
 ✓ Repository Pattern
-✓ Kotlin Coroutines
+✓ Kotlin Coroutines e StateFlow
 ✓ Jetpack Compose
-✓ StateFlow para reatividade
+✓ DataStore para preferências
+✓ Sistema de notificações para atualizações
 
 ================================================================================
-5. REQUISITOS FUNCIONAIS - MVP v3.0
+3. CORE FEATURES - VERSÃO 4.0
 ================================================================================
 
 -------------------------------------------------------------------------------
-5.1 SEMANA 1: FUNCIONALIDADES ESSENCIAIS
+RF-010: MÚLTIPLAS LISTAS
 -------------------------------------------------------------------------------
 
-RF-001: BUSCA E FILTROS
-Prioridade: ALTA
-Complexidade: MÉDIA
-Estimativa: 2-3 dias (16 horas)
-
-Descrição:
-Implementar sistema de busca e filtros para facilitar a localização de
-itens na lista de compras.
-
-Requisitos Funcionais:
-- RF-001.1: Campo de busca deve estar visível na tela principal
-- RF-001.2: Busca deve funcionar em tempo real enquanto o usuário digita
-- RF-001.3: Busca deve filtrar itens por nome (case-insensitive)
-- RF-001.4: Sistema deve oferecer três filtros: Todos, Pendentes, Comprados
-- RF-001.5: Filtro ativo deve ter indicador visual claro
-- RF-001.6: Deve haver botão para limpar busca e filtros
-- RF-001.7: Busca e filtros devem funcionar em conjunto
-- RF-001.8: Performance deve ser mantida mesmo com muitos itens (debounce 300ms)
-
-Critérios de Aceitação:
-- CA-001.1: Busca funciona enquanto o usuário digita
-- CA-001.2: Filtros atualizam a lista instantaneamente
-- CA-001.3: Busca e filtros funcionam em conjunto corretamente
-- CA-001.4: Performance mantida com 100+ itens na lista
-- CA-001.5: Interface é intuitiva e acessível
-
-User Stories:
-- Como usuário, eu quero buscar itens por nome para encontrá-los rapidamente
-- Como usuário, eu quero filtrar por status para ver apenas pendentes ou comprados
-- Como usuário, eu quero combinar busca e filtros para refinar minha busca
-
--------------------------------------------------------------------------------
-
-RF-002: ORDENAÇÃO DE ITENS
-Prioridade: MÉDIA
-Complexidade: BAIXA
-Estimativa: 1-2 dias (8 horas)
-
-Descrição:
-Implementar sistema de ordenação para organizar itens da lista de diferentes
-formas.
-
-Requisitos Funcionais:
-- RF-002.1: Deve haver menu de ordenação (dropdown ou bottom sheet)
-- RF-002.2: Deve oferecer ordenação por Nome (A-Z)
-- RF-002.3: Deve oferecer ordenação por Data (mais recente primeiro)
-- RF-002.4: Deve oferecer ordenação por Preço (menor para maior)
-- RF-002.5: Ordenação atual deve ter indicador visual
-- RF-002.6: Preferência de ordenação deve ser persistida
-- RF-002.7: Ordenação deve funcionar com todos os filtros
-
-Critérios de Aceitação:
-- CA-002.1: Ordenação funciona corretamente em todos os filtros
-- CA-002.2: Performance mantida com muitos itens
-- CA-002.3: UI é intuitiva e acessível
-- CA-002.4: Preferência é mantida após fechar o app
-
-User Stories:
-- Como usuário, eu quero ordenar itens por nome para facilitar a localização
-- Como usuário, eu quero ordenar por preço para ver itens mais caros primeiro
-- Como usuário, eu quero que minha preferência de ordenação seja lembrada
-
--------------------------------------------------------------------------------
-
-RF-003: CATEGORIAS BÁSICAS
 Prioridade: ALTA
 Complexidade: MÉDIA-ALTA
-Estimativa: 3-4 dias (24 horas)
+Estimativa: 3-4 dias (24-32 horas)
+Impacto: ALTO
 
 Descrição:
-Adicionar sistema de categorias para organizar itens da lista de compras.
+Implementar sistema completo de múltiplas listas separadas, permitindo que
+usuários organizem suas compras por contexto (supermercado, farmácia, loja, etc.).
+
+Por que é importante:
+- Permite organização por contexto de compra
+- Aumenta significativamente a utilidade do app
+- Base fundamental para recursos futuros (compartilhamento, colaboração)
+- Melhora a experiência do usuário com múltiplas necessidades
+
+Como funciona:
+- Usuário pode criar múltiplas listas nomeadas
+- Cada lista é independente com seus próprios itens
+- Navegação entre listas via drawer ou bottom sheet
+- Lista padrão "Minhas Compras" criada automaticamente
+- Gerenciamento completo: criar, renomear, deletar listas
 
 Requisitos Funcionais:
-- RF-003.1: Modelo ItemCompra deve ter campo "categoria"
-- RF-003.2: Deve haver migração do Room Database (versão 2 → 3)
-- RF-003.3: Deve haver lista pré-definida de categorias:
-  * Frutas e Verduras
-  * Laticínios
-  * Carnes e Aves
-  * Padaria
-  * Limpeza
-  * Higiene
-  * Bebidas
-  * Grãos e Cereais
-  * Outros
-- RF-003.4: Categoria deve ser selecionável no dialog de adicionar/editar
-- RF-003.5: Categoria deve ser obrigatória ao adicionar item
-- RF-003.6: Categoria deve ser exibida no card do item (badge/chip)
-- RF-003.7: Dados existentes devem ser migrados (categoria padrão "Outros")
-- RF-003.8: Visual deve ser consistente com Material Design 3
-- RF-003.9: (Opcional) Filtro por categoria se sobrar tempo
+- RF-010.1: Criar nova entidade ShoppingList no Room Database
+- RF-010.2: Adicionar campo listId ao ItemCompra (relacionamento)
+- RF-010.3: Criar migração do Room Database (versão atual → nova)
+- RF-010.4: Lista padrão "Minhas Compras" deve ser criada automaticamente
+- RF-010.5: Tela de seleção/navegação entre listas (drawer ou bottom sheet)
+- RF-010.6: Dialog para criar nova lista com nome customizado
+- RF-010.7: Dialog para renomear lista existente
+- RF-010.8: Dialog de confirmação para deletar lista (com todos os itens)
+- RF-010.9: Indicador visual da lista ativa na UI
+- RF-010.10: Persistir lista ativa selecionada entre sessões
+- RF-010.11: Todas as funcionalidades existentes devem funcionar por lista
+- RF-010.12: Histórico deve ser associado à lista específica
 
 Critérios de Aceitação:
-- CA-003.1: Categoria é obrigatória ao adicionar item
-- CA-003.2: Migração não perde dados existentes
-- CA-003.3: Visual é consistente com Material Design 3
-- CA-003.4: Categorias são exibidas corretamente nos cards
+- CA-010.1: Usuário pode criar múltiplas listas independentes
+- CA-010.2: Navegação entre listas é intuitiva e rápida
+- CA-010.3: Dados existentes são migrados para lista padrão
+- CA-010.4: Deletar lista remove todos os itens associados
+- CA-010.5: Performance mantida com 10+ listas
+- CA-010.6: UI é clara e mostra qual lista está ativa
 
 User Stories:
-- Como usuário, eu quero categorizar meus itens para organizar melhor minha lista
-- Como usuário, eu quero ver a categoria de cada item na lista
-- Como usuário, eu quero que meus dados existentes sejam preservados na atualização
+- Como usuário, eu quero criar listas separadas para supermercado e farmácia
+- Como usuário, eu quero navegar facilmente entre minhas listas
+- Como usuário, eu quero renomear minhas listas para melhor organização
+- Como usuário, eu quero deletar listas que não uso mais
 
--------------------------------------------------------------------------------
-5.2 SEMANA 2: MELHORIAS DE UX E FUNCIONALIDADES
--------------------------------------------------------------------------------
-
-RF-004: MODO ESCURO/CLARO
-Prioridade: MÉDIA
-Complexidade: BAIXA
-Estimativa: 1-2 dias (12 horas)
-
-Descrição:
-Implementar suporte a tema claro e escuro para melhorar a experiência do
-usuário em diferentes condições de iluminação.
-
-Requisitos Funcionais:
-- RF-004.1: Deve haver toggle de tema no TopBar ou menu de configurações
-- RF-004.2: Deve suportar tema claro
-- RF-004.3: Deve suportar tema escuro
-- RF-004.4: Preferência do tema deve ser persistida
-- RF-004.5: Transição entre temas deve ser suave
-- RF-004.6: (Opcional) Seguir preferência do sistema
-
-Critérios de Aceitação:
-- CA-004.1: Todos os componentes respeitam o tema selecionado
-- CA-004.2: Cores têm contraste adequado para acessibilidade
-- CA-004.3: Preferência persiste após fechar o app
-- CA-004.4: Transição é suave e sem flickering
-
-User Stories:
-- Como usuário, eu quero usar modo escuro para reduzir cansaço visual
-- Como usuário, eu quero que minha preferência de tema seja lembrada
-- Como usuário, eu quero alternar entre temas facilmente
+Considerações Técnicas:
+- Migração do Room Database deve preservar todos os dados existentes
+- Adicionar índice em listId no ItemCompra para performance
+- ViewModel deve gerenciar lista ativa e operações por lista
+- Repository deve filtrar queries por listId
 
 -------------------------------------------------------------------------------
 
-RF-005: GESTOS E AÇÕES RÁPIDAS
+RF-011: WIDGET NA TELA INICIAL
+-------------------------------------------------------------------------------
+
 Prioridade: MÉDIA
 Complexidade: MÉDIA
-Estimativa: 2-3 dias (16 horas)
+Estimativa: 2-3 dias (16-24 horas)
+Impacto: MÉDIO-ALTO
 
 Descrição:
-Implementar gestos de swipe para ações rápidas nos itens da lista.
+Implementar widget Android na tela inicial que permite acesso rápido às
+funcionalidades principais sem abrir o app.
+
+Por que é importante:
+- Melhora significativamente a experiência do usuário
+- Aumenta engajamento e frequência de uso
+- Acesso rápido sem abrir o app
+- Diferencial competitivo importante
+
+Como funciona:
+- Widget exibe lista ativa com itens pendentes
+- Mostra progresso (itens comprados/total)
+- Botão para adicionar item rapidamente
+- Atualização em tempo real quando app modifica dados
+- Tocar no widget abre o app na lista correspondente
 
 Requisitos Funcionais:
-- RF-005.1: Swipe para direita deve marcar item como comprado
-- RF-005.2: Swipe para esquerda deve deletar item
-- RF-005.3: Deve haver feedback visual durante o swipe
-- RF-005.4: Após deletar, deve aparecer Snackbar com ação "Desfazer"
-- RF-005.5: Desfazer deve restaurar item deletado
-- RF-005.6: (Opcional) Long press para menu de ações rápidas
+- RF-011.1: Criar AppWidgetProvider para widget
+- RF-011.2: Layout do widget com lista de itens pendentes (scrollável)
+- RF-011.3: Exibir contador de progresso (X/Y itens comprados)
+- RF-011.4: Botão "Adicionar Item" que abre dialog no app
+- RF-011.5: Atualização automática quando dados mudam (AppWidgetManager.updateAppWidget)
+- RF-011.6: Suporte a múltiplos widgets (um por lista)
+- RF-011.7: Configuração de qual lista o widget exibe
+- RF-011.8: Tocar em item do widget marca como comprado
+- RF-011.9: Widget deve funcionar em modo claro e escuro
+- RF-011.10: Tamanhos: pequeno (2x1), médio (4x2), grande (4x4)
 
 Critérios de Aceitação:
-- CA-005.1: Gestos funcionam de forma intuitiva
-- CA-005.2: Feedback visual é claro e imediato
-- CA-005.3: Desfazer funciona corretamente
-- CA-005.4: Gestos não interferem com scroll da lista
+- CA-011.1: Widget exibe dados corretos da lista selecionada
+- CA-011.2: Atualização acontece automaticamente quando app modifica dados
+- CA-011.3: Adicionar item via widget funciona corretamente
+- CA-011.4: Marcar item como comprado via widget atualiza widget e app
+- CA-011.5: Widget é responsivo e não trava a tela inicial
+- CA-011.6: Funciona corretamente em diferentes tamanhos de tela
 
 User Stories:
-- Como usuário, eu quero marcar itens como comprados com um gesto rápido
-- Como usuário, eu quero deletar itens com um gesto simples
-- Como usuário, eu quero poder desfazer uma exclusão acidental
+- Como usuário, eu quero ver minha lista na tela inicial sem abrir o app
+- Como usuário, eu quero adicionar itens rapidamente pelo widget
+- Como usuário, eu quero marcar itens como comprados direto do widget
+- Como usuário, eu quero ver o progresso da minha lista no widget
+
+Considerações Técnicas:
+- Usar RemoteViews para layout do widget
+- BroadcastReceiver para atualizações automáticas
+- WorkManager ou AlarmManager para atualizações periódicas (opcional)
+- ProviderInfo para configuração do widget
+- Considerar limitações de atualização do Android (throttling)
 
 -------------------------------------------------------------------------------
 
-RF-006: MELHORIAS NO DIALOG
-Prioridade: BAIXA
-Complexidade: BAIXA
-Estimativa: 1 dia (8 horas)
+RF-012: ESTATÍSTICAS AVANÇADAS
+-------------------------------------------------------------------------------
+
+Prioridade: MÉDIA
+Complexidade: MÉDIA
+Estimativa: 3-4 dias (24-32 horas)
+Impacto: MÉDIO
 
 Descrição:
-Melhorar o dialog de adicionar/editar itens com autocompletar e sugestões.
+Implementar sistema completo de estatísticas e análises com gráficos,
+histórico por período e insights sobre padrões de compra.
+
+Por que é importante:
+- Ajuda no controle financeiro pessoal
+- Visualização clara de padrões de compra
+- Valor agregado significativo para o usuário
+- Diferencia o app da concorrência
+
+Como funciona:
+- Tela dedicada de estatísticas acessível do menu
+- Gráficos de gastos por período (semana/mês/ano)
+- Histórico de compras filtrado por período
+- Lista de itens mais comprados
+- Tendências e comparações entre períodos
+- Filtros por lista específica ou todas as listas
 
 Requisitos Funcionais:
-- RF-006.1: Campo de nome deve ter autocompletar baseado em itens anteriores
-- RF-006.2: Deve mostrar sugestões de itens frequentes
-- RF-006.3: Validação de campos deve ser melhorada
-- RF-006.4: Deve haver feedback visual de erros
+- RF-012.1: Nova tela StatisticsScreen acessível do menu
+- RF-012.2: Gráfico de linha mostrando gastos ao longo do tempo
+- RF-012.3: Gráfico de pizza por categoria de gastos
+- RF-012.4: Gráfico de barras comparando períodos
+- RF-012.5: Filtros de período: Semana, Mês, 3 Meses, Ano, Personalizado
+- RF-012.6: Lista de itens mais comprados (top 10-20)
+- RF-012.7: Estatísticas de frequência (quantas vezes item foi comprado)
+- RF-012.8: Comparação de gastos entre períodos (aumento/diminuição %)
+- RF-012.9: Média de gastos por período
+- RF-012.10: Exportar estatísticas como imagem ou PDF (opcional)
+- RF-012.11: Filtro por lista específica ou todas as listas
 
 Critérios de Aceitação:
-- CA-006.1: Autocompletar acelera a entrada de dados
-- CA-006.2: Sugestões são relevantes e úteis
-- CA-006.3: Validação previne erros do usuário
-- CA-006.4: Feedback de erros é claro
+- CA-012.1: Gráficos são renderizados corretamente e responsivos
+- CA-012.2: Dados são calculados corretamente do histórico
+- CA-012.3: Performance aceitável mesmo com muito histórico
+- CA-012.4: UI é intuitiva e fácil de entender
+- CA-012.5: Filtros funcionam corretamente e atualizam gráficos
+- CA-012.6: Itens mais comprados são calculados corretamente
+
+User Stories:
+- Como usuário, eu quero ver meus gastos ao longo do tempo em um gráfico
+- Como usuário, eu quero saber quais categorias gasto mais
+- Como usuário, eu quero ver quais itens compro com mais frequência
+- Como usuário, eu quero comparar meus gastos entre meses diferentes
+
+Considerações Técnicas:
+- Usar biblioteca de gráficos (MPAndroidChart ou similar)
+- Agregar dados do histórico de compras
+- Cache de cálculos para performance
+- Lazy loading para grandes volumes de dados
+- Considerar uso de Room para queries agregadas
+
+-------------------------------------------------------------------------------
+
+RF-013: NOTIFICAÇÕES INTELIGENTES
+-------------------------------------------------------------------------------
+
+Prioridade: MÉDIA
+Complexidade: BAIXA-MÉDIA
+Estimativa: 2 dias (16 horas)
+Impacto: MÉDIO
+
+Descrição:
+Implementar sistema de notificações que ajuda usuários a não esquecer
+suas compras e mantém engajamento.
+
+Por que é importante:
+- Aumenta engajamento do usuário
+- Ajuda a não esquecer compras importantes
+- Melhora experiência do usuário
+- Funcionalidade esperada em apps modernos
+
+Como funciona:
+- Lembrete configurável para ir às compras (dia/hora)
+- Notificação quando lista estiver completa
+- Lembretes de itens pendentes há muito tempo (ex: 7 dias)
+- Notificações baseadas em localização (opcional - futuro)
+- Configurações na tela de Settings
+
+Requisitos Funcionais:
+- RF-013.1: Sistema de notificações usando NotificationManager
+- RF-013.2: Canal de notificações configurado (Android 8.0+)
+- RF-013.3: Lembrete diário configurável (horário personalizado)
+- RF-013.4: Notificação quando todos os itens forem marcados como comprados
+- RF-013.5: Lembrete de itens pendentes há X dias (configurável, padrão 7)
+- RF-013.6: Tela de configurações de notificações em SettingsScreen
+- RF-013.7: Toggle para habilitar/desabilitar cada tipo de notificação
+- RF-013.8: WorkManager para agendar notificações recorrentes
+- RF-013.9: Notificação com ação rápida "Abrir App"
+- RF-013.10: (Opcional) Notificação baseada em geofencing (localização)
+
+Critérios de Aceitação:
+- CA-013.1: Notificações são exibidas no horário configurado
+- CA-013.2: Usuário pode habilitar/desabilitar cada tipo
+- CA-013.3: Notificações não são excessivas ou intrusivas
+- CA-013.4: Ações rápidas funcionam corretamente
+- CA-013.5: Notificações persistem após reiniciar dispositivo
+- CA-013.6: Respeita configurações de "Não Perturbe" do sistema
+
+User Stories:
+- Como usuário, eu quero receber um lembrete diário para fazer compras
+- Como usuário, eu quero ser notificado quando minha lista estiver completa
+- Como usuário, eu quero ser lembrado de itens que estão pendentes há muito tempo
+- Como usuário, eu quero controlar quais notificações recebo
+
+Considerações Técnicas:
+- Usar WorkManager para notificações agendadas
+- NotificationChannel para Android 8.0+
+- Considerar Battery Optimization do Android
+- Persistir preferências de notificação no DataStore
+- Implementar cancelamento de notificações quando necessário
+
+-------------------------------------------------------------------------------
+
+RF-014: MELHORIAS NO DIALOG (AUTOCOMPLETAR)
+-------------------------------------------------------------------------------
+
+Prioridade: BAIXA-MÉDIA
+Complexidade: BAIXA
+Estimativa: 1 dia (8 horas)
+Impacto: BAIXO-MÉDIO
+
+Descrição:
+Melhorar o dialog de adicionar/editar itens com autocompletar inteligente
+e sugestões baseadas em histórico.
+
+Por que é importante:
+- Acelera significativamente a entrada de dados
+- Melhora experiência do usuário
+- Reduz erros de digitação
+- Funcionalidade esperada em apps modernos
+
+Como funciona:
+- Campo de nome com autocompletar baseado em itens anteriores
+- Sugestões de itens mais frequentes no topo
+- Validação melhorada com feedback visual
+- Sugestões de preço baseadas em compras anteriores do mesmo item
+
+Requisitos Funcionais:
+- RF-014.1: Autocompletar no campo "Nome" usando itens do histórico
+- RF-014.2: Sugestões ordenadas por frequência (itens mais comprados primeiro)
+- RF-014.3: Sugestão de preço baseada na última compra do item
+- RF-014.4: Sugestão de quantidade baseada na última compra
+- RF-014.5: Sugestão de categoria baseada no item mais similar
+- RF-014.6: Validação em tempo real com feedback visual
+- RF-014.7: Mensagens de erro claras e específicas
+- RF-014.8: Indicador visual de campos obrigatórios
+- RF-014.9: Botão "Limpar" para resetar formulário
+
+Critérios de Aceitação:
+- CA-014.1: Autocompletar sugere itens relevantes enquanto usuário digita
+- CA-014.2: Sugestões são ordenadas por relevância (frequência)
+- CA-014.3: Validação previne submissão de dados inválidos
+- CA-014.4: Feedback de erros é claro e ajuda o usuário
+- CA-014.5: Performance é mantida mesmo com muitos itens no histórico
 
 User Stories:
 - Como usuário, eu quero que o app sugira nomes de itens que já adicionei
-- Como usuário, eu quero ver itens que adiciono frequentemente
+- Como usuário, eu quero ver itens que adiciono frequentemente primeiro
+- Como usuário, eu quero que o app sugira preço e quantidade baseado em compras anteriores
 - Como usuário, eu quero ser avisado se cometer um erro ao preencher campos
 
--------------------------------------------------------------------------------
-5.3 SEMANA 3: BACKUP E POLIMENTO
+Considerações Técnicas:
+- Usar AutocompleteTextField do Material 3
+- Query no histórico para buscar itens similares
+- Cache de sugestões frequentes para performance
+- Algoritmo de similaridade de strings (fuzzy matching)
+- Debounce na busca de sugestões
+
 -------------------------------------------------------------------------------
 
-RF-007: BACKUP E RESTAURAÇÃO
-Prioridade: ALTA
-Complexidade: MÉDIA-ALTA
-Estimativa: 3-4 dias (24 horas)
+RF-015: SCANNER DE CÓDIGO DE BARRAS
+-------------------------------------------------------------------------------
+
+Prioridade: BAIXA
+Complexidade: ALTA
+Estimativa: 4-5 dias (32-40 horas)
+Impacto: MÉDIO
 
 Descrição:
-Implementar sistema de backup e restauração de dados para segurança e
-portabilidade.
+Implementar funcionalidade de scanner de código de barras para adicionar
+itens rapidamente escaneando produtos.
+
+Por que é importante:
+- Diferencial competitivo significativo
+- Facilita muito a adição de itens
+- Experiência moderna e intuitiva
+- Reduz erros de digitação
+
+Como funciona:
+- Botão de scanner no dialog de adicionar item
+- Abre câmera para escanear código de barras
+- Busca informações do produto via API
+- Preenche automaticamente nome, categoria e preço sugerido
+- Permite edição antes de salvar
 
 Requisitos Funcionais:
-- RF-007.1: Deve haver menu de configurações/sobre
-- RF-007.2: Deve haver opção "Exportar dados" que gera arquivo JSON
-- RF-007.3: Deve haver opção "Importar dados" que lê arquivo JSON
-- RF-007.4: Deve ser possível compartilhar lista via texto/WhatsApp
-- RF-007.5: Deve haver dialog de confirmação para importação
-- RF-007.6: Deve validar arquivo JSON antes de importar
-- RF-007.7: Importação não deve corromper dados existentes
+- RF-015.1: Integração com biblioteca de leitura de código de barras (ML Kit ou ZXing)
+- RF-015.2: Botão de scanner no dialog de adicionar item
+- RF-015.3: Tela de scanner com preview da câmera
+- RF-015.4: Feedback visual quando código é detectado
+- RF-015.5: Integração com API de produtos (OpenFoodFacts ou similar)
+- RF-015.6: Buscar nome, categoria e informações do produto
+- RF-015.7: Preencher campos do dialog automaticamente
+- RF-015.8: Permitir edição manual após escanear
+- RF-015.9: Tratamento de produtos não encontrados
+- RF-015.10: Suporte a múltiplos formatos (EAN-13, UPC, etc.)
+- RF-015.11: Permissões de câmera solicitadas adequadamente
+- RF-015.12: Modo offline com cache de produtos escaneados
 
 Critérios de Aceitação:
-- CA-007.1: Exportação gera arquivo JSON válido e completo
-- CA-007.2: Importação valida e trata erros adequadamente
-- CA-007.3: Compartilhamento funciona em apps externos
-- CA-007.4: Backup não corrompe dados existentes
-- CA-007.5: Usuário é avisado antes de sobrescrever dados
+- CA-015.1: Scanner detecta códigos de barras corretamente
+- CA-015.2: Informações do produto são buscadas e preenchidas
+- CA-015.3: Funciona em diferentes condições de iluminação
+- CA-015.4: Tratamento adequado de produtos não encontrados
+- CA-015.5: Performance aceitável (detecção em < 2 segundos)
+- CA-015.6: Permissões são solicitadas de forma clara
 
 User Stories:
-- Como usuário, eu quero fazer backup dos meus dados para não perdê-los
-- Como usuário, eu quero restaurar meus dados em outro dispositivo
-- Como usuário, eu quero compartilhar minha lista com outras pessoas
+- Como usuário, eu quero escanear código de barras para adicionar itens rapidamente
+- Como usuário, eu quero que o app busque informações do produto automaticamente
+- Como usuário, eu quero poder editar informações após escanear
+- Como usuário, eu quero que funcione mesmo sem internet (com cache)
+
+Considerações Técnicas:
+- Usar ML Kit Barcode Scanning (Google) ou ZXing
+- Integração com OpenFoodFacts API (gratuita)
+- Cache local de produtos escaneados
+- Tratamento de erros de rede e produtos não encontrados
+- Permissões de câmera (AndroidManifest e runtime)
+- Considerar uso de câmera em background thread
+- Testar em diferentes dispositivos e condições
+
+Desafios:
+- Requer biblioteca externa de leitura
+- Integração com APIs de produtos
+- Tratamento robusto de produtos não encontrados
+- Performance em diferentes condições de iluminação
 
 -------------------------------------------------------------------------------
 
-RF-008: HISTÓRICO DE COMPRAS
-Prioridade: MÉDIA
-Complexidade: MÉDIA
-Estimativa: 2-3 dias (16 horas)
-
-Descrição:
-Implementar sistema de histórico para salvar e reutilizar listas de compras
-anteriores.
-
-Requisitos Funcionais:
-- RF-008.1: Lista deve ser salva automaticamente quando todos os itens forem comprados
-- RF-008.2: Deve haver tela de histórico com listas anteriores
-- RF-008.3: Deve ser possível visualizar lista histórica
-- RF-008.4: Deve ser possível reutilizar lista histórica (criar nova lista baseada nela)
-- RF-008.5: Deve ser possível deletar histórico
-- RF-008.6: Reutilização deve criar nova lista independente
-
-Critérios de Aceitação:
-- CA-008.1: Histórico salva automaticamente quando lista é completada
-- CA-008.2: Reutilização cria nova lista independente
-- CA-008.3: Performance mantida com muitos históricos
-- CA-008.4: Interface é intuitiva e fácil de usar
-
-User Stories:
-- Como usuário, eu quero que minhas listas completadas sejam salvas automaticamente
-- Como usuário, eu quero reutilizar listas anteriores para economizar tempo
-- Como usuário, eu quero ver meu histórico de compras anteriores
-
+RF-016: COMPARTILHAMENTO COLABORATIVO
 -------------------------------------------------------------------------------
 
-RF-009: TESTES E CORREÇÕES
-Prioridade: ALTA
-Complexidade: VARIÁVEL
-Estimativa: 2-3 dias (16 horas)
+Prioridade: BAIXA
+Complexidade: ALTA
+Estimativa: 1-2 semanas (80-100 horas)
+Impacto: ALTO (mas complexo)
 
 Descrição:
-Implementar testes básicos e corrigir bugs encontrados durante o desenvolvimento.
+Implementar sistema completo de compartilhamento e edição colaborativa
+de listas em tempo real usando Supabase como backend.
+
+Por que é importante:
+- Funcionalidade avançada muito valorizada
+- Aumenta significativamente o valor do produto
+- Base para recursos sociais futuros
+- Diferencial competitivo importante
+
+Como funciona:
+- Usuário pode compartilhar lista com outros usuários
+- Múltiplos usuários podem editar a mesma lista simultaneamente
+- Sincronização em tempo real via Supabase Realtime
+- Sistema de autenticação de usuários
+- Notificações quando outros usuários fazem alterações
 
 Requisitos Funcionais:
-- RF-009.1: Deve haver testes unitários básicos (ViewModel)
-- RF-009.2: Deve haver testes de UI básicos (Compose Testing)
-- RF-009.3: Bugs encontrados devem ser corrigidos
-- RF-009.4: Performance deve ser otimizada
-- RF-009.5: Acessibilidade deve ser revisada
-- RF-009.6: Código deve ser revisado
+- RF-016.1: Sistema de autenticação (email/senha ou OAuth)
+- RF-016.2: Perfil de usuário com nome e foto
+- RF-016.3: Compartilhar lista via link ou email
+- RF-016.4: Convites para colaborar em listas
+- RF-016.5: Sincronização em tempo real de alterações
+- RF-016.6: Indicador visual de quem está editando (presence)
+- RF-016.7: Resolução de conflitos quando múltiplos usuários editam
+- RF-016.8: Histórico de alterações (quem fez o quê)
+- RF-016.9: Permissões: visualizar, editar, administrador
+- RF-016.10: Notificações push quando lista é modificada
+- RF-016.11: Modo offline com sincronização posterior
+- RF-016.12: Migração de dados locais para cloud
 
 Critérios de Aceitação:
-- CA-009.1: Cobertura mínima de testes (30-40%)
-- CA-009.2: App funciona sem crashes críticos
-- CA-009.3: Performance é aceitável (< 100ms para operações)
-- CA-009.4: Acessibilidade básica está implementada
+- CA-016.1: Múltiplos usuários podem editar simultaneamente sem conflitos
+- CA-016.2: Alterações aparecem em tempo real para todos
+- CA-016.3: Sincronização funciona corretamente após modo offline
+- CA-016.4: Sistema de permissões funciona adequadamente
+- CA-016.5: Performance aceitável mesmo com muitos colaboradores
+- CA-016.6: Dados locais são migrados corretamente para cloud
 
 User Stories:
-- Como desenvolvedor, eu quero testes para garantir qualidade do código
-- Como usuário, eu quero um app estável sem crashes
-- Como usuário, eu quero um app rápido e responsivo
+- Como usuário, eu quero compartilhar minha lista com minha família
+- Como usuário, eu quero ver alterações feitas por outros em tempo real
+- Como usuário, eu quero saber quem está editando a lista
+- Como usuário, eu quero poder editar mesmo sem internet (sincronizar depois)
+
+Considerações Técnicas:
+- Backend: Supabase (PostgreSQL + Realtime + Auth)
+- Sincronização: Supabase Realtime subscriptions
+- Resolução de conflitos: Last-Write-Wins ou Operational Transform
+- Autenticação: Supabase Auth
+- Notificações: Firebase Cloud Messaging ou Supabase
+- Modo offline: Room local + sincronização quando online
+- Migração: Script para migrar dados locais para Supabase
+
+Desafios:
+- Requer backend completo (Supabase)
+- Sincronização em tempo real complexa
+- Resolução de conflitos é desafiadora
+- Autenticação e segurança
+- Performance com muitos usuários simultâneos
 
 ================================================================================
-6. REQUISITOS NÃO-FUNCIONAIS
+4. USER EXPERIENCE
 ================================================================================
 
-RNF-001: PERFORMANCE
-- Operações de busca devem responder em < 100ms
-- Lista deve scrollar suavemente com 100+ itens
-- App deve iniciar em < 2 segundos
-- Uso de memória deve ser otimizado
+PERSONAS:
 
-RNF-002: USABILIDADE
-- Interface deve ser intuitiva e fácil de usar
-- Ações comuns devem ser acessíveis em 1-2 toques
-- Feedback visual deve ser claro e imediato
-- Navegação deve ser lógica e consistente
+1. Maria - 35 anos, mãe de família
+   - Usa o app para organizar compras da família
+   - Precisa de múltiplas listas (supermercado, farmácia)
+   - Valoriza widget para acesso rápido
+   - Quer ver estatísticas de gastos
 
-RNF-003: ACESSIBILIDADE
-- Content descriptions em todos os ícones
-- Labels adequados para campos
-- Suporte a TalkBack
-- Contraste de cores adequado (WCAG AA)
+2. João - 28 anos, solteiro
+   - Usa para compras pessoais
+   - Valoriza rapidez (scanner, autocompletar)
+   - Quer notificações para não esquecer
+   - Interessado em compartilhar com amigos
 
-RNF-004: CONFIABILIDADE
-- App não deve crashar
-- Dados não devem ser perdidos
-- Migrações de banco devem ser seguras
-- Backup/restauração deve ser confiável
+3. Ana - 45 anos, gerente de casa
+   - Organiza compras da família
+   - Precisa de múltiplas listas por contexto
+   - Valoriza estatísticas para controle financeiro
+   - Quer compartilhar lista com marido
 
-RNF-005: COMPATIBILIDADE
+JORNADA DO USUÁRIO:
+
+Fluxo Principal - Adicionar Item:
+1. Usuário abre app (ou widget)
+2. Vê lista atual ou seleciona outra lista
+3. Clica em "Adicionar Item"
+4. Dialog abre com autocompletar
+5. Usuário digita ou escaneia código
+6. Campos são preenchidos automaticamente
+7. Usuário confirma e item é adicionado
+8. Lista atualiza em tempo real
+
+Fluxo - Múltiplas Listas:
+1. Usuário abre drawer de navegação
+2. Vê todas as listas disponíveis
+3. Seleciona lista desejada
+4. App carrega itens da lista selecionada
+5. Todas as operações funcionam na lista ativa
+
+Fluxo - Widget:
+1. Usuário vê widget na tela inicial
+2. Vê itens pendentes e progresso
+3. Clica em item para marcar como comprado
+4. Widget atualiza automaticamente
+5. Ou clica em "Adicionar" para abrir dialog
+
+Fluxo - Estatísticas:
+1. Usuário abre menu e seleciona "Estatísticas"
+2. Vê gráficos e análises
+3. Filtra por período ou lista
+4. Analisa padrões de compra
+5. Exporta se necessário
+
+UI/UX CONSIDERAÇÕES:
+- Navegação intuitiva entre listas (drawer ou bottom sheet)
+- Widget deve ser informativo mas não poluído
+- Gráficos devem ser claros e fáceis de entender
+- Notificações não devem ser intrusivas
+- Scanner deve ter feedback visual claro
+- Autocompletar deve ser rápido e relevante
+
+================================================================================
+5. TECHNICAL ARCHITECTURE
+================================================================================
+
+COMPONENTES DO SISTEMA:
+
+1. Data Layer:
+   - Room Database (local)
+   - Supabase (cloud - para colaboração)
+   - DataStore (preferências)
+   - Cache de produtos escaneados
+
+2. Business Logic Layer:
+   - ViewModels por feature
+   - Repository Pattern
+   - Use Cases para lógica complexa
+   - Sincronização de dados
+
+3. UI Layer:
+   - Jetpack Compose
+   - Material Design 3
+   - Navigation Component
+   - Widget Provider
+
+4. External Services:
+   - ML Kit / ZXing (scanner)
+   - OpenFoodFacts API (produtos)
+   - Supabase (colaboração)
+   - WorkManager (notificações)
+
+MODELOS DE DADOS:
+
+ShoppingList:
+- id: Long (primary key)
+- name: String
+- createdAt: Long
+- isDefault: Boolean
+- userId: String? (para colaboração)
+
+ItemCompra (atualizado):
+- id: Long
+- listId: Long (foreign key)
+- nome: String
+- quantidade: Int
+- preco: Double?
+- categoria: String
+- comprado: Boolean
+- createdAt: Long
+
+ProductCache (novo):
+- barcode: String (primary key)
+- name: String
+- category: String
+- lastUpdated: Long
+
+User (novo - para colaboração):
+- id: String
+- email: String
+- name: String
+- photoUrl: String?
+
+APIs E INTEGRAÇÕES:
+
+1. OpenFoodFacts API:
+   - Endpoint: https://world.openfoodfacts.org/api/v0/product/{barcode}.json
+   - Busca informações de produtos por código de barras
+   - Retorna nome, categoria, ingredientes, etc.
+
+2. Supabase:
+   - PostgreSQL database
+   - Realtime subscriptions
+   - Authentication
+   - Storage (para fotos de perfil)
+
+REQUISITOS DE INFRAESTRUTURA:
+
 - Android 7.0+ (API 24+)
-- Diferentes tamanhos de tela
-- Orientação portrait e landscape
-- Diferentes densidades de tela
-
-RNF-006: MANUTENIBILIDADE
-- Código bem estruturado e documentado
-- Arquitetura clara e escalável
-- Testes para facilitar refatoração
-- Padrões de código consistentes
+- Permissões: Câmera, Internet, Notificações
+- Espaço de armazenamento: Mínimo 50MB
+- Conexão internet: Necessária para colaboração e scanner (opcional offline)
 
 ================================================================================
-7. CONSIDERAÇÕES TÉCNICAS
+6. DEVELOPMENT ROADMAP
 ================================================================================
 
-TEC-001: MIGRAÇÕES DO ROOM
-- Criar migração adequada para adicionar categoria (versão 2 → 3)
-- Não usar fallbackToDestructiveMigration() em produção
-- Testar migração com dados existentes
-- Garantir que dados não sejam perdidos
+FASE 1: FUNDAÇÃO (Semanas 1-2)
+Objetivo: Estabelecer base para múltiplas listas e melhorias core
 
-TEC-002: PERFORMANCE
-- Usar índices no Room para busca otimizada
-- LazyColumn com keys adequadas para recomposição eficiente
-- Debounce na busca (300ms) para reduzir queries
-- Cache de resultados quando apropriado
+MVP da Fase 1:
+- RF-010: Múltiplas Listas (completo)
+- RF-014: Melhorias no Dialog (autocompletar)
+- Migração de dados existentes
+- Testes básicos de múltiplas listas
 
-TEC-003: ARQUITETURA
-- Manter padrão MVVM
-- Repository Pattern para acesso a dados
-- StateFlow para reatividade
-- Separação clara de responsabilidades
+Entregáveis:
+- Sistema de múltiplas listas funcional
+- Autocompletar no dialog
+- Dados migrados corretamente
+- App estável e testado
 
-TEC-004: TESTES
-- Testes unitários para ViewModel
-- Testes de UI para componentes principais
-- Testes de integração para fluxos críticos
-- Cobertura mínima de 30-40%
+FASE 2: ACESSO RÁPIDO E INSIGHTS (Semanas 3-4)
+Objetivo: Widget e estatísticas para melhorar experiência
+
+MVP da Fase 2:
+- RF-011: Widget na Tela Inicial
+- RF-012: Estatísticas Avançadas
+- Integração widget com múltiplas listas
+- Gráficos funcionais
+
+Entregáveis:
+- Widget funcional e responsivo
+- Tela de estatísticas completa
+- Gráficos renderizando corretamente
+- Performance otimizada
+
+FASE 3: ENGAGEMENT (Semana 5)
+Objetivo: Notificações para aumentar engajamento
+
+MVP da Fase 3:
+- RF-013: Notificações Inteligentes
+- Configurações de notificações
+- WorkManager implementado
+- Testes de notificações
+
+Entregáveis:
+- Sistema de notificações completo
+- Configurações funcionais
+- Notificações agendadas corretamente
+
+FASE 4: EXPERIÊNCIA MODERNA (Semanas 6-7)
+Objetivo: Scanner para facilitar adição de itens
+
+MVP da Fase 4:
+- RF-015: Scanner de Código de Barras
+- Integração com ML Kit
+- API de produtos funcionando
+- Cache de produtos
+
+Entregáveis:
+- Scanner funcional
+- Busca de produtos via API
+- Cache implementado
+- Tratamento de erros robusto
+
+FASE 5: COLABORAÇÃO (Semanas 8-12)
+Objetivo: Compartilhamento e edição colaborativa
+
+MVP da Fase 5:
+- RF-016: Compartilhamento Colaborativo
+- Autenticação Supabase
+- Sincronização em tempo real
+- Resolução de conflitos
+- Modo offline
+
+Entregáveis:
+- Sistema de colaboração completo
+- Sincronização em tempo real funcionando
+- Autenticação e permissões
+- App estável e testado
+
+MELHORIAS FUTURAS (Pós v4.0):
+- Notificações baseadas em localização (geofencing)
+- Exportar estatísticas como PDF
+- Temas personalizados
+- Atalhos de teclado
+- Integração com assistentes de voz
+- Modo escuro automático por horário
 
 ================================================================================
-8. CRONOGRAMA
+7. LOGICAL DEPENDENCY CHAIN
 ================================================================================
 
-SEMANA 1 (Dias 1-5):
-- Dia 1-2: RF-001 (Busca e Filtros) - 16h
-- Dia 3: RF-002 (Ordenação) - 8h
-- Dia 4-5: RF-003 (Categorias) - 24h
+ORDEM LÓGICA DE DESENVOLVIMENTO:
 
-SEMANA 2 (Dias 6-10):
-- Dia 6: RF-004 (Modo Escuro/Claro) - 12h
-- Dia 7-8: RF-005 (Gestos) - 16h
-- Dia 9: RF-006 (Melhorias Dialog) - 8h
-- Dia 10: Buffer/testes - 4h
+1. FUNDAÇÃO (Deve ser feito primeiro):
+   - RF-010: Múltiplas Listas
+     * Base para todas as outras features
+     * Migração de dados é crítica
+     * Todas as features dependem disso
 
-SEMANA 3 (Dias 11-15):
-- Dia 11-13: RF-007 (Backup/Restauração) - 24h
-- Dia 14: RF-008 (Histórico) - 16h
-- Dia 15: RF-009 (Testes finais e polimento) - 16h
+2. MELHORIAS CORE (Pode ser feito em paralelo após fundação):
+   - RF-014: Melhorias no Dialog
+     * Independente, melhora UX imediatamente
+     * Não depende de outras features
 
-TOTAL ESTIMADO: 140 horas
+3. ACESSO RÁPIDO (Após múltiplas listas):
+   - RF-011: Widget
+     * Depende de múltiplas listas (precisa selecionar qual lista)
+     * Pode ser desenvolvido em paralelo com estatísticas
+
+4. INSIGHTS (Pode ser feito em paralelo):
+   - RF-012: Estatísticas Avançadas
+     * Depende de histórico (já existe)
+     * Pode ser desenvolvido em paralelo com widget
+
+5. ENGAGEMENT (Independente):
+   - RF-013: Notificações
+     * Independente das outras features
+     * Pode ser feito a qualquer momento após Fase 1
+
+6. EXPERIÊNCIA MODERNA (Independente):
+   - RF-015: Scanner
+     * Independente, mas melhora com autocompletar
+     * Pode ser feito após Fase 1 ou 2
+
+7. COLABORAÇÃO (Deve ser feito por último):
+   - RF-016: Compartilhamento Colaborativo
+     * Depende de múltiplas listas
+     * Requer backend completo
+     * Mais complexo, deve ser feito por último
+
+PRIORIZAÇÃO PARA MVP RÁPIDO:
+
+Se precisar de algo funcional rapidamente:
+1. RF-010 (Múltiplas Listas) - 3-4 dias
+2. RF-014 (Autocompletar) - 1 dia
+3. RF-011 (Widget) - 2-3 dias
+4. RF-013 (Notificações) - 2 dias
+
+Total: ~8-10 dias para MVP funcional com alto valor
+
+ESCOPO ATÔMICO DE CADA FEATURE:
+
+Cada feature deve ser:
+- Completa e funcional sozinha
+- Testável independentemente
+- Pode ser melhorada incrementalmente
+- Não quebra funcionalidades existentes
+
+EXEMPLO - Múltiplas Listas:
+- Fase 1: Criar/renomear/deletar listas básico
+- Fase 2: Navegação melhorada, indicadores visuais
+- Fase 3: Busca de listas, filtros, ordenação
 
 ================================================================================
-9. RISCOS E DEPENDÊNCIAS
+8. RISKS AND MITIGATIONS
 ================================================================================
 
-RISCO-001: Migração do Room pode ser complexa
+RISCO-001: Migração de dados para múltiplas listas pode corromper dados
 Probabilidade: MÉDIA
 Impacto: ALTO
-Mitigação: Testar migração isoladamente primeiro, criar backup antes
+Mitigação:
+- Criar backup completo antes da migração
+- Testar migração extensivamente com dados de teste
+- Implementar rollback se migração falhar
+- Migração incremental com validação em cada passo
 
-RISCO-002: Gestos podem não funcionar bem em todos os dispositivos
-Probabilidade: BAIXA
+RISCO-002: Widget pode ter problemas de performance
+Probabilidade: MÉDIA
 Impacto: MÉDIO
-Mitigação: Usar biblioteca testada, testar em múltiplos dispositivos
+Mitigação:
+- Limitar número de itens exibidos no widget
+- Usar atualizações eficientes (não a cada mudança)
+- Testar em dispositivos de baixo desempenho
+- Implementar cache de dados do widget
 
-RISCO-003: Prazo apertado pode comprometer qualidade
+RISCO-003: Integração com API de produtos pode falhar
+Probabilidade: ALTA
+Impacto: MÉDIO
+Mitigação:
+- Implementar cache robusto de produtos
+- Modo offline funcional
+- Tratamento de erros claro para usuário
+- Fallback para busca manual se API falhar
+
+RISCO-004: Sincronização colaborativa pode ter conflitos
 Probabilidade: ALTA
 Impacto: ALTO
-Mitigação: Priorizar features críticas, manter buffer de tempo
+Mitigação:
+- Implementar estratégia clara de resolução de conflitos
+- Testar extensivamente com múltiplos usuários
+- Modo offline com merge inteligente
+- Logs detalhados para debug
 
-DEPENDÊNCIA-001: Room Database versão atual
-DEPENDÊNCIA-002: Jetpack Compose estável
-DEPENDÊNCIA-003: Material Design 3
+RISCO-005: Notificações podem ser bloqueadas pelo sistema
+Probabilidade: MÉDIA
+Impacto: BAIXO
+Mitigação:
+- Educar usuário sobre permissões necessárias
+- Verificar se notificações estão habilitadas
+- Oferecer alternativa (lembrete no app)
+- Seguir best practices do Android
+
+RISCO-006: Complexidade do projeto pode aumentar muito
+Probabilidade: ALTA
+Impacto: ALTO
+Mitigação:
+- Priorizar features por valor/impacto
+- Implementar incrementalmente
+- Manter código modular e testável
+- Revisar escopo regularmente
+
+DESAFIOS TÉCNICOS:
+
+1. MVP que podemos construir:
+   - Focar em Fase 1 e 2 primeiro
+   - Deixar colaboração para depois
+   - Validar com usuários antes de expandir
+
+2. Restrições de recursos:
+   - Desenvolver features incrementais
+   - Reutilizar código existente
+   - Usar bibliotecas testadas
+
+3. Performance:
+   - Otimizar queries do Room
+   - Implementar paginação onde necessário
+   - Cache inteligente de dados
 
 ================================================================================
-10. CRITÉRIOS DE SUCESSO DO MVP
+9. APPENDIX
 ================================================================================
 
-FUNCIONALIDADES OBRIGATÓRIAS:
-✓ Busca e filtros funcionando
-✓ Categorias implementadas
-✓ Modo escuro/claro
-✓ Backup/restauração básico
-✓ Gestos básicos (swipe)
+PESQUISAS E REFERÊNCIAS:
+
+Bibliotecas Recomendadas:
+- ML Kit Barcode Scanning (Google) - Scanner
+- MPAndroidChart - Gráficos
+- Supabase Android SDK - Backend
+- WorkManager - Notificações agendadas
+
+APIs Externas:
+- OpenFoodFacts: https://world.openfoodfacts.org/
+- Documentação: https://openfoodfacts.github.io/api-documentation/
+
+ESPECIFICAÇÕES TÉCNICAS:
+
+Migração Room Database:
+- Versão atual: 3
+- Nova versão: 4
+- Adicionar tabela ShoppingList
+- Adicionar campo listId em ItemCompra
+- Migrar dados existentes para lista padrão
+
+Widget Specifications:
+- Tamanhos suportados: 2x1, 4x2, 4x4
+- Atualização: On-demand e periódica (máx 1x/hora)
+- Limite de itens: 10-15 itens no widget pequeno
+
+Notificações:
+- Canal: "Lembretes de Compras"
+- Prioridade: DEFAULT (não intrusivo)
+- Som: Opcional, configurável
+- Vibração: Opcional, configurável
+
+ESTIMATIVAS DETALHADAS:
+
+Fase 1 (Múltiplas Listas + Autocompletar):
+- Múltiplas Listas: 24-32 horas
+- Autocompletar: 8 horas
+- Testes e polimento: 8 horas
+- Total: 40-48 horas (~1-1.5 semanas)
+
+Fase 2 (Widget + Estatísticas):
+- Widget: 16-24 horas
+- Estatísticas: 24-32 horas
+- Integração: 8 horas
+- Total: 48-64 horas (~1.5-2 semanas)
+
+Fase 3 (Notificações):
+- Implementação: 12 horas
+- Configurações: 4 horas
+- Testes: 4 horas
+- Total: 20 horas (~3 dias)
+
+Fase 4 (Scanner):
+- Integração ML Kit: 8 horas
+- UI do scanner: 8 horas
+- API de produtos: 12 horas
+- Cache e offline: 8 horas
+- Total: 36 horas (~1 semana)
+
+Fase 5 (Colaboração):
+- Setup Supabase: 8 horas
+- Autenticação: 16 horas
+- Sincronização: 24 horas
+- Resolução conflitos: 16 horas
+- UI colaboração: 16 horas
+- Testes: 16 horas
+- Total: 96 horas (~2-3 semanas)
+
+TOTAL ESTIMADO: 240-280 horas (~6-7 semanas de desenvolvimento)
+
+================================================================================
+10. CRITÉRIOS DE SUCESSO
+================================================================================
+
+FUNCIONALIDADES OBRIGATÓRIAS (MVP v4.0):
+✓ Múltiplas listas funcionando completamente
+✓ Widget na tela inicial funcional
+✓ Estatísticas avançadas com gráficos
+✓ Notificações inteligentes configuráveis
+✓ Autocompletar no dialog
+✓ Scanner de código de barras (opcional mas desejável)
 
 QUALIDADE:
 ✓ Sem crashes críticos
 ✓ Performance aceitável (< 100ms para operações)
 ✓ UI responsiva e intuitiva
-✓ Acessibilidade básica
-
-DOCUMENTAÇÃO:
-✓ README atualizado
-✓ CHANGELOG atualizado
-✓ Comentários no código crítico
+✓ Acessibilidade mantida
+✓ Dados preservados em migrações
 
 ENTREGÁVEIS:
-✓ APK de Release (v3.0)
+✓ APK de Release (v4.0)
 ✓ Código-fonte no GitHub
 ✓ Release Notes detalhadas
 ✓ Documentação atualizada
-✓ Testes básicos implementados
+✓ Testes implementados (cobertura mínima 40%)
 
-================================================================================
-11. RECURSOS FORA DO ESCOPO (PÓS-MVP)
-================================================================================
-
-FUTURO-001: Múltiplas Listas
-- Criar e gerenciar múltiplas listas
-- Navegação entre listas
-- Renomear/deletar listas
-
-FUTURO-002: Widget
-- Widget na tela inicial
-- Adicionar itens rapidamente
-- Ver progresso sem abrir app
-
-FUTURO-003: Notificações
-- Lembrete para ir às compras
-- Notificação quando lista estiver pronta
-
-FUTURO-004: Estatísticas Avançadas
-- Gráficos de gastos
-- Histórico de compras por período
-- Itens mais comprados
-
-FUTURO-005: Compartilhamento Colaborativo
-- Compartilhar lista com outras pessoas
-- Edição colaborativa em tempo real
-- Sincronização via Firebase
-
-FUTURO-006: Scanner de Código de Barras
-- Adicionar item escaneando código
-- Buscar preços online
-
-================================================================================
-12. APROVAÇÕES E REVISÕES
-================================================================================
-
-APROVADO POR:
-[ ] Product Owner
-[ ] Tech Lead
-[ ] Designer
-[ ] QA Lead
-
-DATA DE APROVAÇÃO: ___________
-
-REVISÕES:
-- Revisão 1: ___________
-- Revisão 2: ___________
-- Revisão Final: ___________
+MÉTRICAS DE SUCESSO:
+- Taxa de retenção de usuários aumenta
+- Tempo médio de adicionar item reduz em 50%
+- Engajamento aumenta (medido por notificações)
+- Feedback positivo de usuários sobre novas features
 
 ================================================================================
 FIM DO DOCUMENTO
 ================================================================================
-

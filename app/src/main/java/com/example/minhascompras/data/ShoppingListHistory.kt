@@ -8,6 +8,7 @@ data class ShoppingListHistory(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val completionDate: Long = System.currentTimeMillis(),
-    val listName: String = "Lista de Compras"
+    val listName: String = "Lista de Compras",
+    val listId: Long? = null // ID da lista de compras que foi arquivada (null para histórico antigo)
 )
 

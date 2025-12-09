@@ -23,6 +23,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.minhascompras.data.AppDatabase
 import com.example.minhascompras.data.ItemCompraRepository
+import com.example.minhascompras.data.ShoppingListRepository
+import com.example.minhascompras.data.ShoppingListPreferencesManager
 import com.example.minhascompras.data.UpdatePreferencesManager
 import com.example.minhascompras.data.ThemeMode
 import com.example.minhascompras.data.ThemePreferencesManager
@@ -35,6 +37,8 @@ import com.example.minhascompras.ui.viewmodel.HistoryViewModel
 import com.example.minhascompras.ui.viewmodel.HistoryViewModelFactory
 import com.example.minhascompras.ui.viewmodel.ListaComprasViewModel
 import com.example.minhascompras.ui.viewmodel.ListaComprasViewModelFactory
+import com.example.minhascompras.ui.viewmodel.ShoppingListViewModel
+import com.example.minhascompras.ui.viewmodel.ShoppingListViewModelFactory
 import com.example.minhascompras.ui.viewmodel.ThemeViewModel
 import com.example.minhascompras.ui.viewmodel.ThemeViewModelFactory
 import com.example.minhascompras.ui.viewmodel.UpdateViewModel
@@ -77,6 +81,13 @@ class MainActivity : ComponentActivity() {
             throw RuntimeException("Erro crítico: não foi possível criar o repository", e)
         }
         
+        val shoppingListRepository = try {
+            ShoppingListRepository(database.shoppingListDao())
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Erro ao criar ShoppingListRepository", e)
+            throw RuntimeException("Erro crítico: não foi possível criar o ShoppingListRepository", e)
+        }
+        
         val themePreferencesManager = try {
             ThemePreferencesManager(applicationContext)
         } catch (e: Exception) {
@@ -93,8 +104,15 @@ class MainActivity : ComponentActivity() {
             throw RuntimeException("Erro crítico: não foi possível inicializar preferências do usuário", e)
         }
         
-        val viewModelFactory = ListaComprasViewModelFactory(repository, userPreferencesManager)
-        val historyViewModelFactory = HistoryViewModelFactory(repository)
+        val shoppingListPreferencesManager = try {
+            ShoppingListPreferencesManager(applicationContext)
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Erro ao criar ShoppingListPreferencesManager", e)
+            throw RuntimeException("Erro crítico: não foi possível inicializar preferências de lista", e)
+        }
+        
+        val historyViewModelFactory = HistoryViewModelFactory(repository, shoppingListPreferencesManager)
+        val shoppingListViewModelFactory = ShoppingListViewModelFactory(shoppingListRepository, shoppingListPreferencesManager)
         val updateViewModelFactory = UpdateViewModelFactory(applicationContext)
         
         // Rastrear uso do app
@@ -125,6 +143,12 @@ class MainActivity : ComponentActivity() {
                         color = MaterialTheme.colorScheme.background
                     ) {
                         val navController = rememberNavController()
+                        // Criar ShoppingListViewModel primeiro
+                        val shoppingListViewModel: ShoppingListViewModel = viewModel(factory = shoppingListViewModelFactory)
+                        // Criar Factory do ListaComprasViewModel com o ShoppingListViewModel
+                        val viewModelFactory = remember(shoppingListViewModel) {
+                            ListaComprasViewModelFactory(repository, userPreferencesManager, shoppingListPreferencesManager, shoppingListRepository, shoppingListViewModel)
+                        }
                         val viewModel: ListaComprasViewModel = viewModel(factory = viewModelFactory)
                         val updateViewModel: UpdateViewModel = viewModel(factory = updateViewModelFactory)
                         
@@ -153,6 +177,7 @@ class MainActivity : ComponentActivity() {
                             composable(Screen.ListaCompras.route) {
                                 ListaComprasScreen(
                                     viewModel = viewModel,
+                                    shoppingListViewModel = shoppingListViewModel,
                                     updateViewModel = updateViewModel,
                                     onNavigateToSettings = {
                                         try {

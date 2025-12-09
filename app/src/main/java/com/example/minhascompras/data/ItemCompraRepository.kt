@@ -10,8 +10,16 @@ class ItemCompraRepository(
 ) {
     val allItens: Flow<List<ItemCompra>> = itemCompraDao.getAllItens()
 
+    fun getItensByList(listId: Long): Flow<List<ItemCompra>> {
+        return itemCompraDao.getItensByList(listId)
+    }
+
     suspend fun getAllItensList(): List<ItemCompra> {
         return itemCompraDao.getAllItens().first()
+    }
+
+    suspend fun getAllItensListByList(listId: Long): List<ItemCompra> {
+        return itemCompraDao.getItensByList(listId).first()
     }
 
     fun getFilteredItens(
@@ -41,6 +49,41 @@ class ItemCompraRepository(
                     itemCompraDao.getItensByStatus(comprado = true)
                 } else {
                     itemCompraDao.searchItensByStatus(normalizedQuery, comprado = true)
+                }
+            }
+        }
+        
+        return baseFlow.map { items -> applySortOrder(items, sortOrder) }
+    }
+
+    fun getFilteredItensByList(
+        listId: Long,
+        searchQuery: String, 
+        filterStatus: FilterStatus,
+        sortOrder: SortOrder
+    ): Flow<List<ItemCompra>> {
+        val normalizedQuery = searchQuery.trim()
+        
+        val baseFlow = when (filterStatus) {
+            FilterStatus.ALL -> {
+                if (normalizedQuery.isEmpty()) {
+                    itemCompraDao.getItensByList(listId)
+                } else {
+                    itemCompraDao.searchItensByList(listId, normalizedQuery)
+                }
+            }
+            FilterStatus.PENDING -> {
+                if (normalizedQuery.isEmpty()) {
+                    itemCompraDao.getItensByListAndStatus(listId, comprado = false)
+                } else {
+                    itemCompraDao.searchItensByListAndStatus(listId, normalizedQuery, comprado = false)
+                }
+            }
+            FilterStatus.PURCHASED -> {
+                if (normalizedQuery.isEmpty()) {
+                    itemCompraDao.getItensByListAndStatus(listId, comprado = true)
+                } else {
+                    itemCompraDao.searchItensByListAndStatus(listId, normalizedQuery, comprado = true)
                 }
             }
         }
@@ -92,8 +135,16 @@ class ItemCompraRepository(
         itemCompraDao.deleteComprados()
     }
 
+    suspend fun deleteCompradosByList(listId: Long) {
+        itemCompraDao.deleteCompradosByList(listId)
+    }
+
     suspend fun deleteAll() {
         itemCompraDao.deleteAll()
+    }
+
+    suspend fun deleteAllByList(listId: Long) {
+        itemCompraDao.deleteAllByList(listId)
     }
 
     suspend fun replaceAllItems(items: List<ItemCompra>) {
@@ -101,12 +152,13 @@ class ItemCompraRepository(
     }
 
     // Funções de histórico
-    suspend fun archiveCurrentList(items: List<ItemCompra>) {
+    suspend fun archiveCurrentList(items: List<ItemCompra>, listId: Long, listName: String) {
         if (items.isEmpty()) return
         
         val history = ShoppingListHistory(
             completionDate = System.currentTimeMillis(),
-            listName = "Lista de Compras"
+            listName = listName,
+            listId = listId
         )
         
         val historyItems = items.map { item ->
@@ -121,8 +173,8 @@ class ItemCompraRepository(
         
         historyDao.insertHistoryWithItems(history, historyItems)
         
-        // Limpar a lista atual
-        itemCompraDao.deleteAll()
+        // Limpar apenas os itens da lista atual (não todos)
+        itemCompraDao.deleteAllByList(listId)
     }
 
     fun getHistoryLists(): Flow<List<ShoppingListHistory>> {
@@ -137,7 +189,7 @@ class ItemCompraRepository(
         historyDao.deleteHistoryById(historyId)
     }
 
-    suspend fun reuseHistoryList(historyId: Long) {
+    suspend fun reuseHistoryList(historyId: Long, listId: Long) {
         val historyWithItems = historyDao.getHistoryListWithItems(historyId).first()
         if (historyWithItems != null) {
             val items = historyWithItems.items.map { historyItem ->
@@ -147,7 +199,8 @@ class ItemCompraRepository(
                     preco = historyItem.preco,
                     categoria = historyItem.categoria,
                     comprado = false, // Resetar para não comprado
-                    dataCriacao = System.currentTimeMillis()
+                    dataCriacao = System.currentTimeMillis(),
+                    listId = listId // Associar à lista ativa
                 )
             }
             itemCompraDao.insertAll(items)

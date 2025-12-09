@@ -6,6 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.minhascompras.data.FilterStatus
 import com.example.minhascompras.data.ItemCompra
 import com.example.minhascompras.data.ItemCompraRepository
+import com.example.minhascompras.data.ShoppingList
+import com.example.minhascompras.data.ShoppingListPreferencesManager
+import com.example.minhascompras.data.ShoppingListRepository
 import com.example.minhascompras.data.SortOrder
 import com.example.minhascompras.data.UserPreferencesManager
 import com.example.minhascompras.utils.Logger
@@ -18,14 +21,28 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class ListaComprasViewModel(
     private val repository: ItemCompraRepository,
-    private val userPreferencesManager: UserPreferencesManager
+    private val userPreferencesManager: UserPreferencesManager,
+    private val shoppingListPreferencesManager: ShoppingListPreferencesManager,
+    private val shoppingListRepository: ShoppingListRepository,
+    private val shoppingListViewModel: ShoppingListViewModel? = null
 ) : ViewModel() {
+    
+    // Observar quantidade de listas não-padrão
+    val hasUserCreatedLists: StateFlow<Boolean> = shoppingListViewModel?.nonDefaultListCount
+        ?.map { it > 0 }
+        ?.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        ) ?: MutableStateFlow(false).asStateFlow()
     // StateFlows para busca e filtro
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -51,6 +68,14 @@ class ListaComprasViewModel(
     private val _uiMessages = MutableSharedFlow<UiMessage>(extraBufferCapacity = 1)
     val uiMessages: SharedFlow<UiMessage> = _uiMessages.asSharedFlow()
 
+    // ID da lista ativa (nullable - pode ser null se não houver listas)
+    val activeListId: StateFlow<Long?> = shoppingListPreferencesManager.activeListId
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = null
+        )
+
     // SortOrder do DataStore
     val sortOrder: StateFlow<SortOrder> = userPreferencesManager.sortOrder
         .stateIn(
@@ -59,23 +84,34 @@ class ListaComprasViewModel(
             initialValue = SortOrder.BY_DATE_DESC
         )
 
-    // Lista completa de itens (sem filtro) para estatísticas
-    val allItens: StateFlow<List<ItemCompra>> = repository.allItens
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+    // Lista completa de itens (sem filtro) para estatísticas da lista ativa
+    val allItens: StateFlow<List<ItemCompra>> = activeListId.flatMapLatest { listId ->
+        if (listId != null) {
+            repository.getItensByList(listId)
+        } else {
+            kotlinx.coroutines.flow.flowOf(emptyList())
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
 
-    // Combine search query (com debounce), filter status e sort order para criar um flow reativo
+    // Combine activeListId, search query (com debounce), filter status e sort order para criar um flow reativo
     val itens: StateFlow<List<ItemCompra>> = combine(
+        activeListId,
         _searchQuery.debounce(300L),
         _filterStatus,
         sortOrder
-    ) { query, filter, sort ->
-        Triple(query, filter, sort)
-    }.flatMapLatest { (query, filter, sort) ->
-        repository.getFilteredItens(query, filter, sort)
+    ) { listId, query, filter, sort ->
+        listId to Triple(query, filter, sort)
+    }.flatMapLatest { (listId, triple) ->
+        val (query, filter, sort) = triple
+        if (listId != null) {
+            repository.getFilteredItensByList(listId, query, filter, sort)
+        } else {
+            kotlinx.coroutines.flow.flowOf(emptyList())
+        }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -99,7 +135,58 @@ class ListaComprasViewModel(
     fun inserirItem(nome: String, quantidade: Int = 1, preco: Double? = null, categoria: String = "Outros") {
         if (nome.isNotBlank()) {
             viewModelScope.launch {
-                repository.insert(ItemCompra(nome = nome.trim(), quantidade = quantidade, preco = preco, categoria = categoria))
+                // Verificar se há listas criadas pelo usuário
+                val allLists = shoppingListRepository.allLists.first()
+                val availableLists = allLists.filter { !it.isArchived }
+                if (availableLists.isEmpty()) {
+                    _uiMessages.emit(UiMessage.Error("Crie uma lista de compras antes de adicionar produtos"))
+                    return@launch
+                }
+                
+                val listId = activeListId.value
+                if (listId == null) {
+                    // Se não houver lista ativa, usar a primeira lista disponível
+                    val firstList = availableLists.first()
+                    shoppingListViewModel?.setActiveList(firstList.id)
+                    repository.insert(
+                        ItemCompra(
+                            nome = nome.trim(),
+                            quantidade = quantidade,
+                            preco = preco,
+                            categoria = categoria,
+                            listId = firstList.id
+                        )
+                    )
+                    return@launch
+                }
+                
+                // Verificar se a lista ativa ainda existe
+                val activeList = shoppingListRepository.getListByIdSync(listId)
+                if (activeList == null || activeList.isArchived) {
+                    // Se a lista não existe mais ou foi arquivada, usar a primeira lista disponível
+                    val firstList = availableLists.firstOrNull { it.id != listId } ?: availableLists.first()
+                    shoppingListViewModel?.setActiveList(firstList.id)
+                    repository.insert(
+                        ItemCompra(
+                            nome = nome.trim(),
+                            quantidade = quantidade,
+                            preco = preco,
+                            categoria = categoria,
+                            listId = firstList.id
+                        )
+                    )
+                    return@launch
+                }
+                
+                repository.insert(
+                    ItemCompra(
+                        nome = nome.trim(),
+                        quantidade = quantidade,
+                        preco = preco,
+                        categoria = categoria,
+                        listId = listId
+                    )
+                )
             }
         }
     }
@@ -140,7 +227,40 @@ class ListaComprasViewModel(
             try {
                 val itensAtuais = allItens.value
                 if (itensAtuais.isNotEmpty()) {
-                    repository.archiveCurrentList(itensAtuais)
+                    val listId = activeListId.value
+                    if (listId == null) {
+                        _uiMessages.emit(UiMessage.Error("Nenhuma lista ativa selecionada"))
+                        return@launch
+                    }
+                    val list = shoppingListRepository.getListByIdSync(listId)
+                    
+                    // Não há mais lista padrão, então qualquer lista pode ser arquivada
+                    
+                    val listName = list?.nome ?: "Lista de Compras"
+                    
+                    // Arquivar os itens
+                    repository.archiveCurrentList(itensAtuais, listId, listName)
+                    
+                    // Marcar a lista como arquivada
+                    if (list != null) {
+                        shoppingListRepository.update(list.copy(isArchived = true))
+                        
+                        // Se a lista arquivada era a ativa, tentar usar a primeira lista disponível
+                        if (listId == activeListId.value) {
+                            val allLists = shoppingListRepository.allLists.first()
+                            val firstList = allLists.firstOrNull { !it.isArchived && it.id != listId }
+                            if (firstList != null) {
+                                shoppingListViewModel?.setActiveList(firstList.id)
+                            } else {
+                                shoppingListViewModel?.let { vm ->
+                                    viewModelScope.launch {
+                                        shoppingListPreferencesManager.setActiveListId(null)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
                     _uiMessages.emit(UiMessage.Success("Lista arquivada com sucesso!"))
                 } else {
                     _uiMessages.emit(UiMessage.Info("Não há itens para arquivar."))
@@ -156,26 +276,47 @@ class ListaComprasViewModel(
 
     fun deletarComprados() {
         viewModelScope.launch {
-            repository.deleteComprados()
+            val listId = activeListId.value
+            if (listId != null) {
+                repository.deleteCompradosByList(listId)
+            }
         }
     }
 
     fun deletarTodos() {
         viewModelScope.launch {
-            repository.deleteAll()
+            val listId = activeListId.value
+            if (listId != null) {
+                repository.deleteAllByList(listId)
+            }
         }
     }
 
     suspend fun getAllItensForExport(): List<ItemCompra> {
-        return repository.getAllItensList()
+        val listId = activeListId.value
+        return if (listId != null) {
+            repository.getAllItensListByList(listId)
+        } else {
+            emptyList()
+        }
     }
 
     suspend fun importItens(items: List<ItemCompra>) {
-        repository.replaceAllItems(items)
+        val listId = activeListId.value
+        if (listId != null) {
+            // Atualizar todos os itens para a lista ativa antes de importar
+            val itemsWithListId = items.map { it.copy(listId = listId) }
+            repository.replaceAllItems(itemsWithListId)
+        }
     }
 
     suspend fun getShareableText(): String {
-        val itens = repository.getAllItensList()
+        val listId = activeListId.value
+        val itens = if (listId != null) {
+            repository.getAllItensListByList(listId)
+        } else {
+            emptyList()
+        }
         if (itens.isEmpty()) {
             return "Lista de Compras vazia"
         }
@@ -245,12 +386,15 @@ class ListaComprasViewModel(
 
 class ListaComprasViewModelFactory(
     private val repository: ItemCompraRepository,
-    private val userPreferencesManager: UserPreferencesManager
+    private val userPreferencesManager: UserPreferencesManager,
+    private val shoppingListPreferencesManager: ShoppingListPreferencesManager,
+    private val shoppingListRepository: ShoppingListRepository,
+    private val shoppingListViewModel: ShoppingListViewModel? = null
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ListaComprasViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return ListaComprasViewModel(repository, userPreferencesManager) as T
+            return ListaComprasViewModel(repository, userPreferencesManager, shoppingListPreferencesManager, shoppingListRepository, shoppingListViewModel) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

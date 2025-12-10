@@ -1,6 +1,5 @@
 package com.example.minhascompras.ui.components
 
-import android.graphics.Typeface
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,23 +11,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.minhascompras.ui.viewmodel.SpendingDataPoint
-import com.patrykandpatrick.vico.compose.axis.axisGuidelineComponent
 import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis
 import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
 import com.patrykandpatrick.vico.compose.chart.Chart
 import com.patrykandpatrick.vico.compose.chart.line.lineChart
 import com.patrykandpatrick.vico.compose.component.lineComponent
-import com.patrykandpatrick.vico.compose.component.marker.rememberMarker
-import com.patrykandpatrick.vico.compose.component.shape.roundedCornerShape
-import com.patrykandpatrick.vico.compose.component.textComponent
-import com.patrykandpatrick.vico.compose.dimensions.dimensionsOf
-import com.patrykandpatrick.vico.compose.style.currentChartStyle
+import com.patrykandpatrick.vico.compose.chart.line.lineSpec
 import com.patrykandpatrick.vico.core.axis.AxisPosition
 import com.patrykandpatrick.vico.core.axis.formatter.AxisValueFormatter
-import com.patrykandpatrick.vico.core.chart.scroll.rememberChartScrollState
 import com.patrykandpatrick.vico.core.entry.FloatEntry
 import com.patrykandpatrick.vico.core.entry.entryModelOf
 import java.text.NumberFormat
@@ -72,9 +64,6 @@ fun SpendingLineChart(
         entryModelOf(chartEntries)
     }
 
-    // Estado do scroll do gráfico
-    val chartScrollState = rememberChartScrollState()
-
     // Formata o valor do eixo X (índice para data)
     val bottomAxisValueFormatter = remember(spendingData, dateFormat) {
         AxisValueFormatter<AxisPosition.Horizontal.Bottom> { value, _ ->
@@ -94,33 +83,6 @@ fun SpendingLineChart(
         }
     }
 
-    // Configuração do marcador (tooltip) para exibir detalhes ao tocar no gráfico
-    val marker = rememberMarker(
-        label = textComponent {
-            color = MaterialTheme.colorScheme.onSurface
-            background = roundedCornerShape(
-                cornerSize = 4.dp,
-                color = MaterialTheme.colorScheme.surface
-            )
-            padding = dimensionsOf(horizontal = 8.dp, vertical = 4.dp)
-            typeface = Typeface.MONOSPACE
-            shadow = com.patrykandpatrick.vico.core.marker.Marker.Label.Text.Shadow(
-                color = Color.Black.copy(alpha = 0.2f),
-                radius = 4f,
-                dx = 0f,
-                dy = 2f
-            )
-        },
-        indicator = lineComponent(
-            color = MaterialTheme.colorScheme.primary,
-            thickness = 2.dp
-        ),
-        guideline = axisGuidelineComponent(
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
-            thickness = 1.dp
-        )
-    )
-
     Column(modifier = modifier.fillMaxWidth()) {
         Chart(
             modifier = Modifier
@@ -128,44 +90,20 @@ fun SpendingLineChart(
                 .height(250.dp),
             chart = lineChart(
                 lines = listOf(
-                    lineComponent(
-                        color = MaterialTheme.colorScheme.primary,
-                        thickness = 3.dp,
-                        smooth = true // Linha suave
+                    lineSpec(
+                        lineColor = MaterialTheme.colorScheme.primary
                     )
                 ),
                 spacing = 0.dp
             ),
             model = model,
             startAxis = rememberStartAxis(
-                title = "Total Gasto",
-                titleComponent = textComponent {
-                    color = MaterialTheme.colorScheme.onSurface
-                    typeface = Typeface.DEFAULT_BOLD
-                },
-                valueFormatter = startAxisValueFormatter,
-                guideline = axisGuidelineComponent(
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-                    thickness = 1.dp
-                )
+                valueFormatter = startAxisValueFormatter
             ),
             bottomAxis = rememberBottomAxis(
-                title = "Data",
-                titleComponent = textComponent {
-                    color = MaterialTheme.colorScheme.onSurface
-                    typeface = Typeface.DEFAULT_BOLD
-                },
                 valueFormatter = bottomAxisValueFormatter,
-                labelRotationDegrees = 45f, // Rotaciona as labels para evitar sobreposição
-                guideline = axisGuidelineComponent(
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-                    thickness = 1.dp
-                )
-            ),
-            marker = marker,
-            chartScrollState = chartScrollState,
-            isZoomEnabled = true // Habilita o pinch-to-zoom
+                labelRotationDegrees = 45f
+            )
         )
     }
 }
-

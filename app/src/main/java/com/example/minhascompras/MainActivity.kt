@@ -126,6 +126,18 @@ class MainActivity : ComponentActivity() {
         val updateViewModelFactory = UpdateViewModelFactory(applicationContext)
         val statisticsViewModelFactory = com.example.minhascompras.ui.viewmodel.StatisticsViewModelFactory(repository)
         
+        val notificationPreferencesManager = try {
+            com.example.minhascompras.data.NotificationPreferencesManager(applicationContext)
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Erro ao criar NotificationPreferencesManager", e)
+            throw RuntimeException("Erro crítico: não foi possível inicializar preferências de notificações", e)
+        }
+        
+        val notificationViewModelFactory = com.example.minhascompras.ui.viewmodel.NotificationViewModelFactory(
+            notificationPreferencesManager,
+            applicationContext
+        )
+        
         // Rastrear uso do app
         lifecycleScope.launch {
             try {
@@ -184,7 +196,7 @@ class MainActivity : ComponentActivity() {
                         val shoppingListViewModel: ShoppingListViewModel = viewModel(factory = shoppingListViewModelFactory)
                         // Criar Factory do ListaComprasViewModel com o ShoppingListViewModel
                         val viewModelFactory = remember(shoppingListViewModel) {
-                            ListaComprasViewModelFactory(repository, userPreferencesManager, shoppingListPreferencesManager, shoppingListRepository, shoppingListViewModel)
+                            ListaComprasViewModelFactory(repository, userPreferencesManager, shoppingListPreferencesManager, shoppingListRepository, shoppingListViewModel, context)
                         }
                         val viewModel: ListaComprasViewModel = viewModel(factory = viewModelFactory)
                         val updateViewModel: UpdateViewModel = viewModel(factory = updateViewModelFactory)
@@ -240,10 +252,14 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                             composable(Screen.Settings.route) {
+                                val notificationViewModel: com.example.minhascompras.ui.viewmodel.NotificationViewModel = viewModel(
+                                    factory = notificationViewModelFactory
+                                )
                                 SettingsScreen(
                                     viewModel = viewModel,
                                     themeViewModel = themeViewModel,
                                     updateViewModel = updateViewModel,
+                                    notificationViewModel = notificationViewModel,
                                     onNavigateBack = {
                                         try {
                                             navController.popBackStack()

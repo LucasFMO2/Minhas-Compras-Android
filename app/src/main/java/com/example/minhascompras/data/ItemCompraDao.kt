@@ -82,6 +82,24 @@ interface ItemCompraDao {
     @Query("DELETE FROM itens_compra WHERE listId = :listId")
     suspend fun deleteAllByList(listId: Long)
 
+    @Query("SELECT COUNT(*) FROM itens_compra WHERE comprado = 0")
+    suspend fun countPendingItems(): Int
+
+    @Query("""
+        SELECT COUNT(*) FROM itens_compra 
+        WHERE comprado = 0 
+        AND listId = :listId
+    """)
+    suspend fun countPendingItemsByList(listId: Long): Int
+
+    @Query("""
+        SELECT * FROM itens_compra 
+        WHERE comprado = 0 
+        AND dataCriacao < :cutoffTime
+        ORDER BY dataCriacao ASC
+    """)
+    suspend fun getPendingItemsOlderThan(cutoffTime: Long): List<ItemCompra>
+
     @Transaction
     suspend fun replaceAllItems(items: List<ItemCompra>) {
         deleteAll()

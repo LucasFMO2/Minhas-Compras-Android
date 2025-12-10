@@ -3,9 +3,11 @@ package com.example.minhascompras.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import android.content.Context
 import com.example.minhascompras.data.FilterStatus
 import com.example.minhascompras.data.ItemCompra
 import com.example.minhascompras.data.ItemCompraRepository
+import com.example.minhascompras.data.PurchaseCompleteNotifier
 import com.example.minhascompras.data.ShoppingList
 import com.example.minhascompras.data.ShoppingListPreferencesManager
 import com.example.minhascompras.data.ShoppingListRepository
@@ -32,8 +34,11 @@ class ListaComprasViewModel(
     private val userPreferencesManager: UserPreferencesManager,
     private val shoppingListPreferencesManager: ShoppingListPreferencesManager,
     private val shoppingListRepository: ShoppingListRepository,
-    private val shoppingListViewModel: ShoppingListViewModel? = null
+    private val shoppingListViewModel: ShoppingListViewModel? = null,
+    private val context: Context? = null
 ) : ViewModel() {
+    
+    private val purchaseCompleteNotifier = context?.let { PurchaseCompleteNotifier(it) }
     
     // Observar quantidade de listas não-padrão
     val hasUserCreatedLists: StateFlow<Boolean> = shoppingListViewModel?.nonDefaultListCount
@@ -217,6 +222,16 @@ class ListaComprasViewModel(
     fun toggleComprado(item: ItemCompra) {
         viewModelScope.launch {
             repository.update(item.copy(comprado = !item.comprado))
+            
+            // Verificar se a lista foi completada após marcar item como comprado
+            if (item.comprado.not()) { // Se estava não comprado e agora está comprado
+                val activeListId = activeListId.value ?: item.listId
+                val activeList = shoppingListRepository.getListByIdSync(activeListId)
+                purchaseCompleteNotifier?.checkAndNotifyIfCompleteAsync(
+                    activeListId,
+                    activeList?.nome ?: "Lista de Compras"
+                )
+            }
         }
     }
 
@@ -389,12 +404,13 @@ class ListaComprasViewModelFactory(
     private val userPreferencesManager: UserPreferencesManager,
     private val shoppingListPreferencesManager: ShoppingListPreferencesManager,
     private val shoppingListRepository: ShoppingListRepository,
-    private val shoppingListViewModel: ShoppingListViewModel? = null
+    private val shoppingListViewModel: ShoppingListViewModel? = null,
+    private val context: Context? = null
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ListaComprasViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return ListaComprasViewModel(repository, userPreferencesManager, shoppingListPreferencesManager, shoppingListRepository, shoppingListViewModel) as T
+            return ListaComprasViewModel(repository, userPreferencesManager, shoppingListPreferencesManager, shoppingListRepository, shoppingListViewModel, context) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

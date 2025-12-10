@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -25,12 +24,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.minhascompras.ui.viewmodel.CategoryBreakdown
-import com.patrykandpatrick.vico.compose.chart.Chart
-import com.patrykandpatrick.vico.compose.chart.pie.pieChart
-import com.patrykandpatrick.vico.compose.component.shape.shader.fromBrush
-import com.patrykandpatrick.vico.core.chart.pie.PieChart
-import com.patrykandpatrick.vico.core.entry.FloatEntry
-import com.patrykandpatrick.vico.core.entry.entryModelOf
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -71,87 +64,55 @@ fun CategoryPieChart(
 
     val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale("pt", "BR")) }
     
-    // Converter CategoryBreakdown para FloatEntry do Vico
-    val chartEntries = remember(categoryData) {
-        categoryData.map { breakdown ->
-            breakdown.amount.toFloat()
-        }
-    }
-    
-    val model = remember(chartEntries) {
-        entryModelOf(chartEntries)
-    }
-
-    // Criar lista de cores para cada fatia
+    // Criar lista de cores para cada categoria
     val colors = remember(categoryData) {
         categoryData.map { breakdown ->
             categoryColors[breakdown.category] ?: categoryColors["Outros"]!!
         }
     }
 
-    // Criar slices do gráfico de pizza
-    val slices = remember(colors, categoryData) {
-        colors.mapIndexed { index, color ->
-            PieChart.Slice(
-                color = fromBrush(
-                    androidx.compose.ui.graphics.Brush.linearGradient(
-                        listOf(color, color)
-                    )
-                ),
-                labelText = if (categoryData[index].percentage > 5) {
-                    "${categoryData[index].percentage.toInt()}%"
-                } else {
-                    ""
-                }
-            )
-        }
-    }
-
     Column(modifier = modifier.fillMaxWidth()) {
-        // Gráfico de pizza
-        Chart(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(250.dp),
-            chart = pieChart(slices = slices),
-            model = model
-        )
-        
-        // Legenda customizada
-        Spacer(modifier = Modifier.height(16.dp))
-        
+        // Exibir dados em formato de lista com cores
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+                .padding(16.dp),
             verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
         ) {
             categoryData.forEachIndexed { index, breakdown ->
-                Row(
+                Card(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                    colors = CardDefaults.cardColors(
+                        containerColor = colors[index].copy(alpha = 0.1f)
+                    )
                 ) {
-                    Box(
+                    Row(
                         modifier = Modifier
-                            .size(16.dp)
-                            .clip(CircleShape)
-                            .background(colors[index])
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = breakdown.category,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Text(
-                        text = "${currencyFormat.format(breakdown.amount)} (${breakdown.percentage.toInt()}%)",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(CircleShape)
+                                .background(colors[index])
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = breakdown.category,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = "${currencyFormat.format(breakdown.amount)} (${breakdown.percentage.toInt()}%)",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
         }
     }
 }
-

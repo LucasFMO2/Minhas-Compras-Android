@@ -1304,8 +1304,74 @@
         "testStrategy": "Verificar que notificações são exibidas no horário configurado. Testar que usuário pode habilitar/desabilitar cada tipo. Verificar que notificações não são excessivas ou intrusivas. Testar que ações rápidas funcionam corretamente.",
         "priority": "medium",
         "dependencies": [],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Configuração Base de Notificações e Canais",
+            "description": "Configurar as permissões necessárias para notificações, inicializar o NotificationManager e criar os canais de notificação para diferentes tipos de alertas (Android 8.0+).",
+            "dependencies": [],
+            "details": "Incluir permissões no AndroidManifest.xml. Criar uma classe helper ou módulo para gerenciar canais de notificação. Definir um canal padrão e, opcionalmente, canais específicos para 'Lembrete Diário', 'Compra Concluída' e 'Itens Pendentes'. As notificações devem ser configuradas para exibir um ícone e um som padrão.\n<info added on 2025-12-10T19:12:51.217Z>\nFoi criado o `NotificationChannelManager.kt` no pacote `data/` para gerenciar de forma centralizada os canais de notificação. Esta classe singleton implementa três canais: `CHANNEL_DAILY_REMINDER` (importância padrão), `CHANNEL_PURCHASE_COMPLETE` (importância padrão) e `CHANNEL_PENDING_ITEMS` (importância baixa, para ser menos intrusivo). A classe `MinhasComprasApplication.kt` foi atualizada para chamar `NotificationChannelManager.createAllChannels(this)` em seu método `onCreate()`, garantindo que os canais sejam criados na inicialização do aplicativo. A permissão `POST_NOTIFICATIONS` já estava configurada corretamente no `AndroidManifest.xml`.\n</info added on 2025-12-10T19:12:51.217Z>",
+            "status": "done",
+            "testStrategy": "Verificar se as permissões são solicitadas/concedidas corretamente. Confirmar a criação dos canais de notificação em dispositivos Android 8.0+ através das configurações do sistema. Enviar uma notificação de teste para cada canal e verificar sua exibição e comportamento básicos.",
+            "updatedAt": "2025-12-10T19:12:52.833Z",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implementar Lembrete Diário Recorrente via WorkManager",
+            "description": "Desenvolver um Worker para agendar e disparar uma notificação de lembrete diário em um horário configurável pelo usuário, utilizando o WorkManager para garantir a recorrência.",
+            "dependencies": [
+              1
+            ],
+            "details": "Criar uma subclasse de `CoroutineWorker` para a notificação diária. O Worker deve consultar as preferências do usuário para determinar o horário e se a notificação está ativa. Agendar o Worker usando `PeriodicWorkRequest` com atraso inicial baseado no horário configurado e um intervalo diário. A notificação deve incluir um lembrete geral sobre compras pendentes. Utilizar o `NotificationManager` configurado no subtask 1.\n<info added on 2025-12-10T19:19:05.182Z>\nImplementação concluída com os seguintes passos: A dependência do WorkManager (`androidx.work:work-runtime-ktx`) foi adicionada aos arquivos `libs.versions.toml` e `build.gradle.kts`. Foi criado o `NotificationPreferencesManager.kt`, utilizando DataStore para gerenciar as configurações do lembrete diário (`dailyReminderEnabled`, `dailyReminderHour`, `dailyReminderMinute`). O DAO `ItemCompraDao.kt` foi atualizado com um novo método `countPendingItems()` para contar itens não comprados. O `DailyReminderWorker.kt` foi desenvolvido para consultar as preferências do usuário, contar os itens pendentes e exibir uma notificação no canal `CHANNEL_DAILY_REMINDER`, retornando `Result.success()` para manter o agendamento periódico. Para gerenciar o agendamento, foi criado o `DailyReminderScheduler.kt`, que utiliza `PeriodicWorkRequest` com um intervalo de 24 horas. A inicialização do agendador foi adicionada ao método `onCreate` da classe `MinhasComprasApplication.kt`.\n</info added on 2025-12-10T19:19:05.182Z>\n<info added on 2025-12-10T19:43:07.289Z>\nFoi realizada uma correção para garantir a precisão do horário do lembrete diário, substituindo o `PeriodicWorkRequest` por uma cadeia de `OneTimeWorkRequest`. Em `DailyReminderScheduler.kt`, o novo método `calculateDelayUntilNextTime()` calcula o atraso exato em milissegundos até o próximo horário configurado, agendando para hoje ou para o dia seguinte, conforme necessário. Em `DailyReminderWorker.kt`, o worker agora reagenda a si mesmo para o próximo dia após a execução, chamando um novo método `rescheduleNextReminder()`. Foi adicionada também uma verificação de horário com tolerância de ±30 minutos como segurança, garantindo que a notificação seja disparada no horário exato definido pelo usuário.\n</info added on 2025-12-10T19:43:07.289Z>",
+            "status": "done",
+            "testStrategy": "Agendar o lembrete diário para um horário próximo e verificar seu disparo. Alterar o horário nas configurações e confirmar que o agendamento é atualizado. Desabilitar a notificação e verificar que ela não é mais disparada. Testar a persistência do agendamento após o reinício do dispositivo.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-10T19:19:10.852Z"
+          },
+          {
+            "id": 3,
+            "title": "Desenvolver Lógica para Notificações de Conclusão de Compra e Itens Pendentes",
+            "description": "Criar a lógica para disparar notificações quando uma lista de compras tem todos os seus itens marcados como comprados e para lembrar o usuário de itens que estão pendentes há X dias (configurável).",
+            "dependencies": [
+              1
+            ],
+            "details": "Para 'Compra Concluída': Implementar um listener ou observador na camada de dados que detecta quando todos os itens de uma `ShoppingList` (`ItemCompra`) são marcados como comprados. Esta notificação deve ser disparada uma única vez por conclusão. Para 'Itens Pendentes': Criar um segundo Worker (ou estender o diário, se aplicável) que, periodicamente (e.g., semanalmente ou diariamente se for um check), verifica itens pendentes há mais de `X` dias (o `X` sendo uma preferência do usuário, padrão 7 dias) e dispara uma notificação consolidada. Ambas as notificações devem ser personalizáveis com base nas preferências do usuário (habilitar/desabilitar).\n<info added on 2025-12-10T19:51:23.340Z>\nA implementação foi concluída. As seguintes alterações foram realizadas:\n\n1.  **Preferências**: Adicionadas novas chaves em `NotificationPreferencesManager.kt` para controlar as notificações de compra concluída (`purchaseCompleteEnabled`), itens pendentes (`pendingItemsEnabled`) e o tempo para considerar um item pendente (`pendingItemsDays`).\n2.  **DAO**: `ItemCompraDao.kt` foi estendido com os métodos `countPendingItemsByList` e `getPendingItemsOlderThan` para consultar o estado dos itens.\n3.  **Notificação de Compra Concluída**: Criada a classe `PurchaseCompleteNotifier.kt`, responsável por verificar se todos os itens de uma lista foram comprados. A verificação é disparada no `ListaComprasViewModel.toggleComprado()`. A notificação utiliza o canal `CHANNEL_PURCHASE_COMPLETE`.\n4.  **Notificação de Itens Pendentes**: Implementado o `PendingItemsWorker.kt`, um worker diário que busca por itens pendentes com base na configuração do usuário, agrupando-os por lista em uma notificação consolidada. Utiliza o canal `CHANNEL_PENDING_ITEMS`.\n5.  **Agendamento**: O `PendingItemsScheduler.kt` foi criado para gerenciar o agendamento do worker de itens pendentes, e sua inicialização foi adicionada em `MinhasComprasApplication.kt`.\n6.  **Integração**: O `ListaComprasViewModelFactory` foi atualizado em `MainActivity.kt` para prover o contexto necessário às notificações no ViewModel.\n</info added on 2025-12-10T19:51:23.340Z>",
+            "status": "done",
+            "testStrategy": "Marcar todos os itens de uma lista como comprados e verificar a notificação de 'Compra Concluída'. Criar uma lista com itens pendentes por mais de 7 dias e simular a execução do Worker para verificar o lembrete de 'Itens Pendentes'. Testar diferentes valores para 'X' dias e verificar a lógica. Desabilitar cada tipo de notificação individualmente e confirmar que não são disparadas.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-10T19:51:26.217Z"
+          },
+          {
+            "id": 4,
+            "title": "Integrar Configurações na SettingsScreen e Persistência",
+            "description": "Adicionar à `SettingsScreen` opções de configuração para cada tipo de notificação, incluindo um toggle para habilitar/desabilitar e campos para personalizar horários/dias.",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Modificar `SettingsScreen` (ou componente similar) para incluir uma seção de 'Notificações'. Adicionar toggles para 'Lembrete Diário', 'Compra Concluída' e 'Itens Pendentes'. Para o lembrete diário, incluir um seletor de horário. Para itens pendentes, incluir um campo numérico para definir 'X' dias. Utilizar `SharedPreferences` ou o Room Database (preferencialmente, se o `SettingsManager` puder ser adaptado para Android ou se for um novo `SettingsManager` para Android) para persistir as preferências do usuário. A alteração dessas configurações deve atualizar o agendamento do WorkManager e a lógica de disparo.\n<info added on 2025-12-10T20:03:02.452Z>\nImplementação concluída. Foi criado um `NotificationViewModel`, seguindo o padrão do `ThemeViewModel`, que gerencia as preferências de notificação através de um `NotificationPreferencesManager` utilizando DataStore para persistência. A `SettingsScreen` foi atualizada com uma nova seção \"Notificações\" contendo cards para \"Lembrete Diário\" (com switch e seletor de horário via `TimePickerDialog`), \"Compra Concluída\" (com switch) e \"Itens Pendentes\" (com switch e seletor de dias via `AlertDialog` com `OutlinedTextField` validado). A integração foi realizada na `MainActivity`, e as alterações nas configurações atualizam automaticamente os agendadores (`DailyReminderScheduler` e `PendingItemsScheduler`).\n</info added on 2025-12-10T20:03:02.452Z>",
+            "status": "done",
+            "testStrategy": "Navegar até a `SettingsScreen` e verificar a presença de todas as opções de notificação. Alterar cada configuração (toggle, horário, número de dias) e verificar se o estado é salvo corretamente e carregado após reiniciar o app. Modificar um toggle e confirmar que o comportamento da notificação correspondente é alterado.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-10T20:03:03.475Z"
+          },
+          {
+            "id": 5,
+            "title": "Implementar Ação Rápida 'Abrir App' e (Opcional) Geofencing",
+            "description": "Adicionar uma ação rápida 'Abrir App' às notificações para que o usuário possa acessar rapidamente o aplicativo. Opcionalmente, pesquisar e implementar uma notificação baseada em geofencing para quando o usuário se aproxima de um local de compra.",
+            "dependencies": [
+              1
+            ],
+            "details": "Para 'Abrir App': Em todas as notificações criadas nos subtasks anteriores, adicionar um `PendingIntent` que lança a `MainActivity` do aplicativo quando a notificação é tocada. Para 'Geofencing' (opcional): Pesquisar a API de Geofencing do Google Play Services. Implementar a detecção de entrada/saída de regiões pré-definidas (e.g., supermercados comuns) e disparar uma notificação contextual (e.g., 'Você está perto do supermercado! Sua lista 'Compras do Mês' tem 10 itens pendentes'). Considerar permissões de localização e consumo de bateria.\n<info added on 2025-12-10T19:58:06.493Z>\nVerificação e correção concluídas. Foi confirmado que a ação \"Abrir App\" já estava implementada corretamente nas notificações dos workers: `DailyReminderWorker`, `PurchaseCompleteNotifier` e `PendingItemsWorker`. Um ajuste foi realizado para evitar conflitos, atribuindo `requestCodes` únicos a cada `PendingIntent` (2001, 2002 e 2003, respectivamente). A configuração dos Intents foi validada, utilizando as flags `FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK` e `FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE` para compatibilidade com Android 12+, além de `setAutoCancel(true)`. A implementação opcional de Geofencing foi adiada para uma futura versão devido à sua complexidade. A ação \"Abrir App\" está totalmente implementada e funcional.\n</info added on 2025-12-10T19:58:06.493Z>",
+            "status": "done",
+            "testStrategy": "Disparar uma notificação e tocar na ação rápida 'Abrir App' para confirmar que o aplicativo é aberto corretamente. Para geofencing (se implementado): Simular a entrada e saída de uma região de geofence (usando emuladores ou ferramentas de desenvolvedor) e verificar o disparo da notificação correspondente.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-10T19:58:07.895Z"
+          }
+        ],
+        "updatedAt": "2025-12-10T20:03:03.475Z"
       },
       {
         "id": "15",
@@ -1617,9 +1683,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-12-10T02:19:13.597Z",
+      "lastModified": "2025-12-10T20:03:03.489Z",
       "taskCount": 17,
-      "completedCount": 12,
+      "completedCount": 13,
       "tags": [
         "master"
       ]

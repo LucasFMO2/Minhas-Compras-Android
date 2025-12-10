@@ -14,8 +14,8 @@ android {
         applicationId = "com.example.minhascompras"
         minSdk = 24
         targetSdk = 34
-        versionCode = 72
-        versionName = "2.22.0"
+        versionCode = 73
+        versionName = "2.23.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -85,6 +85,9 @@ dependencies {
     
     // DataStore
     implementation(libs.androidx.datastore.preferences)
+    
+    // WorkManager
+    implementation(libs.androidx.work.runtime.ktx)
     
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))

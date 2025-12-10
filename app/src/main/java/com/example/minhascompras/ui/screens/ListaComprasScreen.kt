@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -60,6 +61,7 @@ fun ListaComprasScreen(
     updateViewModel: UpdateViewModel? = null,
     onNavigateToSettings: () -> Unit = {},
     onNavigateToHistory: () -> Unit = {},
+    onNavigateToStatistics: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val itens by viewModel.itens.collectAsState() // Lista filtrada para exibição
@@ -358,6 +360,21 @@ fun ListaComprasScreen(
                         selected = false,
                         onClick = {
                             onNavigateToHistory()
+                            scope.launch { drawerState.close() }
+                        }
+                    )
+                    
+                    NavigationDrawerItem(
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Default.BarChart,
+                                contentDescription = null
+                            )
+                        },
+                        label = { Text("Estatísticas") },
+                        selected = false,
+                        onClick = {
+                            onNavigateToStatistics()
                             scope.launch { drawerState.close() }
                         }
                     )

@@ -11,16 +11,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import android.Manifest
+import android.os.Build
 import com.example.minhascompras.data.AppDatabase
 import com.example.minhascompras.data.ItemCompraRepository
 import com.example.minhascompras.data.ShoppingListRepository
@@ -43,6 +49,9 @@ import com.example.minhascompras.ui.viewmodel.ThemeViewModel
 import com.example.minhascompras.ui.viewmodel.ThemeViewModelFactory
 import com.example.minhascompras.ui.viewmodel.UpdateViewModel
 import com.example.minhascompras.ui.viewmodel.UpdateViewModelFactory
+import com.example.minhascompras.ui.viewmodel.StatisticsViewModel
+import com.example.minhascompras.ui.viewmodel.StatisticsViewModelFactory
+import com.example.minhascompras.ui.screens.StatisticsScreen
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
@@ -52,6 +61,7 @@ sealed class Screen(val route: String) {
     object ListaCompras : Screen("lista_compras")
     object Settings : Screen("settings")
     object History : Screen("history")
+    object Statistics : Screen("statistics")
 }
 
 class MainActivity : ComponentActivity() {
@@ -114,6 +124,7 @@ class MainActivity : ComponentActivity() {
         val historyViewModelFactory = HistoryViewModelFactory(repository, shoppingListPreferencesManager)
         val shoppingListViewModelFactory = ShoppingListViewModelFactory(shoppingListRepository, shoppingListPreferencesManager)
         val updateViewModelFactory = UpdateViewModelFactory(applicationContext)
+        val statisticsViewModelFactory = com.example.minhascompras.ui.viewmodel.StatisticsViewModelFactory(repository)
         
         // Rastrear uso do app
         lifecycleScope.launch {
@@ -138,6 +149,32 @@ class MainActivity : ComponentActivity() {
                 }
                 
                 MinhasComprasTheme(darkTheme = darkTheme) {
+                    val context = LocalContext.current
+                    
+                    // Solicitar permissão de notificações para Android 13+ (API 33+)
+                    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.RequestPermission()
+                    ) { isGranted ->
+                        if (isGranted) {
+                            android.util.Log.d("MainActivity", "Permissão de notificações concedida")
+                        } else {
+                            android.util.Log.w("MainActivity", "Permissão de notificações negada")
+                        }
+                    }
+                    
+                    LaunchedEffect(Unit) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            val hasPermission = ContextCompat.checkSelfPermission(
+                                context,
+                                Manifest.permission.POST_NOTIFICATIONS
+                            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                            
+                            if (!hasPermission) {
+                                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            }
+                        }
+                    }
+                    
                     Surface(
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background
@@ -192,6 +229,13 @@ class MainActivity : ComponentActivity() {
                                         } catch (e: Exception) {
                                             android.util.Log.e("MainActivity", "Erro ao navegar", e)
                                         }
+                                    },
+                                    onNavigateToStatistics = {
+                                        try {
+                                            navController.navigate(Screen.Statistics.route)
+                                        } catch (e: Exception) {
+                                            android.util.Log.e("MainActivity", "Erro ao navegar", e)
+                                        }
                                     }
                                 )
                             }
@@ -223,6 +267,21 @@ class MainActivity : ComponentActivity() {
                                         }
                                     },
                                     onReuseList = {
+                                        try {
+                                            navController.popBackStack()
+                                        } catch (e: Exception) {
+                                            android.util.Log.e("MainActivity", "Erro ao voltar", e)
+                                        }
+                                    }
+                                )
+                            }
+                            composable(Screen.Statistics.route) {
+                                val statisticsViewModel: StatisticsViewModel = viewModel(
+                                    factory = statisticsViewModelFactory
+                                )
+                                StatisticsScreen(
+                                    viewModel = statisticsViewModel,
+                                    onNavigateBack = {
                                         try {
                                             navController.popBackStack()
                                         } catch (e: Exception) {

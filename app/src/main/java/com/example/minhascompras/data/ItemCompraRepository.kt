@@ -206,5 +206,18 @@ class ItemCompraRepository(
             itemCompraDao.insertAll(items)
         }
     }
+    
+    // Métodos para estatísticas
+    fun getHistoryByDateRange(startDate: Long, endDate: Long): Flow<List<ShoppingListHistoryWithItems>> {
+        return historyDao.getHistoryByDateRange(startDate, endDate)
+    }
+    
+    fun getHistoryByCategory(category: String, startDate: Long, endDate: Long): Flow<List<HistoryItem>> {
+        return historyDao.getHistoryByCategory(category, startDate, endDate)
+    }
+    
+    fun getTotalSpending(startDate: Long, endDate: Long): Flow<Double> {
+        return historyDao.getTotalSpending(startDate, endDate)
+    }
 }
 

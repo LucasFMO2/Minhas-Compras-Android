@@ -1,6 +1,8 @@
 package com.example.minhascompras.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
+import java.io.File
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -52,6 +54,24 @@ private data class Quadruple<A, B, C, D>(
     val fourth: D
 )
 
+// Helper function para debug logs
+private fun debugLog(location: String, message: String, data: Map<String, Any?> = emptyMap(), hypothesisId: String = "A") {
+    try {
+        Log.d("DebugLog", "[$hypothesisId] $location: $message - $data")
+        val logFile = File("c:\\Users\\nerdd\\Desktop\\Minhas-Compras-Android\\.cursor\\debug.log")
+        val logDir = logFile.parentFile
+        if (logDir != null && !logDir.exists()) {
+            logDir.mkdirs()
+        }
+        val dataEntries = data.entries.joinToString(",") { "\"${it.key}\":\"${it.value}\"" }
+        val logLine = """{"id":"log_${System.currentTimeMillis()}_${hashCode()}","timestamp":${System.currentTimeMillis()},"location":"$location","message":"$message","sessionId":"debug-session","runId":"run1","hypothesisId":"$hypothesisId","data":{$dataEntries}}"""
+        logFile.appendText("$logLine\n")
+    } catch (e: Exception) {
+        Log.e("DebugLog", "Failed to write debug log: ${e.message}", e)
+        e.printStackTrace()
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatisticsScreen(
@@ -61,6 +81,12 @@ fun StatisticsScreen(
 ) {
     val selectedPeriod by viewModel.selectedPeriod.collectAsState()
     
+    // #region agent log
+    androidx.compose.runtime.LaunchedEffect(selectedPeriod.type, selectedPeriod.startDate, selectedPeriod.endDate) {
+        debugLog("StatisticsScreen.kt:62", "selectedPeriod changed", mapOf("type" to selectedPeriod.type.toString(), "startDate" to selectedPeriod.startDate, "endDate" to selectedPeriod.endDate), "A")
+    }
+    // #endregion
+    
     // Estados para os dados
     var spendingOverTime by remember { mutableStateOf<List<com.example.minhascompras.ui.viewmodel.SpendingDataPoint>>(emptyList()) }
     var categoryBreakdown by remember { mutableStateOf<List<com.example.minhascompras.ui.viewmodel.CategoryBreakdown>>(emptyList()) }
@@ -69,23 +95,58 @@ fun StatisticsScreen(
     var isLoading by remember { mutableStateOf(true) }
 
     // Calcular período anterior para comparação
-    val previousPeriod = remember(selectedPeriod) {
+    val previousPeriod = remember(selectedPeriod.type, selectedPeriod.startDate, selectedPeriod.endDate) {
+        // #region agent log
+        debugLog("StatisticsScreen.kt:80", "previousPeriod calculation start", mapOf("type" to selectedPeriod.type.toString(), "startDate" to selectedPeriod.startDate, "endDate" to selectedPeriod.endDate), "A")
+        // #endregion
         try {
             val result = when (selectedPeriod.type) {
                 PeriodType.WEEK -> {
-                    // prevEnd = fim da semana anterior (1 milissegundo antes do startDate atual)
-                    val prevEnd = selectedPeriod.startDate - 1
-                    // prevStart = início da semana anterior (1 semana antes do prevEnd, zerando horas)
-                    val calendar = java.util.Calendar.getInstance().apply {
-                        timeInMillis = prevEnd
-                        add(java.util.Calendar.WEEK_OF_YEAR, -1)
-                        set(java.util.Calendar.HOUR_OF_DAY, 0)
-                        set(java.util.Calendar.MINUTE, 0)
-                        set(java.util.Calendar.SECOND, 0)
-                        set(java.util.Calendar.MILLISECOND, 0)
+                    // #region agent log
+                    debugLog("StatisticsScreen.kt:88", "WEEK period calculation start", mapOf("startDate" to selectedPeriod.startDate, "endDate" to selectedPeriod.endDate), "A")
+                    // #endregion
+                    try {
+                        // Calcular a duração da semana atual
+                        val weekDuration = selectedPeriod.endDate - selectedPeriod.startDate
+                        
+                        // prevStart = início da semana anterior (1 semana antes do startDate atual)
+                        val calendar = java.util.Calendar.getInstance().apply {
+                            timeInMillis = selectedPeriod.startDate
+                            add(java.util.Calendar.WEEK_OF_YEAR, -1)
+                            set(java.util.Calendar.HOUR_OF_DAY, 0)
+                            set(java.util.Calendar.MINUTE, 0)
+                            set(java.util.Calendar.SECOND, 0)
+                            set(java.util.Calendar.MILLISECOND, 0)
+                        }
+                        val prevStart = calendar.timeInMillis
+                        
+                        // prevEnd = fim da semana anterior (prevStart + duração da semana atual, ou startDate - 1)
+                        val prevEnd = if (weekDuration > 0) {
+                            prevStart + weekDuration
+                        } else {
+                            // Fallback: se não conseguir calcular duração, usar 1 milissegundo antes do startDate
+                            if (selectedPeriod.startDate > 1) {
+                                selectedPeriod.startDate - 1
+                            } else {
+                                selectedPeriod.startDate
+                            }
+                        }
+                        
+                        // #region agent log
+                        debugLog("StatisticsScreen.kt:116", "previousPeriod WEEK calculated", mapOf("prevStart" to prevStart, "prevEnd" to prevEnd, "weekDuration" to weekDuration, "prevStartLessThanPrevEnd" to (prevStart < prevEnd)), "A")
+                        // #endregion
+                        
+                        val period = Period(PeriodType.WEEK, prevStart, prevEnd)
+                        // #region agent log
+                        debugLog("StatisticsScreen.kt:128", "previousPeriod WEEK result", mapOf("periodStart" to period.startDate, "periodEnd" to period.endDate), "A")
+                        // #endregion
+                        period
+                    } catch (e: Exception) {
+                        // #region agent log
+                        debugLog("StatisticsScreen.kt:140", "Exception in WEEK calculation", mapOf("exception" to e.message, "stackTrace" to e.stackTraceToString()), "B")
+                        // #endregion
+                        throw e
                     }
-                    val prevStart = calendar.timeInMillis
-                    Period(PeriodType.WEEK, prevStart, prevEnd)
                 }
                 PeriodType.MONTH -> {
                     val calendar = java.util.Calendar.getInstance()
@@ -133,25 +194,43 @@ fun StatisticsScreen(
 
     // Carregar dados quando o período mudar (usando keys para evitar recálculos desnecessários)
     LaunchedEffect(selectedPeriod.startDate, selectedPeriod.endDate, previousPeriod.startDate, previousPeriod.endDate) {
+        // #region agent log
+        debugLog("StatisticsScreen.kt:203", "LaunchedEffect triggered", mapOf("selectedStart" to selectedPeriod.startDate, "selectedEnd" to selectedPeriod.endDate, "prevStart" to previousPeriod.startDate, "prevEnd" to previousPeriod.endDate), "C")
+        // #endregion
         isLoading = true
         try {
+            // #region agent log
+            debugLog("StatisticsScreen.kt:207", "Starting combine flows", mapOf(), "C")
+            // #endregion
             kotlinx.coroutines.flow.combine(
                 viewModel.getSpendingOverTime(selectedPeriod),
                 viewModel.getCategoryBreakdown(selectedPeriod),
                 viewModel.getTopItems(20, selectedPeriod),
                 viewModel.getPeriodComparison(selectedPeriod, previousPeriod)
             ) { spending, categories, top, comparison ->
+                // #region agent log
+                debugLog("StatisticsScreen.kt:213", "combine collected values", mapOf("spendingSize" to spending.size, "categoriesSize" to categories.size, "topSize" to top.size, "comparisonNotNull" to (comparison != null)), "C")
+                // #endregion
                 Quadruple(spending, categories, top, comparison)
             }.collect { result ->
+                // #region agent log
+                debugLog("StatisticsScreen.kt:219", "Updating state with collected data", mapOf("spendingSize" to result.first.size, "categoriesSize" to result.second.size, "topSize" to result.third.size), "C")
+                // #endregion
                 spendingOverTime = result.first
                 categoryBreakdown = result.second
                 topItems = result.third
                 periodComparison = result.fourth
                 isLoading = false
+                // #region agent log
+                debugLog("StatisticsScreen.kt:225", "Data update complete, isLoading=false", mapOf(), "C")
+                // #endregion
             }
         } catch (e: Exception) {
+            // #region agent log
+            debugLog("StatisticsScreen.kt:229", "Exception in LaunchedEffect", mapOf("exception" to e.message, "stackTrace" to e.stackTraceToString()), "B")
+            // #endregion
             isLoading = false
-            throw e
+            // Não relançar exceção para evitar crash
         }
     }
     

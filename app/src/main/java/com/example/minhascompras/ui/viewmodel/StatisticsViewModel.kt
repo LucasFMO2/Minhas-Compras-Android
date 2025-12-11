@@ -336,7 +336,8 @@ class StatisticsViewModel(
         val weekMap = mutableMapOf<Long, Double>()
         
         historyLists.forEach { historyWithItems ->
-            val week = getStartOfWeek(historyWithItems.history.completionDate)
+            val completionDate = historyWithItems.history.completionDate
+            val week = getStartOfWeek(completionDate)
             val total = historyWithItems.items.sumOf { item ->
                 val preco = item.preco ?: 0.0
                 val quantidade = item.quantidade.toDouble()

@@ -51,8 +51,30 @@ fun PeriodComparisonBarChart(
 
     val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale("pt", "BR")) }
     
+    // Validar e normalizar valores para evitar NaN
+    val currentSpending = if (comparison.currentSpending.isNaN() || comparison.currentSpending.isInfinite()) {
+        0.0
+    } else {
+        comparison.currentSpending
+    }
+    val previousSpending = if (comparison.previousSpending.isNaN() || comparison.previousSpending.isInfinite()) {
+        0.0
+    } else {
+        comparison.previousSpending
+    }
+    val difference = if (comparison.difference.isNaN() || comparison.difference.isInfinite()) {
+        0.0
+    } else {
+        comparison.difference
+    }
+    val differencePercentage = if (comparison.differencePercentage.isNaN() || comparison.differencePercentage.isInfinite()) {
+        0.0
+    } else {
+        comparison.differencePercentage
+    }
+    
     // Cores: verde para aumento, vermelho para diminuição
-    val currentColor = if (comparison.difference >= 0) {
+    val currentColor = if (difference >= 0) {
         Color(0xFF22C55E) // Verde para aumento
     } else {
         Color(0xFFEF4444) // Vermelho para diminuição
@@ -86,7 +108,7 @@ fun PeriodComparisonBarChart(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = currencyFormat.format(comparison.currentSpending),
+                        text = currencyFormat.format(currentSpending),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         color = currentColor
@@ -113,7 +135,7 @@ fun PeriodComparisonBarChart(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = currencyFormat.format(comparison.previousSpending),
+                        text = currencyFormat.format(previousSpending),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         color = previousColor
@@ -127,7 +149,7 @@ fun PeriodComparisonBarChart(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = if (comparison.difference >= 0) {
+                    containerColor = if (difference >= 0) {
                         Color(0xFF22C55E).copy(alpha = 0.1f)
                     } else {
                         Color(0xFFEF4444).copy(alpha = 0.1f)
@@ -147,16 +169,14 @@ fun PeriodComparisonBarChart(
                         fontWeight = FontWeight.Medium
                     )
                     Text(
-                        text = if (comparison.difference >= 0) {
-                            val percentage = if (comparison.differencePercentage.isNaN() || comparison.differencePercentage.isInfinite()) 0.0 else comparison.differencePercentage
-                            "+${currencyFormat.format(comparison.difference)} (${String.format(Locale("pt", "BR"), "%.1f", percentage)}%)"
+                        text = if (difference >= 0) {
+                            "+${currencyFormat.format(difference)} (${String.format(Locale("pt", "BR"), "%.1f", differencePercentage)}%)"
                         } else {
-                            val percentage = if (comparison.differencePercentage.isNaN() || comparison.differencePercentage.isInfinite()) 0.0 else comparison.differencePercentage
-                            "${currencyFormat.format(comparison.difference)} (${String.format(Locale("pt", "BR"), "%.1f", percentage)}%)"
+                            "${currencyFormat.format(difference)} (${String.format(Locale("pt", "BR"), "%.1f", differencePercentage)}%)"
                         },
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = if (comparison.difference >= 0) {
+                        color = if (difference >= 0) {
                             Color(0xFF22C55E) // Verde para aumento
                         } else {
                             Color(0xFFEF4444) // Vermelho para diminuição

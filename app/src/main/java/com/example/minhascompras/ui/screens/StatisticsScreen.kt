@@ -73,11 +73,17 @@ fun StatisticsScreen(
         try {
             val result = when (selectedPeriod.type) {
                 PeriodType.WEEK -> {
-                    val calendar = java.util.Calendar.getInstance()
-                    calendar.timeInMillis = selectedPeriod.startDate
-                    calendar.add(java.util.Calendar.WEEK_OF_YEAR, -1)
-                    val prevEnd = calendar.timeInMillis
-                    calendar.add(java.util.Calendar.WEEK_OF_YEAR, -1)
+                    // prevEnd = fim da semana anterior (1 milissegundo antes do startDate atual)
+                    val prevEnd = selectedPeriod.startDate - 1
+                    // prevStart = início da semana anterior (1 semana antes do prevEnd, zerando horas)
+                    val calendar = java.util.Calendar.getInstance().apply {
+                        timeInMillis = prevEnd
+                        add(java.util.Calendar.WEEK_OF_YEAR, -1)
+                        set(java.util.Calendar.HOUR_OF_DAY, 0)
+                        set(java.util.Calendar.MINUTE, 0)
+                        set(java.util.Calendar.SECOND, 0)
+                        set(java.util.Calendar.MILLISECOND, 0)
+                    }
                     val prevStart = calendar.timeInMillis
                     Period(PeriodType.WEEK, prevStart, prevEnd)
                 }

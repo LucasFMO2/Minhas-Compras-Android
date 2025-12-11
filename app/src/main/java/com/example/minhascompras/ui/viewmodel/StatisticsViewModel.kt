@@ -396,7 +396,13 @@ class StatisticsViewModel(
     private fun getStartOfWeek(timestamp: Long): Long {
         val calendar = Calendar.getInstance().apply {
             timeInMillis = timestamp
-            set(Calendar.DAY_OF_WEEK, Calendar.MONDAY) // Segunda-feira como início da semana
+            // Calcular quantos dias se passaram desde a segunda-feira
+            val dayOfWeek = get(Calendar.DAY_OF_WEEK)
+            val daysFromMonday = when (dayOfWeek) {
+                Calendar.SUNDAY -> 6  // Domingo = 6 dias desde segunda
+                else -> dayOfWeek - Calendar.MONDAY  // Outros dias = diferença direta
+            }
+            add(Calendar.DAY_OF_YEAR, -daysFromMonday)
             set(Calendar.HOUR_OF_DAY, 0)
             set(Calendar.MINUTE, 0)
             set(Calendar.SECOND, 0)

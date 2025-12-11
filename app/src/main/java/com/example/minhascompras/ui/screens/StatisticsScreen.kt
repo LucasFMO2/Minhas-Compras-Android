@@ -106,10 +106,7 @@ fun StatisticsScreen(
                     debugLog("StatisticsScreen.kt:88", "WEEK period calculation start", mapOf("startDate" to selectedPeriod.startDate, "endDate" to selectedPeriod.endDate), "A")
                     // #endregion
                     try {
-                        // Calcular a duração da semana atual
-                        val weekDuration = selectedPeriod.endDate - selectedPeriod.startDate
-                        
-                        // prevStart = início da semana anterior (1 semana antes do startDate atual)
+                        // Calcular início da semana anterior (1 semana antes do startDate atual)
                         val calendar = java.util.Calendar.getInstance().apply {
                             timeInMillis = selectedPeriod.startDate
                             add(java.util.Calendar.WEEK_OF_YEAR, -1)
@@ -120,23 +117,34 @@ fun StatisticsScreen(
                         }
                         val prevStart = calendar.timeInMillis
                         
-                        // prevEnd = fim da semana anterior (prevStart + duração da semana atual, ou startDate - 1)
-                        val prevEnd = if (weekDuration > 0) {
-                            prevStart + weekDuration
+                        // Calcular fim da semana anterior (1 milissegundo antes do startDate atual)
+                        // Isso garante que não há sobreposição entre os períodos
+                        val prevEnd = if (selectedPeriod.startDate > 1) {
+                            selectedPeriod.startDate - 1
                         } else {
-                            // Fallback: se não conseguir calcular duração, usar 1 milissegundo antes do startDate
-                            if (selectedPeriod.startDate > 1) {
-                                selectedPeriod.startDate - 1
+                            // Fallback: se startDate for muito pequeno, usar a mesma duração da semana atual
+                            val weekDuration = selectedPeriod.endDate - selectedPeriod.startDate
+                            if (weekDuration > 0 && weekDuration < 8L * 24 * 60 * 60 * 1000) { // Máximo 8 dias
+                                prevStart + weekDuration
                             } else {
-                                selectedPeriod.startDate
+                                // Duração padrão de 7 dias
+                                prevStart + (7L * 24 * 60 * 60 * 1000) - 1
                             }
                         }
                         
+                        // Validar que prevStart < prevEnd
+                        val finalPrevEnd = if (prevStart < prevEnd) {
+                            prevEnd
+                        } else {
+                            // Se prevEnd for menor que prevStart, ajustar para 1 milissegundo após prevStart
+                            prevStart + 1
+                        }
+                        
                         // #region agent log
-                        debugLog("StatisticsScreen.kt:116", "previousPeriod WEEK calculated", mapOf("prevStart" to prevStart, "prevEnd" to prevEnd, "weekDuration" to weekDuration, "prevStartLessThanPrevEnd" to (prevStart < prevEnd)), "A")
+                        debugLog("StatisticsScreen.kt:116", "previousPeriod WEEK calculated", mapOf("prevStart" to prevStart, "prevEnd" to finalPrevEnd, "prevStartLessThanPrevEnd" to (prevStart < finalPrevEnd)), "A")
                         // #endregion
                         
-                        val period = Period(PeriodType.WEEK, prevStart, prevEnd)
+                        val period = Period(PeriodType.WEEK, prevStart, finalPrevEnd)
                         // #region agent log
                         debugLog("StatisticsScreen.kt:128", "previousPeriod WEEK result", mapOf("periodStart" to period.startDate, "periodEnd" to period.endDate), "A")
                         // #endregion
@@ -145,7 +153,10 @@ fun StatisticsScreen(
                         // #region agent log
                         debugLog("StatisticsScreen.kt:140", "Exception in WEEK calculation", mapOf("exception" to e.message, "stackTrace" to e.stackTraceToString()), "B")
                         // #endregion
-                        throw e
+                        // Em caso de erro, retornar um período válido como fallback
+                        val fallbackStart = selectedPeriod.startDate - (7L * 24 * 60 * 60 * 1000)
+                        val fallbackEnd = selectedPeriod.startDate - 1
+                        Period(PeriodType.WEEK, fallbackStart, fallbackEnd)
                     }
                 }
                 PeriodType.MONTH -> {
@@ -192,10 +203,33 @@ fun StatisticsScreen(
         }
     }
 
+    // Validar previousPeriod antes de usar
+    val validPreviousPeriod = remember(previousPeriod) {
+        // Garantir que prevStart < prevEnd e que ambos são válidos
+        if (previousPeriod.startDate < previousPeriod.endDate && 
+            previousPeriod.startDate > 0 && 
+            previousPeriod.endDate > 0) {
+            previousPeriod
+        } else {
+            // Se inválido, criar um período padrão (1 semana antes do período atual)
+            val calendar = java.util.Calendar.getInstance().apply {
+                timeInMillis = selectedPeriod.startDate
+                add(java.util.Calendar.WEEK_OF_YEAR, -1)
+                set(java.util.Calendar.HOUR_OF_DAY, 0)
+                set(java.util.Calendar.MINUTE, 0)
+                set(java.util.Calendar.SECOND, 0)
+                set(java.util.Calendar.MILLISECOND, 0)
+            }
+            val fallbackStart = calendar.timeInMillis
+            val fallbackEnd = selectedPeriod.startDate - 1
+            Period(previousPeriod.type, fallbackStart, fallbackEnd)
+        }
+    }
+
     // Carregar dados quando o período mudar (usando keys para evitar recálculos desnecessários)
-    LaunchedEffect(selectedPeriod.startDate, selectedPeriod.endDate, previousPeriod.startDate, previousPeriod.endDate) {
+    LaunchedEffect(selectedPeriod.startDate, selectedPeriod.endDate, validPreviousPeriod.startDate, validPreviousPeriod.endDate) {
         // #region agent log
-        debugLog("StatisticsScreen.kt:203", "LaunchedEffect triggered", mapOf("selectedStart" to selectedPeriod.startDate, "selectedEnd" to selectedPeriod.endDate, "prevStart" to previousPeriod.startDate, "prevEnd" to previousPeriod.endDate), "C")
+        debugLog("StatisticsScreen.kt:203", "LaunchedEffect triggered", mapOf("selectedStart" to selectedPeriod.startDate, "selectedEnd" to selectedPeriod.endDate, "prevStart" to validPreviousPeriod.startDate, "prevEnd" to validPreviousPeriod.endDate), "C")
         // #endregion
         isLoading = true
         try {
@@ -206,7 +240,7 @@ fun StatisticsScreen(
                 viewModel.getSpendingOverTime(selectedPeriod),
                 viewModel.getCategoryBreakdown(selectedPeriod),
                 viewModel.getTopItems(20, selectedPeriod),
-                viewModel.getPeriodComparison(selectedPeriod, previousPeriod)
+                viewModel.getPeriodComparison(selectedPeriod, validPreviousPeriod)
             ) { spending, categories, top, comparison ->
                 // #region agent log
                 debugLog("StatisticsScreen.kt:213", "combine collected values", mapOf("spendingSize" to spending.size, "categoriesSize" to categories.size, "topSize" to top.size, "comparisonNotNull" to (comparison != null)), "C")

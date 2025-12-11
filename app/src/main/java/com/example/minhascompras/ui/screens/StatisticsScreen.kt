@@ -70,72 +70,82 @@ fun StatisticsScreen(
 
     // Calcular período anterior para comparação
     val previousPeriod = remember(selectedPeriod) {
-        when (selectedPeriod.type) {
-            PeriodType.WEEK -> {
-                val calendar = java.util.Calendar.getInstance()
-                calendar.timeInMillis = selectedPeriod.startDate
-                calendar.add(java.util.Calendar.WEEK_OF_YEAR, -1)
-                val prevEnd = calendar.timeInMillis
-                calendar.add(java.util.Calendar.WEEK_OF_YEAR, -1)
-                val prevStart = calendar.timeInMillis
-                Period(PeriodType.WEEK, prevStart, prevEnd)
+        try {
+            val result = when (selectedPeriod.type) {
+                PeriodType.WEEK -> {
+                    val calendar = java.util.Calendar.getInstance()
+                    calendar.timeInMillis = selectedPeriod.startDate
+                    calendar.add(java.util.Calendar.WEEK_OF_YEAR, -1)
+                    val prevEnd = calendar.timeInMillis
+                    calendar.add(java.util.Calendar.WEEK_OF_YEAR, -1)
+                    val prevStart = calendar.timeInMillis
+                    Period(PeriodType.WEEK, prevStart, prevEnd)
+                }
+                PeriodType.MONTH -> {
+                    val calendar = java.util.Calendar.getInstance()
+                    calendar.timeInMillis = selectedPeriod.startDate
+                    calendar.add(java.util.Calendar.MONTH, -1)
+                    val prevEnd = calendar.timeInMillis
+                    calendar.add(java.util.Calendar.MONTH, -1)
+                    val prevStart = calendar.timeInMillis
+                    Period(PeriodType.MONTH, prevStart, prevEnd)
+                }
+                PeriodType.THREE_MONTHS -> {
+                    val calendar = java.util.Calendar.getInstance()
+                    calendar.timeInMillis = selectedPeriod.startDate
+                    calendar.add(java.util.Calendar.MONTH, -3)
+                    val prevEnd = calendar.timeInMillis
+                    calendar.add(java.util.Calendar.MONTH, -3)
+                    val prevStart = calendar.timeInMillis
+                    Period(PeriodType.THREE_MONTHS, prevStart, prevEnd)
+                }
+                PeriodType.YEAR -> {
+                    val calendar = java.util.Calendar.getInstance()
+                    calendar.timeInMillis = selectedPeriod.startDate
+                    calendar.add(java.util.Calendar.YEAR, -1)
+                    val prevEnd = calendar.timeInMillis
+                    calendar.add(java.util.Calendar.YEAR, -1)
+                    val prevStart = calendar.timeInMillis
+                    Period(PeriodType.YEAR, prevStart, prevEnd)
+                }
+                PeriodType.CUSTOM -> {
+                    val daysDiff = (selectedPeriod.endDate - selectedPeriod.startDate) / (1000 * 60 * 60 * 24)
+                    val calendar = java.util.Calendar.getInstance()
+                    calendar.timeInMillis = selectedPeriod.endDate
+                    calendar.add(java.util.Calendar.DAY_OF_YEAR, -daysDiff.toInt())
+                    val prevEnd = calendar.timeInMillis
+                    calendar.add(java.util.Calendar.DAY_OF_YEAR, -daysDiff.toInt())
+                    val prevStart = calendar.timeInMillis
+                    Period(PeriodType.CUSTOM, prevStart, prevEnd)
+                }
             }
-            PeriodType.MONTH -> {
-                val calendar = java.util.Calendar.getInstance()
-                calendar.timeInMillis = selectedPeriod.startDate
-                calendar.add(java.util.Calendar.MONTH, -1)
-                val prevEnd = calendar.timeInMillis
-                calendar.add(java.util.Calendar.MONTH, -1)
-                val prevStart = calendar.timeInMillis
-                Period(PeriodType.MONTH, prevStart, prevEnd)
-            }
-            PeriodType.THREE_MONTHS -> {
-                val calendar = java.util.Calendar.getInstance()
-                calendar.timeInMillis = selectedPeriod.startDate
-                calendar.add(java.util.Calendar.MONTH, -3)
-                val prevEnd = calendar.timeInMillis
-                calendar.add(java.util.Calendar.MONTH, -3)
-                val prevStart = calendar.timeInMillis
-                Period(PeriodType.THREE_MONTHS, prevStart, prevEnd)
-            }
-            PeriodType.YEAR -> {
-                val calendar = java.util.Calendar.getInstance()
-                calendar.timeInMillis = selectedPeriod.startDate
-                calendar.add(java.util.Calendar.YEAR, -1)
-                val prevEnd = calendar.timeInMillis
-                calendar.add(java.util.Calendar.YEAR, -1)
-                val prevStart = calendar.timeInMillis
-                Period(PeriodType.YEAR, prevStart, prevEnd)
-            }
-            PeriodType.CUSTOM -> {
-                val daysDiff = (selectedPeriod.endDate - selectedPeriod.startDate) / (1000 * 60 * 60 * 24)
-                val calendar = java.util.Calendar.getInstance()
-                calendar.timeInMillis = selectedPeriod.endDate
-                calendar.add(java.util.Calendar.DAY_OF_YEAR, -daysDiff.toInt())
-                val prevEnd = calendar.timeInMillis
-                calendar.add(java.util.Calendar.DAY_OF_YEAR, -daysDiff.toInt())
-                val prevStart = calendar.timeInMillis
-                Period(PeriodType.CUSTOM, prevStart, prevEnd)
-            }
+            result
+        } catch (e: Exception) {
+            throw e
         }
     }
 
     // Carregar dados quando o período mudar (usando keys para evitar recálculos desnecessários)
     LaunchedEffect(selectedPeriod.startDate, selectedPeriod.endDate, previousPeriod.startDate, previousPeriod.endDate) {
         isLoading = true
-        kotlinx.coroutines.flow.combine(
-            viewModel.getSpendingOverTime(selectedPeriod),
-            viewModel.getCategoryBreakdown(selectedPeriod),
-            viewModel.getTopItems(20, selectedPeriod),
-            viewModel.getPeriodComparison(selectedPeriod, previousPeriod)
-        ) { spending, categories, top, comparison ->
-            Quadruple(spending, categories, top, comparison)
-        }.collect { result ->
-            spendingOverTime = result.first
-            categoryBreakdown = result.second
-            topItems = result.third
-            periodComparison = result.fourth
+        try {
+            kotlinx.coroutines.flow.combine(
+                viewModel.getSpendingOverTime(selectedPeriod),
+                viewModel.getCategoryBreakdown(selectedPeriod),
+                viewModel.getTopItems(20, selectedPeriod),
+                viewModel.getPeriodComparison(selectedPeriod, previousPeriod)
+            ) { spending, categories, top, comparison ->
+                Quadruple(spending, categories, top, comparison)
+            }.collect { result ->
+                spendingOverTime = result.first
+                categoryBreakdown = result.second
+                topItems = result.third
+                periodComparison = result.fourth
+                isLoading = false
+            }
+        } catch (e: Exception) {
             isLoading = false
+            throw e
         }
     }
     

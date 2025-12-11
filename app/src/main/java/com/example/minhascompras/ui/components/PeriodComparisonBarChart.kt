@@ -148,9 +148,11 @@ fun PeriodComparisonBarChart(
                     )
                     Text(
                         text = if (comparison.difference >= 0) {
-                            "+${currencyFormat.format(comparison.difference)} (${String.format(Locale("pt", "BR"), "%.1f", comparison.differencePercentage)}%)"
+                            val percentage = if (comparison.differencePercentage.isNaN() || comparison.differencePercentage.isInfinite()) 0.0 else comparison.differencePercentage
+                            "+${currencyFormat.format(comparison.difference)} (${String.format(Locale("pt", "BR"), "%.1f", percentage)}%)"
                         } else {
-                            "${currencyFormat.format(comparison.difference)} (${String.format(Locale("pt", "BR"), "%.1f", comparison.differencePercentage)}%)"
+                            val percentage = if (comparison.differencePercentage.isNaN() || comparison.differencePercentage.isInfinite()) 0.0 else comparison.differencePercentage
+                            "${currencyFormat.format(comparison.difference)} (${String.format(Locale("pt", "BR"), "%.1f", percentage)}%)"
                         },
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,

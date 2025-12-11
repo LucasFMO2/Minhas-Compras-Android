@@ -40,6 +40,15 @@ class MinhasComprasApplication : Application() {
             Log.e("MinhasComprasApp", "Exceção não capturada no thread: ${thread.name}", exception)
             exception.printStackTrace()
             
+            // Se for o erro conhecido do Vico Charts com NaN, tentar evitar crash
+            if (exception is IllegalArgumentException && 
+                exception.message?.contains("Cannot round NaN") == true) {
+                Log.e("MinhasComprasApp", "Erro conhecido do Vico Charts com NaN - tentando evitar crash")
+                // Não chamar o handler padrão para evitar crash
+                // O app continuará rodando, mas a tela de estatísticas pode não funcionar
+                return@setDefaultUncaughtExceptionHandler
+            }
+            
             // Chamar o handler padrão para manter o comportamento normal
             defaultHandler?.uncaughtException(thread, exception)
         }

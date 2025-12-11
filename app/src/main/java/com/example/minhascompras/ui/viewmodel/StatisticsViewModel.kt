@@ -122,23 +122,27 @@ class StatisticsViewModel(
         
         return repository.getHistoryByDateRange(period.startDate, period.endDate)
             .map { historyLists ->
-                val groupedData = when (period.type) {
-                    PeriodType.WEEK -> groupByDay(historyLists)
-                    PeriodType.MONTH, PeriodType.THREE_MONTHS -> groupByWeek(historyLists)
-                    PeriodType.YEAR -> groupByMonth(historyLists)
-                    PeriodType.CUSTOM -> {
-                        val daysDiff = (period.endDate - period.startDate) / (1000 * 60 * 60 * 24)
-                        when {
-                            daysDiff <= 30 -> groupByDay(historyLists)
-                            daysDiff <= 90 -> groupByWeek(historyLists)
-                            else -> groupByMonth(historyLists)
+                try {
+                    val groupedData = when (period.type) {
+                        PeriodType.WEEK -> groupByDay(historyLists)
+                        PeriodType.MONTH, PeriodType.THREE_MONTHS -> groupByWeek(historyLists)
+                        PeriodType.YEAR -> groupByMonth(historyLists)
+                        PeriodType.CUSTOM -> {
+                            val daysDiff = (period.endDate - period.startDate) / (1000 * 60 * 60 * 24)
+                            when {
+                                daysDiff <= 30 -> groupByDay(historyLists)
+                                daysDiff <= 90 -> groupByWeek(historyLists)
+                                else -> groupByMonth(historyLists)
+                            }
                         }
                     }
+                    val result = groupedData.sortedBy { it.date }
+                    // Armazenar no cache
+                    spendingOverTimeCache[cacheKey] = result
+                    result
+                } catch (e: Exception) {
+                    throw e
                 }
-                val result = groupedData.sortedBy { it.date }
-                // Armazenar no cache
-                spendingOverTimeCache[cacheKey] = result
-                result
             }
     }
     
@@ -161,18 +165,35 @@ class StatisticsViewModel(
                 
                 historyLists.forEach { historyWithItems ->
                     historyWithItems.items.forEach { item ->
-                        val amount = (item.preco ?: 0.0) * item.quantidade
-                        totalAmount += amount
-                        val current = categoryMap.getOrDefault(item.categoria, 0.0 to 0)
-                        categoryMap[item.categoria] = (current.first + amount) to (current.second + item.quantidade)
+                        val preco = item.preco ?: 0.0
+                        val quantidade = item.quantidade.toDouble()
+                        // Validar que preço e quantidade são números válidos
+                        val amount = if (preco.isNaN() || preco.isInfinite() || quantidade.isNaN() || quantidade.isInfinite()) {
+                            0.0
+                        } else {
+                            preco * quantidade
+                        }
+                        // Garantir que amount não é NaN ou infinito
+                        if (!amount.isNaN() && !amount.isInfinite() && amount >= 0) {
+                            totalAmount += amount
+                            val current = categoryMap.getOrDefault(item.categoria, 0.0 to 0)
+                            categoryMap[item.categoria] = (current.first + amount) to (current.second + item.quantidade)
+                        }
                     }
                 }
                 
                 val result = categoryMap.map { (category, data) ->
+                    val amount = if (data.first.isNaN() || data.first.isInfinite()) 0.0 else data.first
+                    val percentage = if (totalAmount > 0 && !totalAmount.isNaN() && !totalAmount.isInfinite()) {
+                        val calc = (amount / totalAmount) * 100
+                        if (calc.isNaN() || calc.isInfinite()) 0.0 else calc
+                    } else {
+                        0.0
+                    }
                     CategoryBreakdown(
                         category = category,
-                        amount = data.first,
-                        percentage = if (totalAmount > 0) (data.first / totalAmount) * 100 else 0.0,
+                        amount = amount,
+                        percentage = percentage,
                         itemCount = data.second
                     )
                 }.sortedByDescending { it.amount }
@@ -247,19 +268,24 @@ class StatisticsViewModel(
             repository.getTotalSpending(currentPeriod.startDate, currentPeriod.endDate),
             repository.getTotalSpending(previousPeriod.startDate, previousPeriod.endDate)
         ) { currentSpending, previousSpending ->
-            val difference = currentSpending - previousSpending
-            val differencePercentage = if (previousSpending > 0) {
-                (difference / previousSpending) * 100
+            // Validar que os valores não são NaN ou infinito
+            val current = if (currentSpending.isNaN() || currentSpending.isInfinite()) 0.0 else currentSpending
+            val previous = if (previousSpending.isNaN() || previousSpending.isInfinite()) 0.0 else previousSpending
+            
+            val difference = current - previous
+            val differencePercentage = if (previous > 0 && !previous.isNaN() && !previous.isInfinite()) {
+                val calc = (difference / previous) * 100
+                if (calc.isNaN() || calc.isInfinite()) 0.0 else calc
             } else {
-                if (currentSpending > 0) 100.0 else 0.0
+                if (current > 0) 100.0 else 0.0
             }
             
             val result = PeriodComparison(
                 currentPeriod = currentPeriod,
                 previousPeriod = previousPeriod,
-                currentSpending = currentSpending,
-                previousSpending = previousSpending,
-                difference = difference,
+                currentSpending = current,
+                previousSpending = previous,
+                difference = if (difference.isNaN() || difference.isInfinite()) 0.0 else difference,
                 differencePercentage = differencePercentage
             )
             
@@ -281,9 +307,26 @@ class StatisticsViewModel(
         val dayMap = mutableMapOf<Long, Double>()
         
         historyLists.forEach { historyWithItems ->
-            val day = getStartOfDay(historyWithItems.history.completionDate)
-            val total = historyWithItems.items.sumOf { (it.preco ?: 0.0) * it.quantidade }
-            dayMap[day] = dayMap.getOrDefault(day, 0.0) + total
+            try {
+                val day = getStartOfDay(historyWithItems.history.completionDate)
+                val total = historyWithItems.items.sumOf { item ->
+                    val preco = item.preco ?: 0.0
+                    val quantidade = item.quantidade.toDouble()
+                    // Validar que preço é um número válido (quantidade é Int, sempre válido)
+                    if (preco.isNaN() || preco.isInfinite()) {
+                        0.0
+                    } else {
+                        val amount = preco * quantidade
+                        if (amount.isNaN() || amount.isInfinite()) 0.0 else amount
+                    }
+                }
+                // Garantir que total não é NaN antes de adicionar ao mapa
+                if (!total.isNaN() && !total.isInfinite() && total >= 0) {
+                    dayMap[day] = dayMap.getOrDefault(day, 0.0) + total
+                }
+            } catch (e: Exception) {
+                throw e
+            }
         }
         
         return dayMap.map { (date, amount) -> SpendingDataPoint(date, amount) }
@@ -294,8 +337,21 @@ class StatisticsViewModel(
         
         historyLists.forEach { historyWithItems ->
             val week = getStartOfWeek(historyWithItems.history.completionDate)
-            val total = historyWithItems.items.sumOf { (it.preco ?: 0.0) * it.quantidade }
-            weekMap[week] = weekMap.getOrDefault(week, 0.0) + total
+            val total = historyWithItems.items.sumOf { item ->
+                val preco = item.preco ?: 0.0
+                val quantidade = item.quantidade.toDouble()
+                // Validar que preço é um número válido (quantidade é Int, sempre válido)
+                if (preco.isNaN() || preco.isInfinite()) {
+                    0.0
+                } else {
+                    val amount = preco * quantidade
+                    if (amount.isNaN() || amount.isInfinite()) 0.0 else amount
+                }
+            }
+            // Garantir que total não é NaN antes de adicionar ao mapa
+            if (!total.isNaN() && !total.isInfinite() && total >= 0) {
+                weekMap[week] = weekMap.getOrDefault(week, 0.0) + total
+            }
         }
         
         return weekMap.map { (date, amount) -> SpendingDataPoint(date, amount) }
@@ -306,8 +362,21 @@ class StatisticsViewModel(
         
         historyLists.forEach { historyWithItems ->
             val month = getStartOfMonth(historyWithItems.history.completionDate)
-            val total = historyWithItems.items.sumOf { (it.preco ?: 0.0) * it.quantidade }
-            monthMap[month] = monthMap.getOrDefault(month, 0.0) + total
+            val total = historyWithItems.items.sumOf { item ->
+                val preco = item.preco ?: 0.0
+                val quantidade = item.quantidade.toDouble()
+                // Validar que preço é um número válido (quantidade é Int, sempre válido)
+                if (preco.isNaN() || preco.isInfinite()) {
+                    0.0
+                } else {
+                    val amount = preco * quantidade
+                    if (amount.isNaN() || amount.isInfinite()) 0.0 else amount
+                }
+            }
+            // Garantir que total não é NaN antes de adicionar ao mapa
+            if (!total.isNaN() && !total.isInfinite() && total >= 0) {
+                monthMap[month] = monthMap.getOrDefault(month, 0.0) + total
+            }
         }
         
         return monthMap.map { (date, amount) -> SpendingDataPoint(date, amount) }

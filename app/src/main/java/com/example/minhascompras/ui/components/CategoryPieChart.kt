@@ -106,7 +106,7 @@ fun CategoryPieChart(
                             modifier = Modifier.weight(1f)
                         )
                         Text(
-                            text = "${currencyFormat.format(breakdown.amount)} (${breakdown.percentage.toInt()}%)",
+                            text = "${currencyFormat.format(breakdown.amount)} (${if (breakdown.percentage.isNaN() || breakdown.percentage.isInfinite()) 0 else breakdown.percentage.toInt()}%)",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

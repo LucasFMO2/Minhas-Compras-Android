@@ -64,7 +64,7 @@ private fun debugLog(location: String, message: String, data: Map<String, Any?> 
             logDir.mkdirs()
         }
         val dataEntries = data.entries.joinToString(",") { "\"${it.key}\":\"${it.value}\"" }
-        val logLine = """{"id":"log_${System.currentTimeMillis()}_${hashCode()}","timestamp":${System.currentTimeMillis()},"location":"$location","message":"$message","sessionId":"debug-session","runId":"run1","hypothesisId":"$hypothesisId","data":{$dataEntries}}"""
+        val logLine = """{"id":"log_${System.currentTimeMillis()}_${java.util.UUID.randomUUID().hashCode()}","timestamp":${System.currentTimeMillis()},"location":"$location","message":"$message","sessionId":"debug-session","runId":"run1","hypothesisId":"$hypothesisId","data":{$dataEntries}}"""
         logFile.appendText("$logLine\n")
     } catch (e: Exception) {
         Log.e("DebugLog", "Failed to write debug log: ${e.message}", e)

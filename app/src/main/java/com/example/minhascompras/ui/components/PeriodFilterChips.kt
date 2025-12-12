@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.example.minhascompras.ui.viewmodel.Period
 import com.example.minhascompras.ui.viewmodel.PeriodType
 import java.text.SimpleDateFormat
+import com.example.minhascompras.ui.utils.DateUtils
 import java.util.Calendar
 import java.util.Locale
 
@@ -59,21 +60,7 @@ fun PeriodFilterChips(
             FilterChip(
                 selected = selectedPeriod.type == PeriodType.WEEK,
                 onClick = {
-                    // Calcular início da semana atual (segunda-feira à meia-noite)
-                    val calendar = Calendar.getInstance().apply {
-                        set(Calendar.HOUR_OF_DAY, 0)
-                        set(Calendar.MINUTE, 0)
-                        set(Calendar.SECOND, 0)
-                        set(Calendar.MILLISECOND, 0)
-                        val dayOfWeek = get(Calendar.DAY_OF_WEEK)
-                        val daysFromMonday = when (dayOfWeek) {
-                            Calendar.SUNDAY -> 6  // Domingo = 6 dias desde segunda
-                            else -> dayOfWeek - Calendar.MONDAY  // Outros dias = diferença direta
-                        }
-                        add(Calendar.DAY_OF_YEAR, -daysFromMonday)
-                    }
-                    val weekStart = calendar.timeInMillis
-                    // O fim da semana é o momento atual (até agora)
+                    val weekStart = DateUtils.getStartOfWeek(System.currentTimeMillis())
                     val weekEnd = System.currentTimeMillis()
                     val period = Period(
                         type = PeriodType.WEEK,

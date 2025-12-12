@@ -39,6 +39,7 @@ import com.example.minhascompras.ui.components.PeriodFilterChips
 import com.example.minhascompras.ui.components.SpendingLineChart
 import com.example.minhascompras.ui.components.TopItemsList
 import com.example.minhascompras.ui.utils.ResponsiveUtils
+import com.example.minhascompras.ui.utils.DateUtils
 import com.example.minhascompras.ui.viewmodel.Period
 import com.example.minhascompras.ui.viewmodel.PeriodType
 import com.example.minhascompras.ui.viewmodel.StatisticsViewModel
@@ -73,98 +74,9 @@ fun StatisticsScreen(
         try {
             val result = when (selectedPeriod.type) {
                 PeriodType.WEEK -> {
-                    try {
-                        // O período atual vai do início da semana atual (segunda-feira) até agora
-                        // O período anterior deve ir do início da semana passada até o fim da semana passada (domingo à meia-noite)
-                        // Primeiro, verificar se o startDate está alinhado com segunda-feira
-                        val checkCalendar = java.util.Calendar.getInstance().apply {
-                            timeInMillis = selectedPeriod.startDate
-                        }
-                        val dayOfWeekAtStart = checkCalendar.get(java.util.Calendar.DAY_OF_WEEK)
-                        val isMonday = dayOfWeekAtStart == java.util.Calendar.MONDAY
-                        val hourAtStart = checkCalendar.get(java.util.Calendar.HOUR_OF_DAY)
-                        val minuteAtStart = checkCalendar.get(java.util.Calendar.MINUTE)
-                        val isMidnight = hourAtStart == 0 && minuteAtStart == 0
-                        
-                        // Calcular o início da semana passada (segunda-feira da semana passada)
-                        val prevStartCalendar = java.util.Calendar.getInstance().apply {
-                            timeInMillis = selectedPeriod.startDate
-                            // Se não estiver alinhado, alinhar primeiro
-                            if (!isMonday || !isMidnight) {
-                                val dayOfWeek = get(java.util.Calendar.DAY_OF_WEEK)
-                                val daysFromMonday = when (dayOfWeek) {
-                                    java.util.Calendar.SUNDAY -> 6
-                                    else -> dayOfWeek - java.util.Calendar.MONDAY
-                                }
-                                add(java.util.Calendar.DAY_OF_YEAR, -daysFromMonday)
-                                set(java.util.Calendar.HOUR_OF_DAY, 0)
-                                set(java.util.Calendar.MINUTE, 0)
-                                set(java.util.Calendar.SECOND, 0)
-                                set(java.util.Calendar.MILLISECOND, 0)
-                            }
-                            // Subtrair 1 semana
-                            add(java.util.Calendar.WEEK_OF_YEAR, -1)
-                        }
-                        val prevStart = prevStartCalendar.timeInMillis
-                        
-                        // O fim do período anterior é 1 milissegundo antes do início do período atual
-                        // Isso garante que não há sobreposição
-                        val prevEnd = if (selectedPeriod.startDate > 1) {
-                            selectedPeriod.startDate - 1
-                        } else {
-                            // Fallback: usar duração padrão de 7 dias
-                            prevStart + (7L * 24 * 60 * 60 * 1000) - 1
-                        }
-                        
-                        // Validar que prevStart < prevEnd e ambos são válidos
-                        val finalPrevStart = if (prevStart > 0 && prevStart < prevEnd) prevStart else {
-                            // Fallback: calcular novamente de forma mais segura
-                            val calendar = java.util.Calendar.getInstance().apply {
-                                timeInMillis = System.currentTimeMillis()
-                                val dayOfWeek = get(java.util.Calendar.DAY_OF_WEEK)
-                                val daysFromMonday = when (dayOfWeek) {
-                                    java.util.Calendar.SUNDAY -> 6
-                                    else -> dayOfWeek - java.util.Calendar.MONDAY
-                                }
-                                add(java.util.Calendar.DAY_OF_YEAR, -daysFromMonday)
-                                add(java.util.Calendar.WEEK_OF_YEAR, -1)
-                                set(java.util.Calendar.HOUR_OF_DAY, 0)
-                                set(java.util.Calendar.MINUTE, 0)
-                                set(java.util.Calendar.SECOND, 0)
-                                set(java.util.Calendar.MILLISECOND, 0)
-                            }
-                            calendar.timeInMillis
-                        }
-                        
-                        val finalPrevEnd = if (prevEnd > finalPrevStart && prevEnd > 0) {
-                            prevEnd
-                        } else {
-                            // Fallback: usar duração padrão de 7 dias
-                            finalPrevStart + (7L * 24 * 60 * 60 * 1000) - 1
-                        }
-                        
-                        val period = Period(PeriodType.WEEK, finalPrevStart, finalPrevEnd)
-                        period
-                    } catch (e: Exception) {
-                        // Em caso de erro, retornar um período válido como fallback
-                        val fallbackCalendar = java.util.Calendar.getInstance().apply {
-                            timeInMillis = System.currentTimeMillis()
-                            val dayOfWeek = get(java.util.Calendar.DAY_OF_WEEK)
-                            val daysFromMonday = when (dayOfWeek) {
-                                java.util.Calendar.SUNDAY -> 6
-                                else -> dayOfWeek - java.util.Calendar.MONDAY
-                            }
-                            add(java.util.Calendar.DAY_OF_YEAR, -daysFromMonday)
-                            add(java.util.Calendar.WEEK_OF_YEAR, -1)
-                            set(java.util.Calendar.HOUR_OF_DAY, 0)
-                            set(java.util.Calendar.MINUTE, 0)
-                            set(java.util.Calendar.SECOND, 0)
-                            set(java.util.Calendar.MILLISECOND, 0)
-                        }
-                        val fallbackStart = fallbackCalendar.timeInMillis
-                        val fallbackEnd = fallbackStart + (7L * 24 * 60 * 60 * 1000) - 1
-                        Period(PeriodType.WEEK, fallbackStart, fallbackEnd)
-                    }
+                    val prevStart = DateUtils.getPreviousWeekStart(selectedPeriod.startDate)
+                    val prevEnd = selectedPeriod.startDate - 1
+                    Period(PeriodType.WEEK, prevStart, prevEnd)
                 }
                 PeriodType.MONTH -> {
                     val calendar = java.util.Calendar.getInstance()

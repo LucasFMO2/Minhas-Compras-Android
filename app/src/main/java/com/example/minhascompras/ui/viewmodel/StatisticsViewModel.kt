@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.minhascompras.data.HistoryItem
 import com.example.minhascompras.data.ItemCompraRepository
 import com.example.minhascompras.data.ShoppingListHistoryWithItems
+import com.example.minhascompras.ui.utils.DateUtils
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -114,7 +115,7 @@ class StatisticsViewModel(
      */
     fun getSpendingOverTime(period: Period): Flow<List<SpendingDataPoint>> {
         // Validar período antes de processar
-        if (period.startDate >= period.endDate || period.startDate < 0 || period.endDate < 0) {
+        if (!DateUtils.isValidPeriod(period.startDate, period.endDate)) {
             return kotlinx.coroutines.flow.flowOf(emptyList())
         }
         
@@ -157,7 +158,7 @@ class StatisticsViewModel(
      */
     fun getCategoryBreakdown(period: Period): Flow<List<CategoryBreakdown>> {
         // Validar período antes de processar
-        if (period.startDate >= period.endDate || period.startDate < 0 || period.endDate < 0) {
+        if (!DateUtils.isValidPeriod(period.startDate, period.endDate)) {
             return kotlinx.coroutines.flow.flowOf(emptyList())
         }
         
@@ -220,7 +221,7 @@ class StatisticsViewModel(
      */
     fun getTopItems(limit: Int, period: Period): Flow<List<TopItem>> {
         // Validar período antes de processar
-        if (period.startDate >= period.endDate || period.startDate < 0 || period.endDate < 0) {
+        if (!DateUtils.isValidPeriod(period.startDate, period.endDate)) {
             return kotlinx.coroutines.flow.flowOf(emptyList())
         }
         
@@ -273,11 +274,8 @@ class StatisticsViewModel(
         previousPeriod: Period
     ): Flow<PeriodComparison> {
         // Validar períodos antes de processar
-        val currentValid = currentPeriod.startDate < currentPeriod.endDate && currentPeriod.startDate > 0 && currentPeriod.endDate > 0
-        val previousValid = previousPeriod.startDate < previousPeriod.endDate && previousPeriod.startDate > 0 && previousPeriod.endDate > 0
-        
-        // Se algum período for inválido, retornar comparação com valores zerados
-        if (!currentValid || !previousValid) {
+        if (!DateUtils.isValidPeriod(currentPeriod.startDate, currentPeriod.endDate) ||
+            !DateUtils.isValidPeriod(previousPeriod.startDate, previousPeriod.endDate)) {
             return kotlinx.coroutines.flow.flowOf(
                 PeriodComparison(
                     currentPeriod = currentPeriod,
@@ -468,15 +466,8 @@ class StatisticsViewModel(
         
         val startDate = when (type) {
             PeriodType.WEEK -> {
-                // Alinhar com o início da semana atual (segunda-feira à meia-noite)
-                // Isso deve ser consistente com o cálculo em PeriodFilterChips
-                val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
-                val daysFromMonday = when (dayOfWeek) {
-                    Calendar.SUNDAY -> 6  // Domingo = 6 dias desde segunda
-                    else -> dayOfWeek - Calendar.MONDAY  // Outros dias = diferença direta
-                }
-                // Ir para o início da semana atual (segunda-feira)
-                calendar.add(Calendar.DAY_OF_YEAR, -daysFromMonday)
+                val weekStart = DateUtils.getStartOfWeek(calendar.timeInMillis)
+                calendar.timeInMillis = weekStart
                 calendar.timeInMillis
             }
             PeriodType.MONTH -> {

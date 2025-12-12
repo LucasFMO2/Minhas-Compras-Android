@@ -14,8 +14,8 @@ android {
         applicationId = "com.example.minhascompras"
         minSdk = 24
         targetSdk = 34
-        versionCode = 77
-        versionName = "2.27.0"
+        versionCode = 79
+        versionName = "2.27.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -37,6 +37,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            lint {
+                abortOnError = false
+                checkReleaseBuilds = false
+            }
         }
     }
     

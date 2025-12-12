@@ -1,8 +1,6 @@
 package com.example.minhascompras.ui.components
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
-import java.io.File
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,24 +29,6 @@ import com.example.minhascompras.ui.viewmodel.PeriodType
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-
-// Helper function para debug logs
-private fun debugLog(location: String, message: String, data: Map<String, Any?> = emptyMap(), hypothesisId: String = "A") {
-    try {
-        Log.d("DebugLog", "[$hypothesisId] $location: $message - $data")
-        val logFile = File("c:\\Users\\nerdd\\Desktop\\Minhas-Compras-Android\\.cursor\\debug.log")
-        val logDir = logFile.parentFile
-        if (logDir != null && !logDir.exists()) {
-            logDir.mkdirs()
-        }
-        val dataEntries = data.entries.joinToString(",") { "\"${it.key}\":\"${it.value}\"" }
-        val logLine = """{"id":"log_${System.currentTimeMillis()}_${java.util.UUID.randomUUID().hashCode()}","timestamp":${System.currentTimeMillis()},"location":"$location","message":"$message","sessionId":"debug-session","runId":"run1","hypothesisId":"$hypothesisId","data":{$dataEntries}}"""
-        logFile.appendText("$logLine\n")
-    } catch (e: Exception) {
-        Log.e("DebugLog", "Failed to write debug log: ${e.message}", e)
-        e.printStackTrace()
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,24 +59,28 @@ fun PeriodFilterChips(
             FilterChip(
                 selected = selectedPeriod.type == PeriodType.WEEK,
                 onClick = {
-                    // #region agent log
-                    debugLog("PeriodFilterChips.kt:61", "Semana chip clicked", mapOf(), "D")
-                    // #endregion
-                    val weekStart = getDefaultPeriodStart(PeriodType.WEEK)
+                    // Calcular início da semana atual (segunda-feira à meia-noite)
+                    val calendar = Calendar.getInstance().apply {
+                        set(Calendar.HOUR_OF_DAY, 0)
+                        set(Calendar.MINUTE, 0)
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                        val dayOfWeek = get(Calendar.DAY_OF_WEEK)
+                        val daysFromMonday = when (dayOfWeek) {
+                            Calendar.SUNDAY -> 6  // Domingo = 6 dias desde segunda
+                            else -> dayOfWeek - Calendar.MONDAY  // Outros dias = diferença direta
+                        }
+                        add(Calendar.DAY_OF_YEAR, -daysFromMonday)
+                    }
+                    val weekStart = calendar.timeInMillis
+                    // O fim da semana é o momento atual (até agora)
                     val weekEnd = System.currentTimeMillis()
-                    // #region agent log
-                    debugLog("PeriodFilterChips.kt:65", "Creating WEEK period", mapOf("startDate" to weekStart, "endDate" to weekEnd), "D")
-                    // #endregion
-                    onPeriodSelected(
-                        Period(
-                            type = PeriodType.WEEK,
-                            startDate = weekStart,
-                            endDate = weekEnd
-                        )
+                    val period = Period(
+                        type = PeriodType.WEEK,
+                        startDate = weekStart,
+                        endDate = weekEnd
                     )
-                    // #region agent log
-                    debugLog("PeriodFilterChips.kt:74", "onPeriodSelected called with WEEK", mapOf(), "D")
-                    // #endregion
+                    onPeriodSelected(period)
                 },
                 label = { Text("Semana") }
             )
@@ -262,6 +246,15 @@ private fun getDefaultPeriodStart(type: PeriodType): Long {
 
     return when (type) {
         PeriodType.WEEK -> {
+            // Alinhar com o início da semana (segunda-feira) e depois subtrair 1 semana
+            val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
+            val daysFromMonday = when (dayOfWeek) {
+                Calendar.SUNDAY -> 6  // Domingo = 6 dias desde segunda
+                else -> dayOfWeek - Calendar.MONDAY  // Outros dias = diferença direta
+            }
+            // Ir para o início da semana atual (segunda-feira)
+            calendar.add(Calendar.DAY_OF_YEAR, -daysFromMonday)
+            // Subtrair 1 semana para obter o início da semana anterior
             calendar.add(Calendar.WEEK_OF_YEAR, -1)
             calendar.timeInMillis
         }

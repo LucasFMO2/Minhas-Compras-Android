@@ -39,6 +39,19 @@ android {
             )
         }
     }
+    
+    // Renomear APK com versão para todas as builds futuras
+    applicationVariants.all {
+        val variant = this
+        val versionName = variant.versionName ?: defaultConfig.versionName
+        val versionCode = variant.versionCode
+        
+        variant.outputs.all {
+            val outputFileName = "MinhasCompras-v${versionName}-code${versionCode}.apk"
+            (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName = outputFileName
+        }
+    }
+    
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11

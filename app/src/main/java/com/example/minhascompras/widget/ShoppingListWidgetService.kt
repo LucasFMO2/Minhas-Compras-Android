@@ -82,49 +82,95 @@ class ShoppingListWidgetFactory(
             android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId listId: $listId")
 
             if (listId != -1L) {
-                // Buscar apenas itens pendentes (não comprados) de forma SÍNCRONA
-                android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId: buscando itens pendentes da lista $listId de forma síncrona")
+                // ESTRATÉGIA MELHORADA: Forçar busca fresca dos dados do banco
+                android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId: FORÇANDO BUSCA FRESCA dos itens pendentes da lista $listId")
                 
-                // Usar runBlocking para garantir que os dados sejam carregados sincronamente
-                val resultado = runBlocking(kotlinx.coroutines.Dispatchers.IO) {
-                    try {
-                        itemDao.getItensByListAndStatus(listId, false).first()
-                    } catch (e: Exception) {
-                        android.util.Log.e("ShoppingListWidget", "Erro ao buscar itens síncrona para widget $appWidgetId", e)
-                        emptyList()
-                    }
+                // Limpar cache atual para garantir dados frescos
+                val oldItems = items
+                items = emptyList()
+                
+                // Forçar pequena pausa para garantir que qualquer transação anterior seja concluída
+                kotlinx.coroutines.runBlocking {
+                    kotlinx.coroutines.delay(50) // Pausa maior para garantir conclusão de transações
                 }
                 
-                android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId: encontrados ${resultado.size} itens no banco")
+                // Buscar dados frescos diretamente do banco de forma síncrona
+                val resultado = try {
+                    // Tentar múltiplas vezes para garantir dados frescos
+                    var tentativa = 0
+                    var ultimoResultado: List<ItemCompra> = emptyList()
+                    while (tentativa < 3) {
+                        ultimoResultado = itemDao.getItensByListAndStatusSync(listId, false)
+                        android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId: tentativa ${tentativa + 1} - encontrados ${ultimoResultado.size} itens")
+                        
+                        // Verificar se os dados mudaram em relação ao cache anterior
+                        if (ultimoResultado.size != oldItems.size ||
+                            ultimoResultado.any { novo -> oldItems.none { antigo -> antigo.id == novo.id && antigo.comprado == novo.comprado } }) {
+                            android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId: MUDANÇA DETECTADA na tentativa ${tentativa + 1}")
+                            break
+                        }
+                        
+                        tentativa++
+                        if (tentativa < 3) {
+                            kotlinx.coroutines.runBlocking {
+                                kotlinx.coroutines.delay(100) // Pausa entre tentativas
+                            }
+                        }
+                    }
+                    ultimoResultado
+                } catch (e: Exception) {
+                    android.util.Log.e("ShoppingListWidget", "Erro ao buscar itens síncrona para widget $appWidgetId", e)
+                    emptyList()
+                }
+                
+                android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId: RESULTADO FINAL - encontrados ${resultado.size} itens no banco")
                 
                 // Log detalhado dos itens encontrados
                 resultado.forEachIndexed { index, item ->
                     android.util.Log.d("ShoppingListWidget", "Item $index: ${item.nome} (ID: ${item.id}, Comprado: ${item.comprado})")
                 }
                 
-                // Atualizar items imediatamente (já estamos na thread correta)
-                val oldSize = items.size
+                // Atualizar items imediatamente com dados frescos
+                val oldSize = oldItems.size
                 items = resultado
-                android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId itens atualizados: ${items.size} (antigo: $oldSize)")
+                android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId itens ATUALIZADOS COM DADOS FRESCOS: ${items.size} (antigo: $oldSize)")
                 
                 // Verificar se getCount retornará o valor correto
                 android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId getCount() retornará: ${getCount()}")
                 
-                // Iniciar carregamento assíncrono em background para atualizações futuras
+                // Iniciar verificação adicional em background para garantir sincronização completa
                 dataLoadScope.launch {
                     try {
-                        val asyncResult = itemDao.getItensByListAndStatus(listId, false).first()
-                        android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId: carregamento assíncrono concluído com ${asyncResult.size} itens")
+                        kotlinx.coroutines.delay(300) // Delay maior para garantir processamento completo
                         
-                        // Se houver diferença, atualizar na thread principal
-                        if (asyncResult.size != items.size || asyncResult.any { newItem -> items.none { it.id == newItem.id } }) {
+                        // Buscar novamente para verificar consistência
+                        val verificacaoResult = itemDao.getItensByListAndStatusSync(listId, false)
+                        android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId: VERIFICAÇÃO ADICIONAL - encontrados ${verificacaoResult.size} itens")
+                        
+                        // Se houver inconsistência, forçar atualização
+                        if (verificacaoResult.size != items.size ||
+                            verificacaoResult.any { novo -> items.none { atual -> atual.id == novo.id && atual.comprado == novo.comprado } }) {
+                            android.util.Log.w("ShoppingListWidget", "Widget $appWidgetId: INCONSISTÊNCIA DETECTADA - forçando atualização")
+                            
                             kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                                items = asyncResult
-                                android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId itens atualizados via carregamento assíncrono: ${items.size}")
+                                val verificacaoSize = items.size
+                                items = verificacaoResult
+                                android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId itens corrigidos via verificação: ${items.size} (antigo: $verificacaoSize)")
+                                
+                                // Forçar notificação de mudança de dados
+                                try {
+                                    val appWidgetManager = android.appwidget.AppWidgetManager.getInstance(context)
+                                    appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widget_items_list)
+                                    android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId: notificação de mudança forçada após correção")
+                                } catch (e: Exception) {
+                                    android.util.Log.e("ShoppingListWidget", "Erro ao forçar notificação de mudança", e)
+                                }
                             }
+                        } else {
+                            android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId: verificação concluída - dados consistentes")
                         }
                     } catch (e: Exception) {
-                        android.util.Log.e("ShoppingListWidget", "Erro no carregamento assíncrono para widget $appWidgetId", e)
+                        android.util.Log.e("ShoppingListWidget", "Erro na verificação adicional para widget $appWidgetId", e)
                     }
                 }
             } else {
@@ -189,17 +235,31 @@ class ShoppingListWidgetFactory(
             putExtra(ShoppingListWidgetProvider.EXTRA_ITEM_ID, item.id)
             // Adicionar URI único para cada item
             data = android.net.Uri.parse("widget://item/${item.id}")
+            // DEFINIR EXPLICITAMENTE O COMPONENTE DESTINO
+            component = android.content.ComponentName(context, ShoppingListWidgetProvider::class.java)
         }
-        android.util.Log.d("ShoppingListWidget", "Criando PendingIntent para item ${item.id} (${item.nome}) no widget $appWidgetId")
+        android.util.Log.d("ShoppingListWidget", "=== CRIANDO PendingIntent PARA ITEM ${item.id} (${item.nome}) NO WIDGET $appWidgetId ===")
+        android.util.Log.d("ShoppingListWidget", "Action: ${clickIntent.action}")
+        android.util.Log.d("ShoppingListWidget", "Component: ${clickIntent.component}")
+        android.util.Log.d("ShoppingListWidget", "Data: ${clickIntent.data}")
+        android.util.Log.d("ShoppingListWidget", "Extras: item_id=${clickIntent.getLongExtra(ShoppingListWidgetProvider.EXTRA_ITEM_ID, -1)}, widget_id=${clickIntent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1)}")
+        
         val pendingIntent = android.app.PendingIntent.getBroadcast(
             context,
             item.id.toInt(), // Request code único por item
             clickIntent,
             android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
         )
+        android.util.Log.d("ShoppingListWidget", "PendingIntent criado: $pendingIntent")
+        try {
+            android.util.Log.d("ShoppingListWidget", "Intent do PendingIntent: não disponível para logging")
+        } catch (e: Exception) {
+            android.util.Log.d("ShoppingListWidget", "Intent do PendingIntent: não disponível")
+        }
+        
         views.setOnClickPendingIntent(R.id.widget_item_name, pendingIntent)
         views.setOnClickPendingIntent(R.id.widget_item_checkbox, pendingIntent)
-        android.util.Log.d("ShoppingListWidget", "PendingIntent configurado para item ${item.id} no widget $appWidgetId")
+        android.util.Log.d("ShoppingListWidget", "=== PendingIntent CONFIGURADO PARA ITEM ${item.id} NO WIDGET $appWidgetId ===")
 
         return views
     }

@@ -68,9 +68,12 @@
         <!-- App Widget Provider -->
         <receiver
             android:name=".widget.ShoppingListWidgetProvider"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.example.minhascompras.widget.ACTION_ITEM_CLICKED" />
+                <action android:name="com.example.minhascompras.widget.ACTION_ADD_ITEM" />
+                <action android:name="com.example.minhascompras.widget.ACTION_UPDATE_WIDGET" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"

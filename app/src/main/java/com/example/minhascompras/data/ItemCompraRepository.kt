@@ -134,15 +134,26 @@ class ItemCompraRepository(
         
         // Atualizar widget após inserção com método mais robusto
         context?.let { ctx ->
-            android.util.Log.d("ItemCompraRepository", "Atualizando widgets após inserção do item ${item.nome}")
+            android.util.Log.d("ItemCompraRepository", "Context disponível: ${ctx != null}, atualizando widgets após inserção do item ${item.nome}")
             repositoryScope.launch {
                 try {
                     // Pequena pausa para garantir que o banco tenha processado a inserção
                     kotlinx.coroutines.delay(100)
                     
-                    // Usar método de atualização forçada para garantir sincronização
-                    com.example.minhascompras.widget.ShoppingListWidgetProvider.Companion.refreshWidgetWithDataVerification(ctx)
-                    android.util.Log.d("ItemCompraRepository", "Widgets atualizados com sucesso após inserção")
+                    // Verificar se widgets existem antes de atualizar
+                    val appWidgetManager = android.appwidget.AppWidgetManager.getInstance(ctx)
+                    val widgetIds = appWidgetManager.getAppWidgetIds(
+                        android.content.ComponentName(ctx, com.example.minhascompras.widget.ShoppingListWidgetProvider::class.java)
+                    )
+                    android.util.Log.d("ItemCompraRepository", "Widgets encontrados para atualização: ${widgetIds.contentToString()}")
+                    
+                    if (widgetIds.isNotEmpty()) {
+                        // Usar método de atualização forçada para garantir sincronização
+                        com.example.minhascompras.widget.ShoppingListWidgetProvider.Companion.refreshWidgetWithDataVerification(ctx)
+                        android.util.Log.d("ItemCompraRepository", "Widgets atualizados com sucesso após inserção")
+                    } else {
+                        android.util.Log.w("ItemCompraRepository", "Nenhum widget encontrado para atualizar")
+                    }
                 } catch (e: Exception) {
                     android.util.Log.e("ItemCompraRepository", "Erro ao atualizar widget após inserção", e)
                     // Tentar com método padrão como fallback
@@ -154,6 +165,8 @@ class ItemCompraRepository(
                     }
                 }
             }
+        } ?: run {
+            android.util.Log.w("ItemCompraRepository", "Context nulo disponível, não foi possível atualizar widgets")
         }
         return result
     }

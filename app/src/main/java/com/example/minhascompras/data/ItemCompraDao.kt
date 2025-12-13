@@ -58,6 +58,14 @@ interface ItemCompraDao {
     """)
     fun getItensByListAndStatus(listId: Long, comprado: Boolean): Flow<List<ItemCompra>>
 
+    @Query("""
+        SELECT * FROM itens_compra
+        WHERE listId = :listId
+        AND comprado = :comprado
+        ORDER BY comprado ASC, dataCriacao DESC
+    """)
+    fun getItensByListAndStatusSync(listId: Long, comprado: Boolean): List<ItemCompra>
+
     @Query("SELECT * FROM itens_compra WHERE id = :id")
     suspend fun getItemById(id: Long): ItemCompra?
 

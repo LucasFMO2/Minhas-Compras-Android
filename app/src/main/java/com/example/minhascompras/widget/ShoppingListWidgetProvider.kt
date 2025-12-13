@@ -50,8 +50,26 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
+        android.util.Log.d("ShoppingListWidget", "=== BROADCAST RECEBIDO ===")
+        android.util.Log.d("ShoppingListWidget", "Action: ${intent.action}")
+        android.util.Log.d("ShoppingListWidget", "Component: ${intent.component}")
+        android.util.Log.d("ShoppingListWidget", "Data: ${intent.data}")
+        android.util.Log.d("ShoppingListWidget", "Extras: ${intent.extras}")
+        android.util.Log.d("ShoppingListWidget", "Flags: ${intent.flags}")
+        android.util.Log.d("ShoppingListWidget", "Package: ${intent.`package`}")
+        android.util.Log.d("ShoppingListWidget", "Scheme: ${intent.scheme}")
+        
         super.onReceive(context, intent)
 
+        // Adicionar validação de segurança
+        if (intent.action == null || !intent.action!!.startsWith("com.example.minhascompras.widget.") &&
+            intent.action != "android.appwidget.action.APPWIDGET_UPDATE") {
+            android.util.Log.w("ShoppingListWidget", "Action não autorizada ignorada: ${intent.action}")
+            return
+        }
+
+        android.util.Log.d("ShoppingListWidget", "Action autorizada processada: ${intent.action}")
+        
         when (intent.action) {
             ACTION_ITEM_CLICKED -> {
                 // Marcar item como comprado
@@ -91,7 +109,9 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
     }
 
     private fun markItemAsPurchased(context: Context, appWidgetId: Int, itemId: Long) {
+        android.util.Log.d("ShoppingListWidget", "=== INÍCIO: markItemAsPurchased ===")
         android.util.Log.d("ShoppingListWidget", "Tentando marcar item $itemId como comprado no widget $appWidgetId")
+        android.util.Log.d("ShoppingListWidget", "Thread atual: ${Thread.currentThread().name}")
         
         // Usar um CoroutineScope com SupervisorJob para garantir controle sobre a execução
         val scope = kotlinx.coroutines.CoroutineScope(
@@ -123,36 +143,43 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
                         try {
                             val appWidgetManager = AppWidgetManager.getInstance(context)
                             
-                            // ESTRATÉGIA MELHORADA: Atualização em múltiplas etapas com pausas
+                            // ESTRATÉGIA MELHORADA: Atualização em múltiplas etapas com pausas maiores
                             
                             // PRIMEIRO: Forçar notificação imediata de mudança de dados
                             android.util.Log.d("ShoppingListWidget", "Notificando mudança de dados para widget $appWidgetId")
                             appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widget_items_list)
                             
-                            // Pequena pausa para garantir processamento
-                            kotlinx.coroutines.delay(200)
+                            // Pausa maior para garantir processamento
+                            kotlinx.coroutines.delay(300)
                             
                             // SEGUNDO: Atualizar o widget principal (progresso, contadores, etc.)
                             android.util.Log.d("ShoppingListWidget", "Atualizando widget $appWidgetId após marcar item como comprado")
                             updateAppWidget(context, appWidgetManager, appWidgetId)
                             
-                            // Pequena pausa para garantir processamento
-                            kotlinx.coroutines.delay(200)
+                            // Pausa maior para garantir processamento
+                            kotlinx.coroutines.delay(300)
                             
                             // TERCEIRO: Notificar novamente para garantir sincronização completa
                             android.util.Log.d("ShoppingListWidget", "Notificação final para widget $appWidgetId")
                             appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widget_items_list)
                             
+                            // QUARTO: Forçar atualização completa como último recurso
+                            kotlinx.coroutines.delay(200)
+                            refreshWidgetWithDataVerification(context)
+                            
                             android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId atualizado com sucesso após marcar item como comprado")
+                            android.util.Log.d("ShoppingListWidget", "=== FIM: markItemAsPurchased ===")
                         } catch (e: Exception) {
                             android.util.Log.e("ShoppingListWidget", "Erro ao atualizar widget após marcar item como comprado", e)
                         }
                     }
                 } else {
                     android.util.Log.w("ShoppingListWidget", "Item $itemId não encontrado ou já está comprado")
+                    android.util.Log.d("ShoppingListWidget", "=== FIM: markItemAsPurchased (item não encontrado) ===")
                 }
             } catch (e: Exception) {
                 android.util.Log.e("ShoppingListWidget", "Erro ao marcar item como comprado", e)
+                android.util.Log.d("ShoppingListWidget", "=== FIM: markItemAsPurchased (com erro) ===")
             }
         }
     }

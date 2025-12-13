@@ -187,16 +187,20 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
 
                 if (listId != -1L) {
                     // Buscar dados de forma síncrona usando runBlocking
-                    val pendingItems = runBlocking {
+                    val pendingItems = kotlinx.coroutines.runBlocking {
                         itemDao.getItensByListAndStatus(listId, false).first()
                     }
 
                     // Buscar nome da lista
-                    val list = shoppingListDao.getListByIdSync(listId)
+                    val list = kotlinx.coroutines.runBlocking {
+                        shoppingListDao.getListByIdSync(listId)
+                    }
                     val listName = list?.nome ?: "Lista de Compras"
 
                     // Calcular progresso
-                    val totalItems = itemDao.getItensByList(listId).first()
+                    val totalItems = kotlinx.coroutines.runBlocking {
+                        itemDao.getItensByList(listId).first()
+                    }
                     val completedCount = totalItems.count { it.comprado }
                     val progressText = "$completedCount/${totalItems.size} itens"
 

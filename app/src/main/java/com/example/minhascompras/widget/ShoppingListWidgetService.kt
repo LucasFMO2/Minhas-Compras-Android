@@ -45,28 +45,29 @@ class ShoppingListWidgetFactory(
 
     override fun onDataSetChanged() {
         // Buscar itens do banco de dados quando os dados mudam
-        try {
-            val database = AppDatabase.getDatabase(context)
-            val itemDao = database.itemCompraDao()
+        // Usar corrotina para evitar bloqueio da thread principal
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+            try {
+                val database = AppDatabase.getDatabase(context)
+                val itemDao = database.itemCompraDao()
 
-            // Obter lista associada ao widget
-            val prefs = context.getSharedPreferences(
-                ShoppingListWidgetProvider.WIDGET_PREFS_NAME,
-                android.content.Context.MODE_PRIVATE
-            )
-            val listId = prefs.getLong("widget_${appWidgetId}_list_id", -1L)
+                // Obter lista associada ao widget
+                val prefs = context.getSharedPreferences(
+                    ShoppingListWidgetProvider.WIDGET_PREFS_NAME,
+                    android.content.Context.MODE_PRIVATE
+                )
+                val listId = prefs.getLong("widget_${appWidgetId}_list_id", -1L)
 
-            if (listId != -1L) {
-                // Buscar apenas itens pendentes (não comprados)
-                items = runBlocking {
-                    itemDao.getItensByListAndStatus(listId, false).first()
+                if (listId != -1L) {
+                    // Buscar apenas itens pendentes (não comprados)
+                    items = itemDao.getItensByListAndStatus(listId, false).first()
+                } else {
+                    items = emptyList()
                 }
-            } else {
+            } catch (e: Exception) {
+                android.util.Log.e("ShoppingListWidget", "Erro ao buscar itens", e)
                 items = emptyList()
             }
-        } catch (e: Exception) {
-            android.util.Log.e("ShoppingListWidget", "Erro ao buscar itens", e)
-            items = emptyList()
         }
     }
 

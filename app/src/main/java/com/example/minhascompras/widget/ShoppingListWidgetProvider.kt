@@ -96,10 +96,8 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
                 val database = AppDatabase.getDatabase(context)
                 val itemDao = database.itemCompraDao()
 
-                // Buscar item atual
-                val allItems = runBlocking {
-                    itemDao.getAllItens().first()
-                }
+                // Buscar item atual de forma assíncrona
+                val allItems = itemDao.getAllItens().first()
                 val item = allItems.find { it.id == itemId }
 
                 if (item != null && !item.comprado) {

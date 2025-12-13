@@ -108,14 +108,14 @@ fun WidgetConfigureScreen(
 
     // Carregar listas
     LaunchedEffect(Unit) {
-        try {
-            lists = runBlocking {
-                shoppingListRepository.allLists.first()
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+            try {
+                lists = shoppingListRepository.allLists.first()
+                isLoading = false
+            } catch (e: Exception) {
+                android.util.Log.e("WidgetConfigure", "Erro ao carregar listas", e)
+                isLoading = false
             }
-            isLoading = false
-        } catch (e: Exception) {
-            android.util.Log.e("WidgetConfigure", "Erro ao carregar listas", e)
-            isLoading = false
         }
     }
 

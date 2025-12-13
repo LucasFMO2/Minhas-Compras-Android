@@ -123,13 +123,25 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
                         try {
                             val appWidgetManager = AppWidgetManager.getInstance(context)
                             
-                            // PRIMEIRO: Notificar que os dados mudaram para atualizar a lista
+                            // ESTRATÉGIA MELHORADA: Atualização em múltiplas etapas com pausas
+                            
+                            // PRIMEIRO: Forçar notificação imediata de mudança de dados
                             android.util.Log.d("ShoppingListWidget", "Notificando mudança de dados para widget $appWidgetId")
                             appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widget_items_list)
+                            
+                            // Pequena pausa para garantir processamento
+                            kotlinx.coroutines.delay(200)
                             
                             // SEGUNDO: Atualizar o widget principal (progresso, contadores, etc.)
                             android.util.Log.d("ShoppingListWidget", "Atualizando widget $appWidgetId após marcar item como comprado")
                             updateAppWidget(context, appWidgetManager, appWidgetId)
+                            
+                            // Pequena pausa para garantir processamento
+                            kotlinx.coroutines.delay(200)
+                            
+                            // TERCEIRO: Notificar novamente para garantir sincronização completa
+                            android.util.Log.d("ShoppingListWidget", "Notificação final para widget $appWidgetId")
+                            appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widget_items_list)
                             
                             android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId atualizado com sucesso após marcar item como comprado")
                         } catch (e: Exception) {
@@ -168,6 +180,7 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
          */
         fun updateAllWidgets(context: Context) {
             android.util.Log.d("ShoppingListWidget", "updateAllWidgets chamado")
+            android.util.Log.d("ShoppingListWidget", "Thread atual: ${Thread.currentThread().name}")
             val appWidgetManager = AppWidgetManager.getInstance(context)
             val widgetIds = appWidgetManager.getAppWidgetIds(
                 android.content.ComponentName(
@@ -175,20 +188,47 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
                     ShoppingListWidgetProvider::class.java
                 )
             )
-            android.util.Log.d("ShoppingListWidget", "Encontrados ${widgetIds.size} widgets para atualizar")
+            android.util.Log.d("ShoppingListWidget", "Encontrados ${widgetIds.size} widgets para atualizar: ${widgetIds.contentToString()}")
             
             if (widgetIds.isNotEmpty()) {
-                // PRIMEIRO: Notificar mudança de dados para todos os widgets
-                for (widgetId in widgetIds) {
-                    android.util.Log.d("ShoppingListWidget", "Notificando mudança de dados para widget $widgetId")
-                    appWidgetManager.notifyAppWidgetViewDataChanged(widgetId, R.id.widget_items_list)
-                }
+                // Usar CoroutineScope para garantir que as atualizações sejam sequenciais
+                val scope = kotlinx.coroutines.CoroutineScope(
+                    kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Main
+                )
                 
-                // SEGUNDO: Atualizar cada widget individualmente
-                for (widgetId in widgetIds) {
-                    android.util.Log.d("ShoppingListWidget", "Atualizando widget $widgetId")
-                    updateAppWidget(context, appWidgetManager, widgetId)
+                scope.launch {
+                    try {
+                        // PRIMEIRO: Notificar mudança de dados para todos os widgets
+                        for (widgetId in widgetIds) {
+                            android.util.Log.d("ShoppingListWidget", "Notificando mudança de dados para widget $widgetId")
+                            appWidgetManager.notifyAppWidgetViewDataChanged(widgetId, R.id.widget_items_list)
+                            
+                            // Pequena pausa para garantir que a notificação seja processada
+                            kotlinx.coroutines.delay(100)
+                        }
+                        
+                        // SEGUNDO: Atualizar cada widget individualmente
+                        for (widgetId in widgetIds) {
+                            android.util.Log.d("ShoppingListWidget", "Atualizando widget $widgetId")
+                            updateAppWidget(context, appWidgetManager, widgetId)
+                            
+                            // Pequena pausa entre atualizações
+                            kotlinx.coroutines.delay(50)
+                        }
+                        
+                        // TERCEIRO: Forçar notificação final para garantir sincronização
+                        for (widgetId in widgetIds) {
+                            android.util.Log.d("ShoppingListWidget", "Notificação final para widget $widgetId")
+                            appWidgetManager.notifyAppWidgetViewDataChanged(widgetId, R.id.widget_items_list)
+                        }
+                        
+                        android.util.Log.d("ShoppingListWidget", "Todos os widgets atualizados com sucesso")
+                    } catch (e: Exception) {
+                        android.util.Log.e("ShoppingListWidget", "Erro durante atualização dos widgets", e)
+                    }
                 }
+            } else {
+                android.util.Log.w("ShoppingListWidget", "Nenhum widget encontrado para atualizar")
             }
         }
 
@@ -207,12 +247,84 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
             )
             
             if (widgetIds.isNotEmpty()) {
-                for (widgetId in widgetIds) {
-                    // Forçar notificação múltiplas vezes para garantir atualização
-                    repeat(3) {
-                        appWidgetManager.notifyAppWidgetViewDataChanged(widgetId, R.id.widget_items_list)
+                val scope = kotlinx.coroutines.CoroutineScope(
+                    kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Main
+                )
+                
+                scope.launch {
+                    try {
+                        for (widgetId in widgetIds) {
+                            android.util.Log.d("ShoppingListWidget", "Forçando atualização completa do widget $widgetId")
+                            
+                            // Forçar notificação múltiplas vezes com pausas
+                            repeat(3) {
+                                appWidgetManager.notifyAppWidgetViewDataChanged(widgetId, R.id.widget_items_list)
+                                kotlinx.coroutines.delay(200) // Pausa maior para garantir processamento
+                            }
+                            
+                            // Atualizar widget principal
+                            updateAppWidget(context, appWidgetManager, widgetId)
+                            
+                            // Notificação final
+                            appWidgetManager.notifyAppWidgetViewDataChanged(widgetId, R.id.widget_items_list)
+                            
+                            kotlinx.coroutines.delay(100)
+                        }
+                        
+                        android.util.Log.d("ShoppingListWidget", "Forçamento de atualização concluído para todos os widgets")
+                    } catch (e: Exception) {
+                        android.util.Log.e("ShoppingListWidget", "Erro ao forçar atualização dos widgets", e)
                     }
-                    updateAppWidget(context, appWidgetManager, widgetId)
+                }
+            }
+        }
+
+        /**
+         * Força a atualização completa do widget com verificação de dados.
+         * Método para garantir sincronização completa quando necessário.
+         */
+        fun refreshWidgetWithDataVerification(context: Context) {
+            android.util.Log.d("ShoppingListWidget", "refreshWidgetWithDataVerification chamado")
+            val appWidgetManager = AppWidgetManager.getInstance(context)
+            val widgetIds = appWidgetManager.getAppWidgetIds(
+                android.content.ComponentName(
+                    context,
+                    ShoppingListWidgetProvider::class.java
+                )
+            )
+            
+            if (widgetIds.isNotEmpty()) {
+                val scope = kotlinx.coroutines.CoroutineScope(
+                    kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Main
+                )
+                
+                scope.launch {
+                    try {
+                        for (widgetId in widgetIds) {
+                            android.util.Log.d("ShoppingListWidget", "Iniciando verificação completa para widget $widgetId")
+                            
+                            // PRIMEIRO: Forçar múltiplas notificações para limpar qualquer cache
+                            repeat(3) {
+                                appWidgetManager.notifyAppWidgetViewDataChanged(widgetId, R.id.widget_items_list)
+                                kotlinx.coroutines.delay(150)
+                            }
+                            
+                            // SEGUNDO: Atualizar widget principal
+                            updateAppWidget(context, appWidgetManager, widgetId)
+                            
+                            // Pequena pausa
+                            kotlinx.coroutines.delay(200)
+                            
+                            // TERCEIRO: Notificação final
+                            appWidgetManager.notifyAppWidgetViewDataChanged(widgetId, R.id.widget_items_list)
+                            
+                            android.util.Log.d("ShoppingListWidget", "Verificação completa concluída para widget $widgetId")
+                        }
+                        
+                        android.util.Log.d("ShoppingListWidget", "Verificação completa concluída para todos os widgets")
+                    } catch (e: Exception) {
+                        android.util.Log.e("ShoppingListWidget", "Erro na verificação completa dos widgets", e)
+                    }
                 }
             }
         }
@@ -275,8 +387,14 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
                         android.util.Log.d("ShoppingListWidget", "Lista nome: $listName")
 
                         // Buscar itens pendentes de forma síncrona para garantir dados atualizados
+                        android.util.Log.d("ShoppingListWidget", "Buscando itens pendentes da lista $listId")
                         val pendingItems = itemDao.getItensByListAndStatus(listId, false).first()
-                        android.util.Log.d("ShoppingListWidget", "Itens pendentes: ${pendingItems.size}")
+                        android.util.Log.d("ShoppingListWidget", "Itens pendentes encontrados: ${pendingItems.size}")
+                        
+                        // Log detalhado dos itens pendentes
+                        pendingItems.forEachIndexed { index, item ->
+                            android.util.Log.d("ShoppingListWidget", "Item pendente $index: ${item.nome} (ID: ${item.id})")
+                        }
 
                         // Calcular progresso
                         val totalItems = itemDao.getItensByList(listId).first()
@@ -330,9 +448,19 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
                             android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId: chamando notifyAppWidgetViewDataChanged")
                             appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widget_items_list)
                             
+                            // Pequena pausa para garantir processamento da notificação
+                            kotlinx.coroutines.delay(100)
+                            
                             // SEGUNDO: Atualizar widget com os dados atualizados
                             android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId: chamando updateAppWidget")
                             appWidgetManager.updateAppWidget(appWidgetId, views)
+                            
+                            // Pequena pausa para garantir processamento da atualização
+                            kotlinx.coroutines.delay(100)
+                            
+                            // TERCEIRO: Notificar novamente para garantir sincronização completa
+                            android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId: notificação final para garantir sincronização")
+                            appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widget_items_list)
                         }
                         
                     } catch (e: Exception) {
@@ -355,4 +483,3 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
         }
     }
 }
-

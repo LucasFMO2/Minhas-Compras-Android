@@ -57,6 +57,7 @@ class ShoppingListWidgetFactory(
     
     override fun onDataSetChanged() {
         android.util.Log.d("ShoppingListWidget", "onDataSetChanged chamado para widget $appWidgetId")
+        android.util.Log.d("ShoppingListWidget", "Thread atual: ${Thread.currentThread().name}")
         
         // Evitar múltiplos carregamentos simultâneos
         if (isLoading) {
@@ -66,58 +67,76 @@ class ShoppingListWidgetFactory(
         
         isLoading = true
         
-        // Buscar itens do banco de dados de forma assíncrona sem bloquear
-        dataLoadScope.launch {
-            try {
-                val database = AppDatabase.getDatabase(context)
-                val itemDao = database.itemCompraDao()
+        // Carregar dados de forma síncrona para garantir disponibilidade imediata
+        try {
+            val database = AppDatabase.getDatabase(context)
+            val itemDao = database.itemCompraDao()
 
-                // Obter lista associada ao widget
-                val prefs = context.getSharedPreferences(
-                    ShoppingListWidgetProvider.WIDGET_PREFS_NAME,
-                    android.content.Context.MODE_PRIVATE
-                )
-                val listId = prefs.getLong("widget_${appWidgetId}_list_id", -1L)
+            // Obter lista associada ao widget
+            val prefs = context.getSharedPreferences(
+                ShoppingListWidgetProvider.WIDGET_PREFS_NAME,
+                android.content.Context.MODE_PRIVATE
+            )
+            val listId = prefs.getLong("widget_${appWidgetId}_list_id", -1L)
 
-                android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId listId: $listId")
+            android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId listId: $listId")
 
-                if (listId != -1L) {
-                    // Buscar apenas itens pendentes (não comprados) de forma assíncrona
+            if (listId != -1L) {
+                // Buscar apenas itens pendentes (não comprados) de forma SÍNCRONA
+                android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId: buscando itens pendentes da lista $listId de forma síncrona")
+                
+                // Usar runBlocking para garantir que os dados sejam carregados sincronamente
+                val resultado = runBlocking(kotlinx.coroutines.Dispatchers.IO) {
                     try {
-                        val itensFlow = itemDao.getItensByListAndStatus(listId, false)
-                        val resultado = itensFlow.first()
-                        android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId: encontrados ${resultado.size} itens no banco")
+                        itemDao.getItensByListAndStatus(listId, false).first()
+                    } catch (e: Exception) {
+                        android.util.Log.e("ShoppingListWidget", "Erro ao buscar itens síncrona para widget $appWidgetId", e)
+                        emptyList()
+                    }
+                }
+                
+                android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId: encontrados ${resultado.size} itens no banco")
+                
+                // Log detalhado dos itens encontrados
+                resultado.forEachIndexed { index, item ->
+                    android.util.Log.d("ShoppingListWidget", "Item $index: ${item.nome} (ID: ${item.id}, Comprado: ${item.comprado})")
+                }
+                
+                // Atualizar items imediatamente (já estamos na thread correta)
+                val oldSize = items.size
+                items = resultado
+                android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId itens atualizados: ${items.size} (antigo: $oldSize)")
+                
+                // Verificar se getCount retornará o valor correto
+                android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId getCount() retornará: ${getCount()}")
+                
+                // Iniciar carregamento assíncrono em background para atualizações futuras
+                dataLoadScope.launch {
+                    try {
+                        val asyncResult = itemDao.getItensByListAndStatus(listId, false).first()
+                        android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId: carregamento assíncrono concluído com ${asyncResult.size} itens")
                         
-                        // Atualizar items na thread principal
-                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                            items = resultado
-                            android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId itens atualizados: ${items.size}")
-                        }
-                    } catch (e: kotlinx.coroutines.CancellationException) {
-                        android.util.Log.w("ShoppingListWidget", "Operação cancelada para widget $appWidgetId")
-                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                            items = emptyList()
+                        // Se houver diferença, atualizar na thread principal
+                        if (asyncResult.size != items.size || asyncResult.any { newItem -> items.none { it.id == newItem.id } }) {
+                            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                                items = asyncResult
+                                android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId itens atualizados via carregamento assíncrono: ${items.size}")
+                            }
                         }
                     } catch (e: Exception) {
-                        android.util.Log.e("ShoppingListWidget", "Erro ao buscar itens para widget $appWidgetId", e)
-                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                            items = emptyList()
-                        }
-                    }
-                } else {
-                    android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId não configurado")
-                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                        items = emptyList()
+                        android.util.Log.e("ShoppingListWidget", "Erro no carregamento assíncrono para widget $appWidgetId", e)
                     }
                 }
-            } catch (e: Exception) {
-                android.util.Log.e("ShoppingListWidget", "Erro geral ao buscar itens para widget $appWidgetId", e)
-                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                    items = emptyList()
-                }
-            } finally {
-                isLoading = false
+            } else {
+                android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId não configurado")
+                items = emptyList()
             }
+        } catch (e: Exception) {
+            android.util.Log.e("ShoppingListWidget", "Erro geral ao buscar itens para widget $appWidgetId", e)
+            items = emptyList()
+        } finally {
+            isLoading = false
+            android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId carregamento finalizado. isLoading: $isLoading")
         }
     }
 
@@ -129,12 +148,25 @@ class ShoppingListWidgetFactory(
         items = emptyList()
     }
 
-    override fun getCount(): Int = items.size
+    override fun getCount(): Int {
+        val count = items.size
+        android.util.Log.d("ShoppingListWidget", "getCount() chamado para widget $appWidgetId, retornando: $count")
+        android.util.Log.d("ShoppingListWidget", "Itens atuais na lista: ${items.map { "${it.nome}(ID:${it.id})" }}")
+        return count
+    }
 
     override fun getViewAt(position: Int): RemoteViews? {
-        if (position >= items.size) return null
+        android.util.Log.d("ShoppingListWidget", "getViewAt chamado para posição $position no widget $appWidgetId")
+        android.util.Log.d("ShoppingListWidget", "Total de itens disponíveis: ${items.size}")
+        
+        if (position >= items.size) {
+            android.util.Log.w("ShoppingListWidget", "Posição $position maior que o tamanho da lista (${items.size})")
+            return null
+        }
 
         val item = items[position]
+        android.util.Log.d("ShoppingListWidget", "Criando view para item na posição $position: ${item.nome} (ID: ${item.id})")
+        
         // Usar layout de item apropriado baseado no tamanho do widget
         val itemLayoutResId = if (isSmallWidget) {
             R.layout.widget_item_small
@@ -145,6 +177,7 @@ class ShoppingListWidgetFactory(
 
         // Configurar nome do item
         views.setTextViewText(R.id.widget_item_name, item.nome)
+        android.util.Log.d("ShoppingListWidget", "TextView configurado com: ${item.nome}")
 
         // Checkbox sempre desmarcado (apenas itens pendentes são exibidos)
         views.setBoolean(R.id.widget_item_checkbox, "setChecked", false)

@@ -128,14 +128,30 @@ class ItemCompraRepository(
     }
 
     suspend fun insert(item: ItemCompra): Long {
+        android.util.Log.d("ItemCompraRepository", "Inserindo item: ${item.nome} (ID: ${item.id}) na lista ${item.listId}")
         val result = itemCompraDao.insert(item)
-        // Atualizar widget após inserção
+        android.util.Log.d("ItemCompraRepository", "Item inserido com ID: $result")
+        
+        // Atualizar widget após inserção com método mais robusto
         context?.let { ctx ->
+            android.util.Log.d("ItemCompraRepository", "Atualizando widgets após inserção do item ${item.nome}")
             repositoryScope.launch {
                 try {
-                    com.example.minhascompras.widget.ShoppingListWidgetProvider.updateAllWidgets(ctx)
+                    // Pequena pausa para garantir que o banco tenha processado a inserção
+                    kotlinx.coroutines.delay(100)
+                    
+                    // Usar método de atualização forçada para garantir sincronização
+                    com.example.minhascompras.widget.ShoppingListWidgetProvider.Companion.refreshWidgetWithDataVerification(ctx)
+                    android.util.Log.d("ItemCompraRepository", "Widgets atualizados com sucesso após inserção")
                 } catch (e: Exception) {
                     android.util.Log.e("ItemCompraRepository", "Erro ao atualizar widget após inserção", e)
+                    // Tentar com método padrão como fallback
+                    try {
+                        com.example.minhascompras.widget.ShoppingListWidgetProvider.updateAllWidgets(ctx)
+                        android.util.Log.d("ItemCompraRepository", "Widgets atualizados com método fallback após inserção")
+                    } catch (e2: Exception) {
+                        android.util.Log.e("ItemCompraRepository", "Erro no fallback de atualização do widget", e2)
+                    }
                 }
             }
         }
@@ -144,13 +160,24 @@ class ItemCompraRepository(
 
     suspend fun update(item: ItemCompra) {
         itemCompraDao.update(item)
-        // Atualizar widget após atualização
+        // Atualizar widget após atualização com método mais robusto
         context?.let { ctx ->
             repositoryScope.launch {
                 try {
-                    com.example.minhascompras.widget.ShoppingListWidgetProvider.updateAllWidgets(ctx)
+                    // Pequena pausa para garantir que o banco tenha processado a atualização
+                    kotlinx.coroutines.delay(100)
+                    
+                    // Usar método de atualização forçada para garantir sincronização
+                    com.example.minhascompras.widget.ShoppingListWidgetProvider.Companion.refreshWidgetWithDataVerification(ctx)
                 } catch (e: Exception) {
                     android.util.Log.e("ItemCompraRepository", "Erro ao atualizar widget após atualização", e)
+                    // Tentar com método padrão como fallback
+                    try {
+                        com.example.minhascompras.widget.ShoppingListWidgetProvider.updateAllWidgets(ctx)
+                        android.util.Log.d("ItemCompraRepository", "Widgets atualizados com método fallback após atualização")
+                    } catch (e2: Exception) {
+                        android.util.Log.e("ItemCompraRepository", "Erro no fallback de atualização do widget", e2)
+                    }
                 }
             }
         }
@@ -158,13 +185,24 @@ class ItemCompraRepository(
 
     suspend fun delete(item: ItemCompra) {
         itemCompraDao.delete(item)
-        // Atualizar widget após exclusão
+        // Atualizar widget após exclusão com método mais robusto
         context?.let { ctx ->
             repositoryScope.launch {
                 try {
-                    com.example.minhascompras.widget.ShoppingListWidgetProvider.updateAllWidgets(ctx)
+                    // Pequena pausa para garantir que o banco tenha processado a exclusão
+                    kotlinx.coroutines.delay(100)
+                    
+                    // Usar método de atualização forçada para garantir sincronização
+                    com.example.minhascompras.widget.ShoppingListWidgetProvider.Companion.refreshWidgetWithDataVerification(ctx)
                 } catch (e: Exception) {
                     android.util.Log.e("ItemCompraRepository", "Erro ao atualizar widget após exclusão", e)
+                    // Tentar com método padrão como fallback
+                    try {
+                        com.example.minhascompras.widget.ShoppingListWidgetProvider.updateAllWidgets(ctx)
+                        android.util.Log.d("ItemCompraRepository", "Widgets atualizados com método fallback após exclusão")
+                    } catch (e2: Exception) {
+                        android.util.Log.e("ItemCompraRepository", "Erro no fallback de atualização do widget", e2)
+                    }
                 }
             }
         }

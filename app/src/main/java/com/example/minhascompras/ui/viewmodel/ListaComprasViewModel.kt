@@ -140,29 +140,36 @@ class ListaComprasViewModel(
 
     fun inserirItem(nome: String, quantidade: Int = 1, preco: Double? = null, categoria: String = "Outros") {
         if (nome.isNotBlank()) {
+            android.util.Log.d("ListaComprasViewModel", "Inserindo item: $nome, quantidade: $quantidade, preco: $preco, categoria: $categoria")
             viewModelScope.launch {
                 // Verificar se há listas criadas pelo usuário
                 val allLists = shoppingListRepository.allLists.first()
                 val availableLists = allLists.filter { !it.isArchived }
+                android.util.Log.d("ListaComprasViewModel", "Listas disponíveis: ${availableLists.size}, listas arquivadas: ${allLists.size - availableLists.size}")
+                
                 if (availableLists.isEmpty()) {
+                    android.util.Log.w("ListaComprasViewModel", "Nenhuma lista disponível para adicionar item")
                     _uiMessages.emit(UiMessage.Error("Crie uma lista de compras antes de adicionar produtos"))
                     return@launch
                 }
                 
                 val listId = activeListId.value
+                android.util.Log.d("ListaComprasViewModel", "Lista ativa atual: $listId")
+                
                 if (listId == null) {
                     // Se não houver lista ativa, usar a primeira lista disponível
                     val firstList = availableLists.first()
+                    android.util.Log.d("ListaComprasViewModel", "Usando primeira lista disponível: ${firstList.nome} (ID: ${firstList.id})")
                     shoppingListViewModel?.setActiveList(firstList.id)
-                    repository.insert(
-                        ItemCompra(
-                            nome = nome.trim(),
-                            quantidade = quantidade,
-                            preco = preco,
-                            categoria = categoria,
-                            listId = firstList.id
-                        )
+                    val item = ItemCompra(
+                        nome = nome.trim(),
+                        quantidade = quantidade,
+                        preco = preco,
+                        categoria = categoria,
+                        listId = firstList.id
                     )
+                    android.util.Log.d("ListaComprasViewModel", "Inserindo item na lista ${firstList.id}: ${item.nome}")
+                    repository.insert(item)
                     return@launch
                 }
                 
@@ -171,30 +178,32 @@ class ListaComprasViewModel(
                 if (activeList == null || activeList.isArchived) {
                     // Se a lista não existe mais ou foi arquivada, usar a primeira lista disponível
                     val firstList = availableLists.firstOrNull { it.id != listId } ?: availableLists.first()
+                    android.util.Log.d("ListaComprasViewModel", "Lista ativa não existe ou foi arquivada. Usando: ${firstList.nome} (ID: ${firstList.id})")
                     shoppingListViewModel?.setActiveList(firstList.id)
-                    repository.insert(
-                        ItemCompra(
-                            nome = nome.trim(),
-                            quantidade = quantidade,
-                            preco = preco,
-                            categoria = categoria,
-                            listId = firstList.id
-                        )
-                    )
-                    return@launch
-                }
-                
-                repository.insert(
-                    ItemCompra(
+                    val item = ItemCompra(
                         nome = nome.trim(),
                         quantidade = quantidade,
                         preco = preco,
                         categoria = categoria,
-                        listId = listId
+                        listId = firstList.id
                     )
+                    android.util.Log.d("ListaComprasViewModel", "Inserindo item na lista ${firstList.id}: ${item.nome}")
+                    repository.insert(item)
+                    return@launch
+                }
+                
+                val item = ItemCompra(
+                    nome = nome.trim(),
+                    quantidade = quantidade,
+                    preco = preco,
+                    categoria = categoria,
+                    listId = listId
                 )
+                android.util.Log.d("ListaComprasViewModel", "Inserindo item na lista ativa $listId: ${item.nome}")
+                repository.insert(item)
                 
                 // Atualizar widgets após inserir item
+                android.util.Log.d("ListaComprasViewModel", "Chamando updateAllWidgets após inserir item")
                 context?.let { ShoppingListWidgetProvider.updateAllWidgets(it) }
             }
         }

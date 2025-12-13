@@ -56,6 +56,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.example.minhascompras.widget.ShoppingListWidgetProvider
 
 sealed class Screen(val route: String) {
     object ListaCompras : Screen("lista_compras")
@@ -138,13 +139,17 @@ class MainActivity : ComponentActivity() {
             applicationContext
         )
         
-        // Rastrear uso do app
+        // Rastrear uso do app e atualizar widget quando o app vai para primeiro plano
         lifecycleScope.launch {
             try {
                 val updatePreferencesManager = UpdatePreferencesManager(applicationContext)
                 updatePreferencesManager.updateLastAppUse()
+                
+                // Atualizar widgets quando o app for para o primeiro plano
+                android.util.Log.d("MainActivity", "App foi para o primeiro plano, atualizando widgets")
+                ShoppingListWidgetProvider.Companion.refreshWidgetWithDataVerification(applicationContext)
             } catch (e: Exception) {
-                android.util.Log.e("MainActivity", "Erro ao atualizar timestamp de uso", e)
+                android.util.Log.e("MainActivity", "Erro ao atualizar timestamp de uso ou widgets", e)
             }
         }
         

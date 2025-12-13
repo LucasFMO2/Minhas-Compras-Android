@@ -13,6 +13,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 
 /**
  * Widget Provider para exibir lista de compras na tela inicial do Android.
@@ -92,15 +93,19 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
     private fun markItemAsPurchased(context: Context, appWidgetId: Int, itemId: Long) {
         android.util.Log.d("ShoppingListWidget", "Tentando marcar item $itemId como comprado no widget $appWidgetId")
         
-        // Atualizar item no banco de dados de forma assíncrona
-        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+        // Usar um CoroutineScope com SupervisorJob para garantir controle sobre a execução
+        val scope = kotlinx.coroutines.CoroutineScope(
+            kotlinx.coroutines.SupervisorJob() +
+            kotlinx.coroutines.Dispatchers.IO
+        )
+        
+        scope.launch {
             try {
                 val database = AppDatabase.getDatabase(context)
                 val itemDao = database.itemCompraDao()
 
-                // Buscar item atual de forma assíncrona
-                val allItems = itemDao.getAllItens().first()
-                val item = allItems.find { it.id == itemId }
+                // Buscar item específico de forma mais eficiente
+                val item = itemDao.getItemById(itemId)
 
                 android.util.Log.d("ShoppingListWidget", "Item encontrado: ${item?.nome}, já comprado: ${item?.comprado}")
 
@@ -109,11 +114,28 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
                     val updatedItem = item.copy(comprado = true)
                     itemDao.update(updatedItem)
                     android.util.Log.d("ShoppingListWidget", "Item ${item.nome} marcado como comprado no banco")
-
-                    // Atualizar widget
-                    val appWidgetManager = AppWidgetManager.getInstance(context)
-                    updateAppWidget(context, appWidgetManager, appWidgetId)
-                    android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId atualizado após marcar item como comprado")
+                    
+                    // Aguardar a conclusão da transação do banco
+                    kotlinx.coroutines.yield()
+                    
+                    // Mudar para thread principal para atualizações de UI
+                    withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        try {
+                            val appWidgetManager = AppWidgetManager.getInstance(context)
+                            
+                            // PRIMEIRO: Notificar que os dados mudaram para atualizar a lista
+                            android.util.Log.d("ShoppingListWidget", "Notificando mudança de dados para widget $appWidgetId")
+                            appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widget_items_list)
+                            
+                            // SEGUNDO: Atualizar o widget principal (progresso, contadores, etc.)
+                            android.util.Log.d("ShoppingListWidget", "Atualizando widget $appWidgetId após marcar item como comprado")
+                            updateAppWidget(context, appWidgetManager, appWidgetId)
+                            
+                            android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId atualizado com sucesso após marcar item como comprado")
+                        } catch (e: Exception) {
+                            android.util.Log.e("ShoppingListWidget", "Erro ao atualizar widget após marcar item como comprado", e)
+                        }
+                    }
                 } else {
                     android.util.Log.w("ShoppingListWidget", "Item $itemId não encontrado ou já está comprado")
                 }
@@ -145,6 +167,7 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
          * Deve ser chamado quando os dados mudam no app.
          */
         fun updateAllWidgets(context: Context) {
+            android.util.Log.d("ShoppingListWidget", "updateAllWidgets chamado")
             val appWidgetManager = AppWidgetManager.getInstance(context)
             val widgetIds = appWidgetManager.getAppWidgetIds(
                 android.content.ComponentName(
@@ -152,8 +175,43 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
                     ShoppingListWidgetProvider::class.java
                 )
             )
+            android.util.Log.d("ShoppingListWidget", "Encontrados ${widgetIds.size} widgets para atualizar")
+            
+            if (widgetIds.isNotEmpty()) {
+                // PRIMEIRO: Notificar mudança de dados para todos os widgets
+                for (widgetId in widgetIds) {
+                    android.util.Log.d("ShoppingListWidget", "Notificando mudança de dados para widget $widgetId")
+                    appWidgetManager.notifyAppWidgetViewDataChanged(widgetId, R.id.widget_items_list)
+                }
+                
+                // SEGUNDO: Atualizar cada widget individualmente
+                for (widgetId in widgetIds) {
+                    android.util.Log.d("ShoppingListWidget", "Atualizando widget $widgetId")
+                    updateAppWidget(context, appWidgetManager, widgetId)
+                }
+            }
+        }
+
+        /**
+         * Força a atualização imediata dos dados do widget.
+         * Método mais agressivo para garantir sincronização.
+         */
+        fun forceRefreshWidgets(context: Context) {
+            android.util.Log.d("ShoppingListWidget", "forceRefreshWidgets chamado")
+            val appWidgetManager = AppWidgetManager.getInstance(context)
+            val widgetIds = appWidgetManager.getAppWidgetIds(
+                android.content.ComponentName(
+                    context,
+                    ShoppingListWidgetProvider::class.java
+                )
+            )
+            
             if (widgetIds.isNotEmpty()) {
                 for (widgetId in widgetIds) {
+                    // Forçar notificação múltiplas vezes para garantir atualização
+                    repeat(3) {
+                        appWidgetManager.notifyAppWidgetViewDataChanged(widgetId, R.id.widget_items_list)
+                    }
                     updateAppWidget(context, appWidgetManager, widgetId)
                 }
             }
@@ -205,16 +263,18 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
                         if (list == null) {
                             android.util.Log.w("ShoppingListWidget", "Lista $listId não encontrada")
                             // Lista não existe mais, mostrar mensagem para reconfigurar
-                            views.setTextViewText(R.id.widget_list_name, "Lista removida")
-                            views.setTextViewText(R.id.widget_progress_text, "Reconfigure o widget")
-                            appWidgetManager.updateAppWidget(appWidgetId, views)
+                            withContext(Dispatchers.Main) {
+                                views.setTextViewText(R.id.widget_list_name, "Lista removida")
+                                views.setTextViewText(R.id.widget_progress_text, "Reconfigure o widget")
+                                appWidgetManager.updateAppWidget(appWidgetId, views)
+                            }
                             return@launch
                         }
 
                         val listName = list.nome
                         android.util.Log.d("ShoppingListWidget", "Lista nome: $listName")
 
-                        // Buscar itens pendentes
+                        // Buscar itens pendentes de forma síncrona para garantir dados atualizados
                         val pendingItems = itemDao.getItensByListAndStatus(listId, false).first()
                         android.util.Log.d("ShoppingListWidget", "Itens pendentes: ${pendingItems.size}")
 
@@ -223,59 +283,66 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
                         val completedCount = totalItems.count { it.comprado }
                         val progressText = "$completedCount/${totalItems.size} itens"
 
-                        // Atualizar views com dados
-                        views.setTextViewText(R.id.widget_list_name, listName)
-                        views.setTextViewText(R.id.widget_progress_text, progressText)
+                        // Mudar para thread principal para atualizações de UI
+                        withContext(Dispatchers.Main) {
+                            // Atualizar views com dados
+                            views.setTextViewText(R.id.widget_list_name, listName)
+                            views.setTextViewText(R.id.widget_progress_text, progressText)
 
-                        // Conectar RemoteViewsService ao ListView
-                        val serviceIntent = Intent(context, ShoppingListWidgetService::class.java)
-                        serviceIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-                        serviceIntent.putExtra("is_small_widget", layoutResId == R.layout.widget_layout_small)
-                        serviceIntent.data = android.net.Uri.parse(serviceIntent.toUri(Intent.URI_INTENT_SCHEME))
-                        views.setRemoteAdapter(R.id.widget_items_list, serviceIntent)
+                            // Conectar RemoteViewsService ao ListView
+                            val serviceIntent = Intent(context, ShoppingListWidgetService::class.java)
+                            serviceIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                            serviceIntent.putExtra("is_small_widget", layoutResId == R.layout.widget_layout_small)
+                            serviceIntent.data = android.net.Uri.parse(serviceIntent.toUri(Intent.URI_INTENT_SCHEME))
+                            views.setRemoteAdapter(R.id.widget_items_list, serviceIntent)
 
-                        // Configurar empty view (será exibido quando não houver itens)
-                        views.setEmptyView(R.id.widget_items_list, R.id.widget_empty_view)
+                            // Configurar empty view (será exibido quando não houver itens)
+                            views.setEmptyView(R.id.widget_items_list, R.id.widget_empty_view)
 
-                        // Configurar PendingIntent para o botão "Adicionar Item"
-                        val addItemIntent = Intent(context, ShoppingListWidgetProvider::class.java).apply {
-                            action = ACTION_ADD_ITEM
-                            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-                            putExtra(EXTRA_LIST_ID, listId)
+                            // Configurar PendingIntent para o botão "Adicionar Item"
+                            val addItemIntent = Intent(context, ShoppingListWidgetProvider::class.java).apply {
+                                action = ACTION_ADD_ITEM
+                                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                                putExtra(EXTRA_LIST_ID, listId)
+                            }
+                            val addItemPendingIntent = android.app.PendingIntent.getBroadcast(
+                                context,
+                                appWidgetId,
+                                addItemIntent,
+                                android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+                            )
+                            views.setOnClickPendingIntent(R.id.widget_add_item_button, addItemPendingIntent)
+
+                            // Configurar PendingIntent para abrir o app ao tocar no cabeçalho
+                            val openAppIntent = Intent(context, com.example.minhascompras.MainActivity::class.java).apply {
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                                putExtra("list_id", listId)
+                            }
+                            val openAppPendingIntent = android.app.PendingIntent.getActivity(
+                                context,
+                                appWidgetId + 1000, // Request code diferente
+                                openAppIntent,
+                                android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+                            )
+                            views.setOnClickPendingIntent(R.id.widget_list_name, openAppPendingIntent)
+
+                            // PRIMEIRO: Notificar que os dados mudaram para atualizar a lista
+                            android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId: chamando notifyAppWidgetViewDataChanged")
+                            appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widget_items_list)
+                            
+                            // SEGUNDO: Atualizar widget com os dados atualizados
+                            android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId: chamando updateAppWidget")
+                            appWidgetManager.updateAppWidget(appWidgetId, views)
                         }
-                        val addItemPendingIntent = android.app.PendingIntent.getBroadcast(
-                            context,
-                            appWidgetId,
-                            addItemIntent,
-                            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
-                        )
-                        views.setOnClickPendingIntent(R.id.widget_add_item_button, addItemPendingIntent)
-
-                        // Configurar PendingIntent para abrir o app ao tocar no cabeçalho
-                        val openAppIntent = Intent(context, com.example.minhascompras.MainActivity::class.java).apply {
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                            putExtra("list_id", listId)
-                        }
-                        val openAppPendingIntent = android.app.PendingIntent.getActivity(
-                            context,
-                            appWidgetId + 1000, // Request code diferente
-                            openAppIntent,
-                            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
-                        )
-                        views.setOnClickPendingIntent(R.id.widget_list_name, openAppPendingIntent)
-
-                        // Notificar que os dados mudaram para atualizar a lista PRIMEIRO
-                        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widget_items_list)
-                        
-                        // Atualizar widget DEPOIS de notificar sobre mudança dos dados
-                        appWidgetManager.updateAppWidget(appWidgetId, views)
                         
                     } catch (e: Exception) {
                         android.util.Log.e("ShoppingListWidget", "Erro ao atualizar widget $appWidgetId", e)
                         // Em caso de erro, mostrar mensagem genérica
-                        views.setTextViewText(R.id.widget_list_name, "Erro ao carregar")
-                        views.setTextViewText(R.id.widget_progress_text, "Toque para abrir app")
-                        appWidgetManager.updateAppWidget(appWidgetId, views)
+                        withContext(Dispatchers.Main) {
+                            views.setTextViewText(R.id.widget_list_name, "Erro ao carregar")
+                            views.setTextViewText(R.id.widget_progress_text, "Toque para abrir app")
+                            appWidgetManager.updateAppWidget(appWidgetId, views)
+                        }
                     }
                 }
             } else {

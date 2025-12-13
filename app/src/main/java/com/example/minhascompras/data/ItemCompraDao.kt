@@ -51,12 +51,15 @@ interface ItemCompraDao {
     fun getItensByStatus(comprado: Boolean): Flow<List<ItemCompra>>
 
     @Query("""
-        SELECT * FROM itens_compra 
+        SELECT * FROM itens_compra
         WHERE listId = :listId
         AND comprado = :comprado
         ORDER BY comprado ASC, dataCriacao DESC
     """)
     fun getItensByListAndStatus(listId: Long, comprado: Boolean): Flow<List<ItemCompra>>
+
+    @Query("SELECT * FROM itens_compra WHERE id = :id")
+    suspend fun getItemById(id: Long): ItemCompra?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(item: ItemCompra): Long

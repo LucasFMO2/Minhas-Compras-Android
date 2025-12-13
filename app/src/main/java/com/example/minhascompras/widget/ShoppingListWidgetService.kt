@@ -9,6 +9,9 @@ import com.example.minhascompras.data.AppDatabase
 import com.example.minhascompras.data.ItemCompra
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Job
 
 /**
  * RemoteViewsService para fornecer dados à ListView do widget.
@@ -43,54 +46,85 @@ class ShoppingListWidgetFactory(
         // Inicialização se necessário
     }
 
+    // Adicionar um CoroutineScope persistente para a factory
+    private val dataLoadJob = Job()
+    private val dataLoadScope = kotlinx.coroutines.CoroutineScope(
+        kotlinx.coroutines.SupervisorJob(dataLoadJob) + kotlinx.coroutines.Dispatchers.IO
+    )
+    
+    // Variável para controlar se há carregamento em andamento
+    private var isLoading = false
+    
     override fun onDataSetChanged() {
         android.util.Log.d("ShoppingListWidget", "onDataSetChanged chamado para widget $appWidgetId")
         
-        // Buscar itens do banco de dados quando os dados mudam
-        // Usar coroutine dedicada para não bloquear o thread principal
-        try {
-            val database = AppDatabase.getDatabase(context)
-            val itemDao = database.itemCompraDao()
+        // Evitar múltiplos carregamentos simultâneos
+        if (isLoading) {
+            android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId já está carregando dados, ignorando chamada")
+            return
+        }
+        
+        isLoading = true
+        
+        // Buscar itens do banco de dados de forma assíncrona sem bloquear
+        dataLoadScope.launch {
+            try {
+                val database = AppDatabase.getDatabase(context)
+                val itemDao = database.itemCompraDao()
 
-            // Obter lista associada ao widget
-            val prefs = context.getSharedPreferences(
-                ShoppingListWidgetProvider.WIDGET_PREFS_NAME,
-                android.content.Context.MODE_PRIVATE
-            )
-            val listId = prefs.getLong("widget_${appWidgetId}_list_id", -1L)
-
-            android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId listId: $listId")
-
-            if (listId != -1L) {
-                // Buscar apenas itens pendentes (não comprados) de forma assíncrona
-                // Usar um CoroutineScope dedicado para esta operação
-                val scope = kotlinx.coroutines.CoroutineScope(
-                    kotlinx.coroutines.SupervisorJob() +
-                    kotlinx.coroutines.Dispatchers.IO
+                // Obter lista associada ao widget
+                val prefs = context.getSharedPreferences(
+                    ShoppingListWidgetProvider.WIDGET_PREFS_NAME,
+                    android.content.Context.MODE_PRIVATE
                 )
-                
-                // Executar de forma síncrona mas sem bloquear o thread principal
-                items = try {
-                    kotlinx.coroutines.runBlocking {
-                        itemDao.getItensByListAndStatus(listId, false).first()
+                val listId = prefs.getLong("widget_${appWidgetId}_list_id", -1L)
+
+                android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId listId: $listId")
+
+                if (listId != -1L) {
+                    // Buscar apenas itens pendentes (não comprados) de forma assíncrona
+                    try {
+                        val itensFlow = itemDao.getItensByListAndStatus(listId, false)
+                        val resultado = itensFlow.first()
+                        android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId: encontrados ${resultado.size} itens no banco")
+                        
+                        // Atualizar items na thread principal
+                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                            items = resultado
+                            android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId itens atualizados: ${items.size}")
+                        }
+                    } catch (e: kotlinx.coroutines.CancellationException) {
+                        android.util.Log.w("ShoppingListWidget", "Operação cancelada para widget $appWidgetId")
+                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                            items = emptyList()
+                        }
+                    } catch (e: Exception) {
+                        android.util.Log.e("ShoppingListWidget", "Erro ao buscar itens para widget $appWidgetId", e)
+                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                            items = emptyList()
+                        }
                     }
-                } catch (e: kotlinx.coroutines.CancellationException) {
-                    android.util.Log.w("ShoppingListWidget", "Operação cancelada para widget $appWidgetId")
-                    emptyList()
+                } else {
+                    android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId não configurado")
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        items = emptyList()
+                    }
                 }
-                
-                android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId itens carregados: ${items.size}")
-            } else {
-                android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId não configurado")
-                items = emptyList()
+            } catch (e: Exception) {
+                android.util.Log.e("ShoppingListWidget", "Erro geral ao buscar itens para widget $appWidgetId", e)
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    items = emptyList()
+                }
+            } finally {
+                isLoading = false
             }
-        } catch (e: Exception) {
-            android.util.Log.e("ShoppingListWidget", "Erro ao buscar itens para widget $appWidgetId", e)
-            items = emptyList()
         }
     }
 
     override fun onDestroy() {
+        android.util.Log.d("ShoppingListWidget", "onDestroy chamado para widget $appWidgetId")
+        // Cancelar todas as coroutines em andamento
+        dataLoadJob.cancel()
         // Limpeza se necessário
         items = emptyList()
     }
@@ -123,6 +157,7 @@ class ShoppingListWidgetFactory(
             // Adicionar URI único para cada item
             data = android.net.Uri.parse("widget://item/${item.id}")
         }
+        android.util.Log.d("ShoppingListWidget", "Criando PendingIntent para item ${item.id} (${item.nome}) no widget $appWidgetId")
         val pendingIntent = android.app.PendingIntent.getBroadcast(
             context,
             item.id.toInt(), // Request code único por item
@@ -131,6 +166,7 @@ class ShoppingListWidgetFactory(
         )
         views.setOnClickPendingIntent(R.id.widget_item_name, pendingIntent)
         views.setOnClickPendingIntent(R.id.widget_item_checkbox, pendingIntent)
+        android.util.Log.d("ShoppingListWidget", "PendingIntent configurado para item ${item.id} no widget $appWidgetId")
 
         return views
     }

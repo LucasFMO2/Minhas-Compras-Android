@@ -29,7 +29,7 @@ Você pode fazer isso de duas formas:
 
 #### Opção B: Manualmente pelo navegador
 
-1. Acesse: https://github.com/nerddescoladofmo-cmyk/Minhas-Compras-Android/releases/new
+1. Acesse: https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/new
 
 2. Preencha os campos:
    - **Tag**: Selecione `v2.10.8` (já existe)
@@ -52,8 +52,8 @@ Você pode fazer isso de duas formas:
 ## 🎯 Resultado esperado:
 
 Após criar a release, ela aparecerá em:
-- https://github.com/nerddescoladofmo-cmyk/Minhas-Compras-Android/releases
+- https://github.com/Lucasfmo1/Minhas-Compras-Android/releases
 
 E o link de download no README funcionará automaticamente:
-- https://github.com/nerddescoladofmo-cmyk/Minhas-Compras-Android/releases/download/v2.10.8/app-release-v2.10.8.apk
+- https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/download/v2.10.8/app-release-v2.10.8.apk
 

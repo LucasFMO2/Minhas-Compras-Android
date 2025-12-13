@@ -83,7 +83,7 @@ Documentação sobre otimizações aplicadas no projeto.
 ## 🔗 Links Úteis
 
 - [Repositório GitHub](../../README.md)
-- [Releases](https://github.com/nerddescoladofmo-cmyk/Minhas-Compras-Android/releases)
+- [Releases](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases)
 
 ---
 

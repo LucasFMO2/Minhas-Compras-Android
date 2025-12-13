@@ -3,7 +3,7 @@
 ## 🎯 Passo a Passo Visual
 
 ### 1️⃣ Acesse a página de criação de release
-**URL:** https://github.com/nerddescoladofmo-cmyk/Minhas-Compras-Android/releases/new**
+**URL:** https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/new**
 
 ### 2️⃣ Preencha os campos básicos
 
@@ -70,7 +70,7 @@ C:\Users\nerdd\AndroidStudioProjects\minhascompras2\app-release-v2.10.8.apk
 ## ✅ Após Publicar
 
 A release estará disponível em:
-- https://github.com/nerddescoladofmo-cmyk/Minhas-Compras-Android/releases
+- https://github.com/Lucasfmo1/Minhas-Compras-Android/releases
 
 E o link de download no README funcionará automaticamente!
 

@@ -24,7 +24,7 @@ gh release create $tag --title "Release v2.10.8" --notes-file $notesFile $apkPat
 if ($LASTEXITCODE -eq 0) {
     Write-Host ""
     Write-Host "✅ Release criada com sucesso!" -ForegroundColor Green
-    Write-Host "🔗 URL: https://github.com/nerddescoladofmo-cmyk/Minhas-Compras-Android/releases/tag/$tag" -ForegroundColor Cyan
+    Write-Host "🔗 URL: https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/tag/$tag" -ForegroundColor Cyan
 } else {
     Write-Host ""
     Write-Host "❌ Erro ao criar release" -ForegroundColor Red

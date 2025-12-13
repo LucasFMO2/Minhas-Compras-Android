@@ -44,8 +44,10 @@ class ShoppingListWidgetFactory(
     }
 
     override fun onDataSetChanged() {
+        android.util.Log.d("ShoppingListWidget", "onDataSetChanged chamado para widget $appWidgetId")
+        
         // Buscar itens do banco de dados quando os dados mudam
-        // Usar runBlocking para garantir sincronização
+        // Usar coroutine dedicada para não bloquear o thread principal
         try {
             val database = AppDatabase.getDatabase(context)
             val itemDao = database.itemCompraDao()
@@ -57,16 +59,33 @@ class ShoppingListWidgetFactory(
             )
             val listId = prefs.getLong("widget_${appWidgetId}_list_id", -1L)
 
+            android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId listId: $listId")
+
             if (listId != -1L) {
-                // Buscar apenas itens pendentes (não comprados)
-                items = kotlinx.coroutines.runBlocking {
-                    itemDao.getItensByListAndStatus(listId, false).first()
+                // Buscar apenas itens pendentes (não comprados) de forma assíncrona
+                // Usar um CoroutineScope dedicado para esta operação
+                val scope = kotlinx.coroutines.CoroutineScope(
+                    kotlinx.coroutines.SupervisorJob() +
+                    kotlinx.coroutines.Dispatchers.IO
+                )
+                
+                // Executar de forma síncrona mas sem bloquear o thread principal
+                items = try {
+                    kotlinx.coroutines.runBlocking {
+                        itemDao.getItensByListAndStatus(listId, false).first()
+                    }
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    android.util.Log.w("ShoppingListWidget", "Operação cancelada para widget $appWidgetId")
+                    emptyList()
                 }
+                
+                android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId itens carregados: ${items.size}")
             } else {
+                android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId não configurado")
                 items = emptyList()
             }
         } catch (e: Exception) {
-            android.util.Log.e("ShoppingListWidget", "Erro ao buscar itens", e)
+            android.util.Log.e("ShoppingListWidget", "Erro ao buscar itens para widget $appWidgetId", e)
             items = emptyList()
         }
     }

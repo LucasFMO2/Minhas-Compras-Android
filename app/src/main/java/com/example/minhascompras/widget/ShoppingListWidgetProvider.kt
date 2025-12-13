@@ -156,6 +156,8 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
             appWidgetManager: AppWidgetManager,
             appWidgetId: Int
         ) {
+            android.util.Log.d("ShoppingListWidget", "Atualizando widget $appWidgetId")
+            
             // Determinar qual layout usar baseado no tamanho do widget
             val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
             val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
@@ -175,91 +177,104 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
             // Criar RemoteViews com layout apropriado
             val views = RemoteViews(context.packageName, layoutResId)
 
-            // Carregar dados do banco de dados de forma síncrona (necessário para widgets)
-            try {
-                val database = AppDatabase.getDatabase(context)
-                val itemDao = database.itemCompraDao()
-                val shoppingListDao = database.shoppingListDao()
+            // Obter lista associada ao widget
+            val prefs = context.getSharedPreferences(WIDGET_PREFS_NAME, Context.MODE_PRIVATE)
+            val listId = prefs.getLong("widget_${appWidgetId}_list_id", -1L)
+            
+            android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId listId: $listId")
 
-                // Obter lista associada ao widget
-                val prefs = context.getSharedPreferences(WIDGET_PREFS_NAME, Context.MODE_PRIVATE)
-                val listId = prefs.getLong("widget_${appWidgetId}_list_id", -1L)
+            if (listId != -1L) {
+                // Usar CoroutineScope para operações assíncronas
+                val widgetScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+                widgetScope.launch {
+                    try {
+                        val database = AppDatabase.getDatabase(context)
+                        val itemDao = database.itemCompraDao()
+                        val shoppingListDao = database.shoppingListDao()
 
-                if (listId != -1L) {
-                    // Buscar dados de forma síncrona usando runBlocking
-                    val pendingItems = kotlinx.coroutines.runBlocking {
-                        itemDao.getItensByListAndStatus(listId, false).first()
+                        // Verificar se a lista ainda existe
+                        val list = shoppingListDao.getListByIdSync(listId)
+                        if (list == null) {
+                            android.util.Log.w("ShoppingListWidget", "Lista $listId não encontrada")
+                            // Lista não existe mais, mostrar mensagem para reconfigurar
+                            views.setTextViewText(R.id.widget_list_name, "Lista removida")
+                            views.setTextViewText(R.id.widget_progress_text, "Reconfigure o widget")
+                            appWidgetManager.updateAppWidget(appWidgetId, views)
+                            return@launch
+                        }
+
+                        val listName = list.nome
+                        android.util.Log.d("ShoppingListWidget", "Lista nome: $listName")
+
+                        // Buscar itens pendentes
+                        val pendingItems = itemDao.getItensByListAndStatus(listId, false).first()
+                        android.util.Log.d("ShoppingListWidget", "Itens pendentes: ${pendingItems.size}")
+
+                        // Calcular progresso
+                        val totalItems = itemDao.getItensByList(listId).first()
+                        val completedCount = totalItems.count { it.comprado }
+                        val progressText = "$completedCount/${totalItems.size} itens"
+
+                        // Atualizar views com dados
+                        views.setTextViewText(R.id.widget_list_name, listName)
+                        views.setTextViewText(R.id.widget_progress_text, progressText)
+
+                        // Conectar RemoteViewsService ao ListView
+                        val serviceIntent = Intent(context, ShoppingListWidgetService::class.java)
+                        serviceIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                        serviceIntent.putExtra("is_small_widget", layoutResId == R.layout.widget_layout_small)
+                        serviceIntent.data = android.net.Uri.parse(serviceIntent.toUri(Intent.URI_INTENT_SCHEME))
+                        views.setRemoteAdapter(R.id.widget_items_list, serviceIntent)
+
+                        // Configurar empty view (será exibido quando não houver itens)
+                        views.setEmptyView(R.id.widget_items_list, R.id.widget_empty_view)
+
+                        // Configurar PendingIntent para o botão "Adicionar Item"
+                        val addItemIntent = Intent(context, ShoppingListWidgetProvider::class.java).apply {
+                            action = ACTION_ADD_ITEM
+                            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                            putExtra(EXTRA_LIST_ID, listId)
+                        }
+                        val addItemPendingIntent = android.app.PendingIntent.getBroadcast(
+                            context,
+                            appWidgetId,
+                            addItemIntent,
+                            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+                        )
+                        views.setOnClickPendingIntent(R.id.widget_add_item_button, addItemPendingIntent)
+
+                        // Configurar PendingIntent para abrir o app ao tocar no cabeçalho
+                        val openAppIntent = Intent(context, com.example.minhascompras.MainActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                            putExtra("list_id", listId)
+                        }
+                        val openAppPendingIntent = android.app.PendingIntent.getActivity(
+                            context,
+                            appWidgetId + 1000, // Request code diferente
+                            openAppIntent,
+                            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+                        )
+                        views.setOnClickPendingIntent(R.id.widget_list_name, openAppPendingIntent)
+
+                        // Atualizar widget
+                        appWidgetManager.updateAppWidget(appWidgetId, views)
+                        
+                        // Notificar que os dados mudaram para atualizar a lista
+                        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widget_items_list)
+                        
+                    } catch (e: Exception) {
+                        android.util.Log.e("ShoppingListWidget", "Erro ao atualizar widget $appWidgetId", e)
+                        // Em caso de erro, mostrar mensagem genérica
+                        views.setTextViewText(R.id.widget_list_name, "Erro ao carregar")
+                        views.setTextViewText(R.id.widget_progress_text, "Toque para abrir app")
+                        appWidgetManager.updateAppWidget(appWidgetId, views)
                     }
-
-                    // Buscar nome da lista
-                    val list = kotlinx.coroutines.runBlocking {
-                        shoppingListDao.getListByIdSync(listId)
-                    }
-                    val listName = list?.nome ?: "Lista de Compras"
-
-                    // Calcular progresso
-                    val totalItems = kotlinx.coroutines.runBlocking {
-                        itemDao.getItensByList(listId).first()
-                    }
-                    val completedCount = totalItems.count { it.comprado }
-                    val progressText = "$completedCount/${totalItems.size} itens"
-
-                    // Atualizar views com dados
-                    views.setTextViewText(R.id.widget_list_name, listName)
-                    views.setTextViewText(R.id.widget_progress_text, progressText)
-
-                    // Conectar RemoteViewsService ao ListView
-                    val serviceIntent = Intent(context, ShoppingListWidgetService::class.java)
-                    serviceIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-                    serviceIntent.putExtra("is_small_widget", layoutResId == R.layout.widget_layout_small)
-                    serviceIntent.data = android.net.Uri.parse(serviceIntent.toUri(Intent.URI_INTENT_SCHEME))
-                    views.setRemoteAdapter(R.id.widget_items_list, serviceIntent)
-
-                    // Configurar empty view (será exibido quando não houver itens)
-                    views.setEmptyView(R.id.widget_items_list, R.id.widget_empty_view)
-
-                    // Notificar que os dados mudaram para atualizar a lista
-                    appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widget_items_list)
-
-                    // Configurar PendingIntent para o botão "Adicionar Item"
-                    val addItemIntent = Intent(context, ShoppingListWidgetProvider::class.java).apply {
-                        action = ACTION_ADD_ITEM
-                        putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-                        putExtra(EXTRA_LIST_ID, listId)
-                    }
-                    val addItemPendingIntent = android.app.PendingIntent.getBroadcast(
-                        context,
-                        appWidgetId,
-                        addItemIntent,
-                        android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
-                    )
-                    views.setOnClickPendingIntent(R.id.widget_add_item_button, addItemPendingIntent)
-
-                    // Configurar PendingIntent para abrir o app ao tocar no cabeçalho
-                    val openAppIntent = Intent(context, com.example.minhascompras.MainActivity::class.java).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                        putExtra("list_id", listId)
-                    }
-                    val openAppPendingIntent = android.app.PendingIntent.getActivity(
-                        context,
-                        appWidgetId + 1000, // Request code diferente
-                        openAppIntent,
-                        android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
-                    )
-                    views.setOnClickPendingIntent(R.id.widget_list_name, openAppPendingIntent)
-                } else {
-                    // Widget não configurado ainda
-                    views.setTextViewText(R.id.widget_list_name, "Configurar Widget")
-                    views.setTextViewText(R.id.widget_progress_text, "Toque para configurar")
                 }
-
-                // Atualizar widget
-                appWidgetManager.updateAppWidget(appWidgetId, views)
-            } catch (e: Exception) {
-                android.util.Log.e("ShoppingListWidget", "Erro ao atualizar widget", e)
-                // Em caso de erro, mostrar mensagem genérica
-                views.setTextViewText(R.id.widget_list_name, "Erro ao carregar")
-                views.setTextViewText(R.id.widget_progress_text, "Toque para abrir app")
+            } else {
+                // Widget não configurado ainda
+                android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId não configurado")
+                views.setTextViewText(R.id.widget_list_name, "Configurar Widget")
+                views.setTextViewText(R.id.widget_progress_text, "Toque para configurar")
                 appWidgetManager.updateAppWidget(appWidgetId, views)
             }
         }

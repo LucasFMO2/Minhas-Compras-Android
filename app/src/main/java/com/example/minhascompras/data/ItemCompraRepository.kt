@@ -1,13 +1,21 @@
 package com.example.minhascompras.data
 
+import android.content.Context
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 class ItemCompraRepository(
     private val itemCompraDao: ItemCompraDao,
-    private val historyDao: HistoryDao
+    private val historyDao: HistoryDao,
+    private val context: Context? = null
 ) {
+    
+    private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     val allItens: Flow<List<ItemCompra>> = itemCompraDao.getAllItens()
 
     fun getItensByList(listId: Long): Flow<List<ItemCompra>> {
@@ -120,35 +128,116 @@ class ItemCompraRepository(
     }
 
     suspend fun insert(item: ItemCompra): Long {
-        return itemCompraDao.insert(item)
+        val result = itemCompraDao.insert(item)
+        // Atualizar widget após inserção
+        context?.let { ctx ->
+            repositoryScope.launch {
+                try {
+                    com.example.minhascompras.widget.ShoppingListWidgetProvider.updateAllWidgets(ctx)
+                } catch (e: Exception) {
+                    android.util.Log.e("ItemCompraRepository", "Erro ao atualizar widget após inserção", e)
+                }
+            }
+        }
+        return result
     }
 
     suspend fun update(item: ItemCompra) {
         itemCompraDao.update(item)
+        // Atualizar widget após atualização
+        context?.let { ctx ->
+            repositoryScope.launch {
+                try {
+                    com.example.minhascompras.widget.ShoppingListWidgetProvider.updateAllWidgets(ctx)
+                } catch (e: Exception) {
+                    android.util.Log.e("ItemCompraRepository", "Erro ao atualizar widget após atualização", e)
+                }
+            }
+        }
     }
 
     suspend fun delete(item: ItemCompra) {
         itemCompraDao.delete(item)
+        // Atualizar widget após exclusão
+        context?.let { ctx ->
+            repositoryScope.launch {
+                try {
+                    com.example.minhascompras.widget.ShoppingListWidgetProvider.updateAllWidgets(ctx)
+                } catch (e: Exception) {
+                    android.util.Log.e("ItemCompraRepository", "Erro ao atualizar widget após exclusão", e)
+                }
+            }
+        }
     }
 
     suspend fun deleteComprados() {
         itemCompraDao.deleteComprados()
+        // Atualizar widget após excluir comprados
+        context?.let { ctx ->
+            repositoryScope.launch {
+                try {
+                    com.example.minhascompras.widget.ShoppingListWidgetProvider.updateAllWidgets(ctx)
+                } catch (e: Exception) {
+                    android.util.Log.e("ItemCompraRepository", "Erro ao atualizar widget após excluir comprados", e)
+                }
+            }
+        }
     }
 
     suspend fun deleteCompradosByList(listId: Long) {
         itemCompraDao.deleteCompradosByList(listId)
+        // Atualizar widget após excluir comprados da lista
+        context?.let { ctx ->
+            repositoryScope.launch {
+                try {
+                    com.example.minhascompras.widget.ShoppingListWidgetProvider.updateAllWidgets(ctx)
+                } catch (e: Exception) {
+                    android.util.Log.e("ItemCompraRepository", "Erro ao atualizar widget após excluir comprados da lista", e)
+                }
+            }
+        }
     }
 
     suspend fun deleteAll() {
         itemCompraDao.deleteAll()
+        // Atualizar widget após excluir tudo
+        context?.let { ctx ->
+            repositoryScope.launch {
+                try {
+                    com.example.minhascompras.widget.ShoppingListWidgetProvider.updateAllWidgets(ctx)
+                } catch (e: Exception) {
+                    android.util.Log.e("ItemCompraRepository", "Erro ao atualizar widget após excluir tudo", e)
+                }
+            }
+        }
     }
 
     suspend fun deleteAllByList(listId: Long) {
         itemCompraDao.deleteAllByList(listId)
+        // Atualizar widget após excluir tudo da lista
+        context?.let { ctx ->
+            repositoryScope.launch {
+                try {
+                    com.example.minhascompras.widget.ShoppingListWidgetProvider.updateAllWidgets(ctx)
+                } catch (e: Exception) {
+                    android.util.Log.e("ItemCompraRepository", "Erro ao atualizar widget após excluir tudo da lista", e)
+                }
+            }
+        }
     }
 
     suspend fun replaceAllItems(items: List<ItemCompra>) {
         itemCompraDao.replaceAllItems(items)
+        // Atualizar widget após substituir itens
+        context?.let { ctx ->
+            repositoryScope.launch {
+                try {
+                    com.example.minhascompras.widget.ShoppingListWidgetProvider.updateAllWidgets(ctx)
+                } catch (e: Exception) {
+                    android.util.Log.e("ItemCompraRepository", "Erro ao atualizar widget após substituir itens", e)
+                }
+            }
+        }
     }
 
     // Funções de histórico

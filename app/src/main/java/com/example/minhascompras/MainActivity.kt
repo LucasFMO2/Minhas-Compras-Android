@@ -85,7 +85,7 @@ class MainActivity : ComponentActivity() {
         }
         
         val repository = try {
-            ItemCompraRepository(database.itemCompraDao(), database.historyDao())
+            ItemCompraRepository(database.itemCompraDao(), database.historyDao(), applicationContext)
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Erro ao criar repository", e)
             throw RuntimeException("Erro crítico: não foi possível criar o repository", e)

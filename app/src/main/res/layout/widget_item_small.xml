@@ -5,7 +5,9 @@
     android:orientation="horizontal"
     android:padding="4dp"
     android:gravity="center_vertical"
-    android:background="?android:attr/selectableItemBackground">
+    android:background="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
 
     <CheckBox
         android:id="@+id/widget_item_checkbox"

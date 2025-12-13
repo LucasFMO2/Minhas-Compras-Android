@@ -244,9 +244,13 @@ class ShoppingListWidgetFactory(
         android.util.Log.d("ShoppingListWidget", "Data: ${clickIntent.data}")
         android.util.Log.d("ShoppingListWidget", "Extras: item_id=${clickIntent.getLongExtra(ShoppingListWidgetProvider.EXTRA_ITEM_ID, -1)}, widget_id=${clickIntent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1)}")
         
+        // Gerar request code único para evitar conflitos
+        val requestCode = (appWidgetId * 1000 + (item.id % 1000)).toInt()
+        android.util.Log.d("ShoppingListWidget", "Request code gerado para item ${item.id}: $requestCode")
+        
         val pendingIntent = android.app.PendingIntent.getBroadcast(
             context,
-            item.id.toInt(), // Request code único por item
+            requestCode, // Request code único baseado no widgetId e itemId
             clickIntent,
             android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
         )

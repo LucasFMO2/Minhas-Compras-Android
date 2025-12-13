@@ -192,15 +192,11 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
                     }
 
                     // Buscar nome da lista
-                    val list = runBlocking {
-                        shoppingListDao.getListByIdSync(listId)
-                    }
+                    val list = shoppingListDao.getListByIdSync(listId)
                     val listName = list?.nome ?: "Lista de Compras"
 
                     // Calcular progresso
-                    val totalItems = runBlocking {
-                        itemDao.getItensByList(listId).first()
-                    }
+                    val totalItems = itemDao.getItensByList(listId).first()
                     val completedCount = totalItems.count { it.comprado }
                     val progressText = "$completedCount/${totalItems.size} itens"
 

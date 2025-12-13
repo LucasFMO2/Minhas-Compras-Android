@@ -90,6 +90,8 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
     }
 
     private fun markItemAsPurchased(context: Context, appWidgetId: Int, itemId: Long) {
+        android.util.Log.d("ShoppingListWidget", "Tentando marcar item $itemId como comprado no widget $appWidgetId")
+        
         // Atualizar item no banco de dados de forma assíncrona
         kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
             try {
@@ -100,14 +102,20 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
                 val allItems = itemDao.getAllItens().first()
                 val item = allItems.find { it.id == itemId }
 
+                android.util.Log.d("ShoppingListWidget", "Item encontrado: ${item?.nome}, já comprado: ${item?.comprado}")
+
                 if (item != null && !item.comprado) {
                     // Marcar como comprado
                     val updatedItem = item.copy(comprado = true)
                     itemDao.update(updatedItem)
+                    android.util.Log.d("ShoppingListWidget", "Item ${item.nome} marcado como comprado no banco")
 
                     // Atualizar widget
                     val appWidgetManager = AppWidgetManager.getInstance(context)
                     updateAppWidget(context, appWidgetManager, appWidgetId)
+                    android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId atualizado após marcar item como comprado")
+                } else {
+                    android.util.Log.w("ShoppingListWidget", "Item $itemId não encontrado ou já está comprado")
                 }
             } catch (e: Exception) {
                 android.util.Log.e("ShoppingListWidget", "Erro ao marcar item como comprado", e)

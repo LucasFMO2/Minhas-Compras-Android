@@ -256,11 +256,11 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
                         )
                         views.setOnClickPendingIntent(R.id.widget_list_name, openAppPendingIntent)
 
-                        // Atualizar widget
-                        appWidgetManager.updateAppWidget(appWidgetId, views)
-                        
-                        // Notificar que os dados mudaram para atualizar a lista
+                        // Notificar que os dados mudaram para atualizar a lista PRIMEIRO
                         appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widget_items_list)
+                        
+                        // Atualizar widget DEPOIS de notificar sobre mudança dos dados
+                        appWidgetManager.updateAppWidget(appWidgetId, views)
                         
                     } catch (e: Exception) {
                         android.util.Log.e("ShoppingListWidget", "Erro ao atualizar widget $appWidgetId", e)

@@ -1159,8 +1159,73 @@
         "dependencies": [
           "11"
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Configuração da Estrutura Básica do App Widget",
+            "description": "Criar a estrutura fundamental para o widget, incluindo a classe AppWidgetProvider, o arquivo de metadados XML que define suas propriedades, e os layouts iniciais.",
+            "dependencies": [],
+            "details": "Criar uma nova classe `ShoppingListWidgetProvider` que herda de `AppWidgetProvider`. Criar um arquivo `res/xml/shopping_list_widget_info.xml` para definir `minWidth`, `minHeight`, `updatePeriodMillis`, `previewImage` e o `configure` activity. Criar os arquivos de layout base em `res/layout/` para o widget, como `widget_layout_medium.xml`, com placeholders para a lista e botões.\n<info added on 2025-12-13T01:12:18.093Z>\nImplementação concluída da estrutura básica do App Widget:\n\n1. ShoppingListWidgetProvider.kt: Classe principal do widget que herda de AppWidgetProvider, implementando métodos onUpdate, onDeleted, onEnabled, onDisabled e onReceive. Inclui lógica básica para carregar dados do banco de dados Room e atualizar o widget.\n\n2. shopping_list_widget_info.xml: Arquivo de metadados XML definindo propriedades do widget (minWidth, minHeight, updatePeriodMillis, initialLayout, configure activity, etc.). Configurado para tamanho médio (4x2 células) com suporte a redimensionamento.\n\n3. widget_layout_medium.xml: Layout inicial do widget com um cabeçalho mostrando o nome da lista e contador de progresso, uma ListView para exibir itens (será implementado na subtarefa 12.3) e um botão \"Adicionar Item\".\n\n4. WidgetConfigureActivity.kt: Placeholder da activity de configuração (será implementada completamente na subtarefa 12.2).\n\n5. AndroidManifest.xml: Registrado o receiver do widget com intent-filter e meta-data apontando para o arquivo XML de configuração.\n\n6. strings.xml: Adicionada string \"widget_description\" para a descrição do widget.\n\nO widget está funcionalmente básico e pronto para as próximas subtarefas que implementarão: configuração de lista, exibição de itens, interatividade e suporte a múltiplos tamanhos.\n</info added on 2025-12-13T01:12:18.093Z>",
+            "status": "done",
+            "testStrategy": "Verificar se o widget aparece na lista de widgets do sistema operacional Android. Adicionar o widget à tela inicial e verificar se o layout de placeholder é exibido corretamente.",
+            "updatedAt": "2025-12-13T01:12:20.477Z",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implementar Atividade de Configuração do Widget",
+            "description": "Desenvolver a tela de configuração que é aberta quando o usuário adiciona o widget, permitindo que ele selecione qual lista de compras o widget deve exibir.",
+            "dependencies": [
+              1
+            ],
+            "details": "Criar uma `Activity` chamada `WidgetConfigureActivity`. Nesta tela, buscar todas as listas de compras do usuário do banco de dados Room e exibi-las. Ao selecionar uma lista e confirmar, salvar a associação entre o `appWidgetId` e o `shoppingListId` (usando SharedPreferences). Após salvar, acionar a primeira atualização do widget.\n<info added on 2025-12-13T01:14:46.542Z>\nA implementação foi concluída através da `WidgetConfigureActivity.kt`, que utiliza Jetpack Compose para exibir as listas de compras obtidas do `ShoppingListRepository`. A interface trata estados de carregamento e de lista vazia, além de indicar qual é a lista padrão. Ao selecionar uma lista, a associação entre o `appWidgetId` e o `shoppingListId` é salva em SharedPreferences usando uma chave no formato \"widget_{appWidgetId}_list_id\". Em seguida, uma atualização imediata do widget é acionada. A activity foi registrada no `AndroidManifest.xml` com o filtro de intent `APPWIDGET_CONFIGURE`. Para permitir o acesso, a constante `WIDGET_PREFS_NAME` em `ShoppingListWidgetProvider.kt` foi tornada pública.\n</info added on 2025-12-13T01:14:46.542Z>",
+            "status": "done",
+            "testStrategy": "Testar que a tela de configuração é aberta ao adicionar um novo widget. Verificar se todas as listas de compras do usuário são listadas. Testar que, após a seleção, o widget é criado e associado à lista correta.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-13T01:14:47.276Z"
+          },
+          {
+            "id": 3,
+            "title": "Exibição da Lista de Itens no Widget",
+            "description": "Implementar o serviço e a fábrica necessários para popular a lista rolável do widget com os itens pendentes da lista de compras selecionada.",
+            "dependencies": [
+              2
+            ],
+            "details": "Criar uma classe que herda de `RemoteViewsService` e uma `RemoteViewsFactory`. A factory irá buscar os itens da lista configurada no banco de dados. Para cada item, criar uma `RemoteViews` para a linha da lista, exibindo o nome do item e um checkbox. Conectar este serviço ao `ListView` no layout do widget.\n<info added on 2025-12-13T01:17:24.208Z>\n1. **ShoppingListWidgetService.kt**: RemoteViewsService criado, que herda de `RemoteViewsService`, implementa `onGetViewFactory` para retornar `ShoppingListWidgetFactory` e foi registrado no AndroidManifest com a permissão `BIND_REMOTEVIEWS`.\n\n2. **ShoppingListWidgetFactory**: `RemoteViewsFactory` implementada para buscar itens pendentes (não comprados) do banco de dados Room, filtrando pelo `listId` configurado no widget. Implementa todos os métodos necessários e cria `RemoteViews` para cada item usando `widget_item.xml`.\n\n3. **widget_item.xml**: Layout para cada item da lista criado, contendo um `CheckBox` (sempre desmarcado, pois apenas pendentes são exibidos) e um `TextView` para o nome do item.\n\n4. **ShoppingListWidgetProvider.kt**: Atualizado para conectar o serviço ao `ListView` usando `setRemoteAdapter`, configurar a `empty view` e chamar `notifyAppWidgetViewDataChanged` para atualizar a lista.\n\n5. **widget_layout_medium.xml**: Layout do widget atualizado com um `FrameLayout` que contém o `ListView` e a `empty view`.\n\nA lista de itens pendentes agora é exibida corretamente no widget, com scroll automático quando há muitos itens. A interatividade (marcar como comprado) será implementada na subtarefa 12.4.\n</info added on 2025-12-13T01:17:24.208Z>",
+            "status": "done",
+            "testStrategy": "Verificar se a lista de itens pendentes da lista selecionada é exibida corretamente no widget. Testar a funcionalidade de rolagem. Confirmar que itens já comprados não aparecem na lista.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-13T01:17:25.510Z"
+          },
+          {
+            "id": 4,
+            "title": "Implementar Interatividade: Marcar Item e Adicionar Novo",
+            "description": "Adicionar as ações de clique no widget: marcar um item como comprado e abrir a tela para adicionar um novo item à lista.",
+            "dependencies": [
+              3
+            ],
+            "details": "Na `RemoteViewsFactory`, para cada item da lista, adicionar um `PendingIntent` que envia um broadcast com o `appWidgetId` e o `itemId`. No `onReceive` do `AppWidgetProvider`, capturar este broadcast, atualizar o status do item no banco de dados e notificar a atualização do widget. Criar outro `PendingIntent` para o botão 'Adicionar Item' que abre um dialog ou activity no app principal, passando o `listId`.\n<info added on 2025-12-13T01:21:20.719Z>\nImplementação da interatividade do widget concluída.\n\nEm ShoppingListWidgetProvider.kt, foram adicionadas as constantes ACTION_ITEM_CLICKED, ACTION_ADD_ITEM, EXTRA_ITEM_ID e EXTRA_LIST_ID. A lógica em onReceive foi atualizada para processar esses broadcasts personalizados. A função markItemAsPurchased localiza o item no banco de dados, marca-o como comprado (comprado = true), atualiza o registro e notifica o widget para recarregar. A função openAppToAddItem abre a MainActivity com os extras necessários para exibir o diálogo de adição de item na lista correta.\n\nEm ShoppingListWidgetService.kt, a RemoteViewsFactory foi atualizada para que cada item da lista (tanto o nome quanto a checkbox) tenha um PendingIntent que envia um broadcast com a ação ACTION_ITEM_CLICKED, incluindo o appWidgetId e o itemId. Foi utilizado um request code único para cada item para evitar conflitos de PendingIntent.\n\nA função updateAppWidget em ShoppingListWidgetProvider.kt foi atualizada para incluir um PendingIntent no botão \"Adicionar Item\" que dispara o broadcast ACTION_ADD_ITEM, e outro PendingIntent no cabeçalho do widget que abre a MainActivity. Ambos foram configurados com as flags FLAG_UPDATE_CURRENT e FLAG_IMMUTABLE.\n\nNa MainActivity.kt, foi adicionada a lógica para processar os extras \"open_add_dialog\" e \"list_id\" vindos do intent do widget, garantindo que a lista correta seja ativada antes de passar o controle para a ListaComprasScreen com a instrução para exibir o diálogo.\n\nFinalmente, a ListaComprasScreen.kt foi ajustada para aceitar um parâmetro opcional initialShowDialog, que inicializa o estado showDialog, permitindo que o diálogo de adição seja exibido imediatamente quando solicitado pelo widget.\n</info added on 2025-12-13T01:21:20.719Z>",
+            "status": "done",
+            "testStrategy": "Tocar em um item no widget deve marcá-lo como comprado e removê-lo da lista do widget. Clicar no botão 'Adicionar Item' deve abrir a interface correta no app. Verificar que a contagem de progresso (X/Y) é atualizada.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-13T01:21:22.384Z"
+          },
+          {
+            "id": 5,
+            "title": "Suporte a Redimensionamento, Temas e Atualização Automática",
+            "description": "Finalizar o widget implementando suporte para múltiplos tamanhos, adaptação aos temas claro/escuro do sistema, e garantir que ele se atualize automaticamente quando os dados são modificados pelo app.",
+            "dependencies": [
+              4
+            ],
+            "details": "Criar layouts alternativos para os tamanhos 2x1 (pequeno) e 4x4 (grande). Utilizar atributos de tema (como `?android:attr/textColor`) nos layouts para suportar os modos claro e escuro. Implementar um mecanismo (ex: BroadcastReceiver) para que o app principal notifique o widget sobre alterações de dados, acionando `AppWidgetManager.notifyAppWidgetViewDataChanged()` e `AppWidgetManager.updateAppWidget()` para forçar a atualização visual.\n<info added on 2025-12-13T01:25:23.942Z>\nImplementação concluída:\n\n1.  **Layouts para múltiplos tamanhos:**\n    *   `widget_layout_small.xml`: Layout compacto para tamanho 2x1 (110dp x 40dp mínimo)\n    *   `widget_layout_medium.xml`: Layout padrão para tamanho 4x2 (250dp x 110dp)\n    *   `widget_layout_large.xml`: Layout expandido para tamanho 4x4 (250dp x 250dp)\n    *   `widget_item_small.xml`: Layout de item compacto para widget pequeno\n\n2.  **Detecção automática de tamanho:**\n    *   Atualizado `ShoppingListWidgetProvider.updateAppWidget()` para detectar o tamanho do widget usando `AppWidgetManager.getAppWidgetOptions()`\n    *   Seleção automática do layout apropriado baseado em células (2x1, 4x2, 4x4+)\n    *   Factory atualizada para usar layout de item correto baseado no tamanho\n\n3.  **Suporte a temas claro/escuro:**\n    *   Todos os layouts usam atributos de tema do sistema como `?android:attr/colorBackground` e `?android:attr/textColorPrimary` para suportar automaticamente os modos claro e escuro.\n\n4.  **Sistema de atualização automática:**\n    *   Criada função estática `ShoppingListWidgetProvider.updateAllWidgets()` para atualizar todos os widgets.\n    *   Adicionadas chamadas no `ListaComprasViewModel` após todas as operações de modificação de dados (adicionar, atualizar, deletar, etc.).\n    *   Adicionada ação `ACTION_UPDATE_WIDGET` no `onReceive()` para processar broadcasts de atualização.\n\n5.  **Configuração do widget:**\n    *   Atualizado `shopping_list_widget_info.xml` com `minWidth=\"110dp\"`, `minHeight=\"40dp\"` e `resizeMode=\"horizontal|vertical\"` para permitir redimensionamento completo.\n</info added on 2025-12-13T01:25:23.942Z>",
+            "status": "done",
+            "testStrategy": "Testar o redimensionamento do widget na tela inicial e verificar se o layout se adapta. Mudar o tema do sistema e confirmar que as cores do widget se ajustam. Modificar a lista no app (adicionar, remover, marcar itens) e verificar se o widget reflete as mudanças em poucos segundos.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-13T01:25:29.678Z"
+          }
+        ],
+        "updatedAt": "2025-12-13T01:25:29.678Z"
       },
       {
         "id": "13",
@@ -1683,9 +1748,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-12-10T20:03:03.489Z",
+      "lastModified": "2025-12-13T01:25:29.682Z",
       "taskCount": 17,
-      "completedCount": 13,
+      "completedCount": 14,
       "tags": [
         "master"
       ]

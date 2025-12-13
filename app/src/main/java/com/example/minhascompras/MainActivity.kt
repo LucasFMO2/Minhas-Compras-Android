@@ -218,6 +218,27 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                         }
+
+                        // Verificar se deve abrir dialog de adicionar item (vindo do widget)
+                        val shouldOpenAddDialog = intent?.getBooleanExtra("open_add_dialog", false) ?: false
+                        val widgetListId = intent?.getLongExtra("list_id", -1L) ?: -1L
+                        
+                        // Se veio do widget com listId, garantir que essa lista está ativa
+                        LaunchedEffect(shouldOpenAddDialog, widgetListId) {
+                            if (shouldOpenAddDialog && widgetListId != -1L) {
+                                try {
+                                    // Verificar se a lista do widget está ativa
+                                    val currentActiveListId = shoppingListViewModel.activeListId.value
+                                    if (currentActiveListId != widgetListId) {
+                                        shoppingListViewModel.setActiveList(widgetListId)
+                                        // Aguardar um pouco para a lista ser atualizada
+                                        delay(300)
+                                    }
+                                } catch (e: Exception) {
+                                    android.util.Log.e("MainActivity", "Erro ao definir lista ativa do widget", e)
+                                }
+                            }
+                        }
                         
                         NavHost(
                             navController = navController,
@@ -228,6 +249,7 @@ class MainActivity : ComponentActivity() {
                                     viewModel = viewModel,
                                     shoppingListViewModel = shoppingListViewModel,
                                     updateViewModel = updateViewModel,
+                                    initialShowDialog = shouldOpenAddDialog,
                                     onNavigateToSettings = {
                                         try {
                                             navController.navigate(Screen.Settings.route)

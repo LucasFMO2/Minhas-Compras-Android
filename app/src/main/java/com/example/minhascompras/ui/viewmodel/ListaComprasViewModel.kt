@@ -14,6 +14,7 @@ import com.example.minhascompras.data.ShoppingListRepository
 import com.example.minhascompras.data.SortOrder
 import com.example.minhascompras.data.UserPreferencesManager
 import com.example.minhascompras.utils.Logger
+import com.example.minhascompras.widget.ShoppingListWidgetProvider
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -192,6 +193,9 @@ class ListaComprasViewModel(
                         listId = listId
                     )
                 )
+                
+                // Atualizar widgets após inserir item
+                context?.let { ShoppingListWidgetProvider.updateAllWidgets(it) }
             }
         }
     }
@@ -199,6 +203,8 @@ class ListaComprasViewModel(
     fun atualizarItem(item: ItemCompra) {
         viewModelScope.launch {
             repository.update(item)
+            // Atualizar widgets após atualizar item
+            context?.let { ShoppingListWidgetProvider.updateAllWidgets(it) }
         }
     }
 
@@ -206,6 +212,8 @@ class ListaComprasViewModel(
         viewModelScope.launch {
             _lastDeletedItem.value = item
             repository.delete(item)
+            // Atualizar widgets após deletar item
+            context?.let { ShoppingListWidgetProvider.updateAllWidgets(it) }
         }
     }
 
@@ -215,6 +223,8 @@ class ListaComprasViewModel(
             viewModelScope.launch {
                 repository.insert(item)
                 _lastDeletedItem.value = null
+                // Atualizar widgets após restaurar item
+                context?.let { ShoppingListWidgetProvider.updateAllWidgets(it) }
             }
         }
     }
@@ -232,6 +242,9 @@ class ListaComprasViewModel(
                     activeList?.nome ?: "Lista de Compras"
                 )
             }
+            
+            // Atualizar widgets após marcar item como comprado
+            context?.let { ShoppingListWidgetProvider.updateAllWidgets(it) }
         }
     }
 
@@ -294,6 +307,8 @@ class ListaComprasViewModel(
             val listId = activeListId.value
             if (listId != null) {
                 repository.deleteCompradosByList(listId)
+                // Atualizar widgets após deletar itens comprados
+                context?.let { ShoppingListWidgetProvider.updateAllWidgets(it) }
             }
         }
     }
@@ -303,6 +318,8 @@ class ListaComprasViewModel(
             val listId = activeListId.value
             if (listId != null) {
                 repository.deleteAllByList(listId)
+                // Atualizar widgets após deletar todos os itens
+                context?.let { ShoppingListWidgetProvider.updateAllWidgets(it) }
             }
         }
     }

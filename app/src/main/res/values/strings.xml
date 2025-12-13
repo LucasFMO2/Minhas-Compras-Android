@@ -11,4 +11,5 @@
     <string name="confirmar_deletar_comprados">Deseja deletar todos os itens comprados?</string>
     <string name="sim">Sim</string>
     <string name="nao">Não</string>
+    <string name="widget_description">Acesso rápido à sua lista de compras</string>
 </resources>

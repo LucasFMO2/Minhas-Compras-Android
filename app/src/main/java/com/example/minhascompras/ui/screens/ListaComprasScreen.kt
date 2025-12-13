@@ -62,11 +62,12 @@ fun ListaComprasScreen(
     onNavigateToSettings: () -> Unit = {},
     onNavigateToHistory: () -> Unit = {},
     onNavigateToStatistics: () -> Unit = {},
+    initialShowDialog: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val itens by viewModel.itens.collectAsState() // Lista filtrada para exibição
     val allItens by viewModel.allItens.collectAsState() // Lista completa para estatísticas
-    var showDialog by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(initialShowDialog) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showArchiveDialog by remember { mutableStateOf(false) }
     var itemParaEditar by remember { mutableStateOf<ItemCompra?>(null) }

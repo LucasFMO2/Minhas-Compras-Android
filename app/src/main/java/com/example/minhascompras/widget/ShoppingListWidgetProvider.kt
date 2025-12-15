@@ -59,6 +59,25 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
         android.util.Log.d("ShoppingListWidget", "Package: ${intent.`package`}")
         android.util.Log.d("ShoppingListWidget", "Scheme: ${intent.scheme}")
         
+        // ADICIONADO: Log mais detalhado para debugging
+        android.util.Log.d("ShoppingListWidget", "=== DEBUGGING DETALHADO DO INTENT ===")
+        android.util.Log.d("ShoppingListWidget", "Intent toString: ${intent.toString()}")
+        android.util.Log.d("ShoppingListWidget", "Intent toURI: ${intent.toUri(Intent.URI_INTENT_SCHEME)}")
+        android.util.Log.d("ShoppingListWidget", "Intent type: ${intent.type}")
+        android.util.Log.d("ShoppingListWidget", "Intent categories: ${intent.categories}")
+        android.util.Log.d("ShoppingListWidget", "Intent source: ${intent.`package`}")
+        android.util.Log.d("ShoppingListWidget", "Intent extras bundle: ${intent.extras?.javaClass}")
+        
+        // Log detalhado para ACTION_ITEM_CLICKED
+        if (intent.action == ACTION_ITEM_CLICKED) {
+            val itemId = intent.getLongExtra(EXTRA_ITEM_ID, -1L)
+            val widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
+            android.util.Log.d("ShoppingListWidget", "!!! ACTION_ITEM_CLICKED DETECTADO !!!")
+            android.util.Log.d("ShoppingListWidget", "Item ID: $itemId, Widget ID: $widgetId")
+        } else {
+            android.util.Log.d("ShoppingListWidget", "Action recebido NÃO é ACTION_ITEM_CLICKED: ${intent.action}")
+        }
+        
         super.onReceive(context, intent)
 
         // Adicionar validação de segurança

@@ -261,9 +261,40 @@ class ShoppingListWidgetFactory(
             android.util.Log.d("ShoppingListWidget", "Intent do PendingIntent: não disponível")
         }
         
-        views.setOnClickPendingIntent(R.id.widget_item_name, pendingIntent)
-        views.setOnClickPendingIntent(R.id.widget_item_checkbox, pendingIntent)
+        // CORREÇÃO: Configurar PendingIntent em múltiplos elementos para máxima compatibilidade
+        try {
+            // PRIMEIRO: Configurar no container LinearLayout root (elemento mais abrangente)
+            views.setOnClickPendingIntent(R.id.widget_item_container, pendingIntent)
+            android.util.Log.d("ShoppingListWidget", "!!! PendingIntent CONFIGURADO NO CONTAINER (widget_item_container) !!!")
+            
+            // SEGUNDO: Configurar no TextView como backup
+            views.setOnClickPendingIntent(R.id.widget_item_name, pendingIntent)
+            android.util.Log.d("ShoppingListWidget", "!!! PendingIntent TAMBÉM CONFIGURADO NO TEXTVIEW (widget_item_name) !!!")
+            
+            // TERCEIRO: Configurar no CheckBox como alternativa adicional
+            views.setOnClickPendingIntent(R.id.widget_item_checkbox, pendingIntent)
+            android.util.Log.d("ShoppingListWidget", "!!! PendingIntent TAMBÉM CONFIGURADO NO CHECKBOX (widget_item_checkbox) !!!")
+            
+            android.util.Log.d("ShoppingListWidget", "!!! ESTRATÉGIA COMPLETA: Container + TextView + CheckBox !!!")
+            
+        } catch (e: Exception) {
+            android.util.Log.e("ShoppingListWidget", "Erro ao configurar PendingIntent", e)
+        }
+        
         android.util.Log.d("ShoppingListWidget", "=== PendingIntent CONFIGURADO PARA ITEM ${item.id} NO WIDGET $appWidgetId ===")
+        
+        // Verificação adicional para garantir que o PendingIntent foi configurado
+        try {
+            val testIntent = android.app.PendingIntent.getBroadcast(
+                context,
+                requestCode,
+                clickIntent,
+                android.app.PendingIntent.FLAG_NO_CREATE or android.app.PendingIntent.FLAG_IMMUTABLE
+            )
+            android.util.Log.d("ShoppingListWidget", "PendingIntent VERIFICAÇÃO para item ${item.id}: ${testIntent != null} (requestCode: $requestCode)")
+        } catch (e: Exception) {
+            android.util.Log.e("ShoppingListWidget", "Erro ao verificar PendingIntent para item ${item.id}", e)
+        }
 
         return views
     }

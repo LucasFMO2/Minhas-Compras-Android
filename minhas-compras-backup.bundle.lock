@@ -1,0 +1,10 @@
+# v2 git bundle
+40dcfc70978bfab02b5f8430cb0f92664e6ca5eb refs/heads/main
+847458f4f905691c12fb307b87a68936a45f3654 refs/tags/v1.0
+cc13510ceb5c8612ab8d6ec2f0a466826ea8ac0d refs/tags/v2.0
+1f71b86d394cb46643dd97efaedebf3f33877aa4 refs/tags/v2.1
+d8e1af563f35bbc7037b502beec1d97f99278716 refs/tags/v2.10.0
+fa78987b3bffd3488cfe05ff5b8225c6232c9e57 refs/tags/v2.10.1
+c30fed7778f81f49ebd30f74152a2333dfbaa1cc refs/tags/v2.10.10
+20001cc3bd6c070d8bb6e85a1f43708f5d070640 refs/tags/v2.10.11
+6e3f5af05c9eedeb1007927f0137dc587ce51196 refs/tags/v2.10.12

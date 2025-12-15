@@ -66,6 +66,13 @@ interface ItemCompraDao {
     """)
     fun getItensByListAndStatusSync(listId: Long, comprado: Boolean): List<ItemCompra>
 
+    @Query("""
+        SELECT * FROM itens_compra
+        WHERE listId = :listId
+        ORDER BY comprado ASC, dataCriacao DESC
+    """)
+    fun getItensByListSync(listId: Long): List<ItemCompra>
+
     @Query("SELECT * FROM itens_compra WHERE id = :id")
     suspend fun getItemById(id: Long): ItemCompra?
 
@@ -110,6 +117,9 @@ interface ItemCompraDao {
         ORDER BY dataCriacao ASC
     """)
     suspend fun getPendingItemsOlderThan(cutoffTime: Long): List<ItemCompra>
+
+    @Query("UPDATE itens_compra SET comprado = :comprado WHERE id = :itemId")
+    suspend fun updateItemStatus(itemId: Long, comprado: Boolean)
 
     @Transaction
     suspend fun replaceAllItems(items: List<ItemCompra>) {

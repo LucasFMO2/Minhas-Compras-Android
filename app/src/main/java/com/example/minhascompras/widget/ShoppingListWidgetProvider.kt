@@ -91,7 +91,7 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
         
         when (intent.action) {
             ACTION_ITEM_CLICKED -> {
-                // Marcar item como comprado
+                // Alternar status do item (toggle)
                 val appWidgetId = intent.getIntExtra(
                     AppWidgetManager.EXTRA_APPWIDGET_ID,
                     AppWidgetManager.INVALID_APPWIDGET_ID
@@ -99,7 +99,7 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
                 val itemId = intent.getLongExtra(EXTRA_ITEM_ID, -1L)
 
                 if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID && itemId != -1L) {
-                    markItemAsPurchased(context, appWidgetId, itemId)
+                    toggleItemStatus(context, appWidgetId, itemId)
                 }
             }
             ACTION_ADD_ITEM -> {
@@ -124,12 +124,23 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
                     updateAppWidget(context, appWidgetManager, widgetId)
                 }
             }
+            ACTION_TOGGLE_FILTER -> {
+                // Alternar filtro entre mostrar apenas pendentes ou todos
+                val appWidgetId = intent.getIntExtra(
+                    AppWidgetManager.EXTRA_APPWIDGET_ID,
+                    AppWidgetManager.INVALID_APPWIDGET_ID
+                )
+
+                if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                    toggleFilter(context, appWidgetId)
+                }
+            }
         }
     }
 
-    private fun markItemAsPurchased(context: Context, appWidgetId: Int, itemId: Long) {
-        android.util.Log.d("ShoppingListWidget", "=== INÍCIO: markItemAsPurchased ===")
-        android.util.Log.d("ShoppingListWidget", "Tentando marcar item $itemId como comprado no widget $appWidgetId")
+    private fun toggleItemStatus(context: Context, appWidgetId: Int, itemId: Long) {
+        android.util.Log.d("ShoppingListWidget", "=== INÍCIO: toggleItemStatus ===")
+        android.util.Log.d("ShoppingListWidget", "Tentando alternar status do item $itemId no widget $appWidgetId")
         android.util.Log.d("ShoppingListWidget", "Thread atual: ${Thread.currentThread().name}")
         
         // Usar um CoroutineScope com SupervisorJob para garantir controle sobre a execução
@@ -143,64 +154,67 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
                 val database = AppDatabase.getDatabase(context)
                 val itemDao = database.itemCompraDao()
 
-                // Buscar item específico de forma mais eficiente
+                // Buscar item específico
                 val item = itemDao.getItemById(itemId)
 
-                android.util.Log.d("ShoppingListWidget", "Item encontrado: ${item?.nome}, já comprado: ${item?.comprado}")
+                android.util.Log.d("ShoppingListWidget", "Item encontrado: ${item?.nome}, status atual: ${item?.comprado}")
 
-                if (item != null && !item.comprado) {
-                    // Marcar como comprado
-                    val updatedItem = item.copy(comprado = true)
-                    itemDao.update(updatedItem)
-                    android.util.Log.d("ShoppingListWidget", "Item ${item.nome} marcado como comprado no banco")
-                    
-                    // Aguardar a conclusão da transação do banco
-                    kotlinx.coroutines.yield()
+                if (item != null) {
+                    // Alternar status (toggle)
+                    val newStatus = !item.comprado
+                    itemDao.updateItemStatus(itemId, newStatus)
+                    android.util.Log.d("ShoppingListWidget", "Item ${item.nome} status alterado para: $newStatus")
                     
                     // Mudar para thread principal para atualizações de UI
                     withContext(kotlinx.coroutines.Dispatchers.Main) {
                         try {
                             val appWidgetManager = AppWidgetManager.getInstance(context)
                             
-                            // ESTRATÉGIA MELHORADA: Atualização em múltiplas etapas com pausas maiores
+                            // ESTRATÉGIA OTIMIZADA: Atualização eficiente sem delays desnecessários
                             
-                            // PRIMEIRO: Forçar notificação imediata de mudança de dados
+                            // PRIMEIRO: Notificar mudança de dados imediatamente
                             android.util.Log.d("ShoppingListWidget", "Notificando mudança de dados para widget $appWidgetId")
                             appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widget_items_list)
                             
-                            // Pausa maior para garantir processamento
-                            kotlinx.coroutines.delay(300)
-                            
-                            // SEGUNDO: Atualizar o widget principal (progresso, contadores, etc.)
-                            android.util.Log.d("ShoppingListWidget", "Atualizando widget $appWidgetId após marcar item como comprado")
+                            // SEGUNDO: Atualizar widget principal (progresso, contadores, etc.)
+                            android.util.Log.d("ShoppingListWidget", "Atualizando widget $appWidgetId após alternar status")
                             updateAppWidget(context, appWidgetManager, appWidgetId)
                             
-                            // Pausa maior para garantir processamento
-                            kotlinx.coroutines.delay(300)
-                            
-                            // TERCEIRO: Notificar novamente para garantir sincronização completa
-                            android.util.Log.d("ShoppingListWidget", "Notificação final para widget $appWidgetId")
-                            appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widget_items_list)
-                            
-                            // QUARTO: Forçar atualização completa como último recurso
-                            kotlinx.coroutines.delay(200)
-                            refreshWidgetWithDataVerification(context)
-                            
-                            android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId atualizado com sucesso após marcar item como comprado")
-                            android.util.Log.d("ShoppingListWidget", "=== FIM: markItemAsPurchased ===")
+                            android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId atualizado com sucesso após alternar status")
+                            android.util.Log.d("ShoppingListWidget", "=== FIM: toggleItemStatus ===")
                         } catch (e: Exception) {
-                            android.util.Log.e("ShoppingListWidget", "Erro ao atualizar widget após marcar item como comprado", e)
+                            android.util.Log.e("ShoppingListWidget", "Erro ao atualizar widget após alternar status", e)
                         }
                     }
                 } else {
-                    android.util.Log.w("ShoppingListWidget", "Item $itemId não encontrado ou já está comprado")
-                    android.util.Log.d("ShoppingListWidget", "=== FIM: markItemAsPurchased (item não encontrado) ===")
+                    android.util.Log.w("ShoppingListWidget", "Item $itemId não encontrado")
+                    android.util.Log.d("ShoppingListWidget", "=== FIM: toggleItemStatus (item não encontrado) ===")
                 }
             } catch (e: Exception) {
-                android.util.Log.e("ShoppingListWidget", "Erro ao marcar item como comprado", e)
-                android.util.Log.d("ShoppingListWidget", "=== FIM: markItemAsPurchased (com erro) ===")
+                android.util.Log.e("ShoppingListWidget", "Erro ao alternar status do item", e)
+                android.util.Log.d("ShoppingListWidget", "=== FIM: toggleItemStatus (com erro) ===")
             }
         }
+    }
+
+    private fun toggleFilter(context: Context, appWidgetId: Int) {
+        android.util.Log.d("ShoppingListWidget", "=== INÍCIO: toggleFilter ===")
+        android.util.Log.d("ShoppingListWidget", "Tentando alternar filtro no widget $appWidgetId")
+        
+        val prefs = context.getSharedPreferences(WIDGET_PREFS_NAME, Context.MODE_PRIVATE)
+        val currentFilter = prefs.getBoolean("widget_${appWidgetId}_show_only_pending", true)
+        val newFilter = !currentFilter
+        
+        // Salvar nova preferência de filtro
+        prefs.edit().putBoolean("widget_${appWidgetId}_show_only_pending", newFilter).apply()
+        
+        android.util.Log.d("ShoppingListWidget", "Filtro alternado de $currentFilter para $newFilter no widget $appWidgetId")
+        
+        // Atualizar widget com novo filtro
+        val appWidgetManager = AppWidgetManager.getInstance(context)
+        updateAppWidget(context, appWidgetManager, appWidgetId)
+        
+        android.util.Log.d("ShoppingListWidget", "=== FIM: toggleFilter ===")
     }
 
     private fun openAppToAddItem(context: Context, listId: Long) {
@@ -217,6 +231,7 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
         const val ACTION_ITEM_CLICKED = "com.example.minhascompras.widget.ACTION_ITEM_CLICKED"
         const val ACTION_ADD_ITEM = "com.example.minhascompras.widget.ACTION_ADD_ITEM"
         const val ACTION_UPDATE_WIDGET = "com.example.minhascompras.widget.ACTION_UPDATE_WIDGET"
+        const val ACTION_TOGGLE_FILTER = "com.example.minhascompras.widget.ACTION_TOGGLE_FILTER"
         const val EXTRA_ITEM_ID = "extra_item_id"
         const val EXTRA_LIST_ID = "extra_list_id"
 
@@ -476,6 +491,24 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
                                 android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
                             )
                             views.setOnClickPendingIntent(R.id.widget_add_item_button, addItemPendingIntent)
+
+                            // Configurar PendingIntent para o botão de filtro
+                            val filterIntent = Intent(context, ShoppingListWidgetProvider::class.java).apply {
+                                action = ACTION_TOGGLE_FILTER
+                                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                            }
+                            val filterPendingIntent = android.app.PendingIntent.getBroadcast(
+                                context,
+                                appWidgetId + 2000, // Request code diferente
+                                filterIntent,
+                                android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+                            )
+                            views.setOnClickPendingIntent(R.id.widget_filter_button, filterPendingIntent)
+
+                            // Obter estado atual do filtro para atualizar texto do botão
+                            val showOnlyPending = prefs.getBoolean("widget_${appWidgetId}_show_only_pending", true)
+                            val filterText = if (showOnlyPending) "Pendentes" else "Todos"
+                            views.setTextViewText(R.id.widget_filter_button, filterText)
 
                             // Configurar PendingIntent para abrir o app ao tocar no cabeçalho
                             val openAppIntent = Intent(context, com.example.minhascompras.MainActivity::class.java).apply {

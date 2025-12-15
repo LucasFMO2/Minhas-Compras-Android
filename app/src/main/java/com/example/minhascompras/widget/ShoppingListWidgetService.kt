@@ -78,12 +78,14 @@ class ShoppingListWidgetFactory(
                 android.content.Context.MODE_PRIVATE
             )
             val listId = prefs.getLong("widget_${appWidgetId}_list_id", -1L)
+            // Obter preferência de filtro (padrão: apenas pendentes)
+            val showOnlyPending = prefs.getBoolean("widget_${appWidgetId}_show_only_pending", true)
 
-            android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId listId: $listId")
+            android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId listId: $listId, showOnlyPending: $showOnlyPending")
 
             if (listId != -1L) {
                 // ESTRATÉGIA MELHORADA: Forçar busca fresca dos dados do banco
-                android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId: FORÇANDO BUSCA FRESCA dos itens pendentes da lista $listId")
+                android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId: FORÇANDO BUSCA FRESCA dos itens da lista $listId")
                 
                 // Limpar cache atual para garantir dados frescos
                 val oldItems = items
@@ -100,7 +102,12 @@ class ShoppingListWidgetFactory(
                     var tentativa = 0
                     var ultimoResultado: List<ItemCompra> = emptyList()
                     while (tentativa < 3) {
-                        ultimoResultado = itemDao.getItensByListAndStatusSync(listId, false)
+                        // Buscar itens baseado na preferência de filtro
+                        ultimoResultado = if (showOnlyPending) {
+                            itemDao.getItensByListAndStatusSync(listId, false)
+                        } else {
+                            itemDao.getItensByListSync(listId)
+                        }
                         android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId: tentativa ${tentativa + 1} - encontrados ${ultimoResultado.size} itens")
                         
                         // Verificar se os dados mudaram em relação ao cache anterior
@@ -225,8 +232,24 @@ class ShoppingListWidgetFactory(
         views.setTextViewText(R.id.widget_item_name, item.nome)
         android.util.Log.d("ShoppingListWidget", "TextView configurado com: ${item.nome}")
 
-        // Checkbox sempre desmarcado (apenas itens pendentes são exibidos)
-        views.setBoolean(R.id.widget_item_checkbox, "setChecked", false)
+        // Configurar checkbox baseado no status do item
+        views.setBoolean(R.id.widget_item_checkbox, "setChecked", item.comprado)
+        
+        // Adicionar feedback visual para itens comprados
+        if (item.comprado) {
+            // Aplicar estilo de texto tachado para itens comprados
+            views.setBoolean(R.id.widget_item_name, "setPaintFlags",
+                android.graphics.Paint.STRIKE_THRU_TEXT_FLAG)
+            // Definir cor do texto para itens comprados (mais claro)
+            views.setTextColor(R.id.widget_item_name,
+                android.graphics.Color.GRAY)
+        } else {
+            // Remover estilo tachado para itens pendentes
+            views.setBoolean(R.id.widget_item_name, "setPaintFlags", 0)
+            // Restaurar cor padrão do texto
+            views.setTextColor(R.id.widget_item_name,
+                context.getColor(android.R.color.primary_text_light))
+        }
 
         // Adicionar PendingIntent para marcar item como comprado ao tocar
         val clickIntent = Intent().apply {

@@ -62,15 +62,35 @@
             android:visibility="gone" />
     </FrameLayout>
 
-    <!-- Botão Adicionar Item -->
-    <Button
-        android:id="@+id/widget_add_item_button"
+    <!-- Container para botões -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/adicionar_item"
-        android:textSize="12sp"
-        android:layout_marginTop="4dp"
-        style="?android:attr/buttonStyleSmall" />
+        android:orientation="horizontal"
+        android:layout_marginTop="4dp">
+
+        <!-- Botão de Filtro -->
+        <Button
+            android:id="@+id/widget_filter_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Pendentes"
+            android:textSize="10sp"
+            android:layout_marginEnd="2dp"
+            style="?android:attr/buttonStyleSmall" />
+
+        <!-- Botão Adicionar Item -->
+        <Button
+            android:id="@+id/widget_add_item_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/adicionar_item"
+            android:textSize="10sp"
+            android:layout_marginStart="2dp"
+            style="?android:attr/buttonStyleSmall" />
+    </LinearLayout>
 
 </LinearLayout>
 

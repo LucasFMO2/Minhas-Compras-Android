@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Clipboard/Lista de compras com checkmarks -->
+    <!-- Corpo do clipboard -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M28,20 L28,16 C28,12.69 30.69,10 34,10 L74,10 C77.31,10 80,12.69 80,16 L80,20 L84,20 C87.31,20 90,22.69 90,26 L90,88 C90,91.31 87.31,94 84,94 L24,94 C20.69,94 18,91.31 18,88 L18,26 C18,22.69 20.69,20 24,20 L28,20 Z"/>
+    
+    <!-- Topo do clipboard (alça) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M40,20 L40,12 C40,10.9 40.9,10 42,10 L66,10 C67.1,10 68,10.9 68,12 L68,20 L40,20 Z"/>
+    
+    <!-- Círculo do topo do clipboard -->
+    <path
+        android:fillColor="#6366F1"
+        android:pathData="M54,8 A2,2 0 1,1 54,12 A2,2 0 1,1 54,8 Z"/>
+    
+    <!-- Linha 1 da lista -->
+    <path
+        android:fillColor="#E0E7FF"
+        android:pathData="M32,36 L32,44 L76,44 L76,36 Z"/>
+    
+    <!-- Checkmark 1 (preenchido) -->
+    <path
+        android:fillColor="#10B981"
+        android:pathData="M36,40 L40,44 L44,40 L42,40 L40,42 L38,40 Z"/>
+    
+    <!-- Linha 2 da lista -->
+    <path
+        android:fillColor="#E0E7FF"
+        android:pathData="M32,50 L32,58 L76,58 L76,50 Z"/>
+    
+    <!-- Checkmark 2 (preenchido) -->
+    <path
+        android:fillColor="#10B981"
+        android:pathData="M36,54 L40,58 L44,54 L42,54 L40,56 L38,54 Z"/>
+    
+    <!-- Linha 3 da lista (sem checkmark - item pendente) -->
+    <path
+        android:fillColor="#E0E7FF"
+        android:pathData="M32,64 L32,72 L76,72 L76,64 Z"/>
+    
+    <!-- Círculo vazio para item pendente (usando stroke) -->
+    <path
+        android:strokeColor="#6366F1"
+        android:strokeWidth="2"
+        android:pathData="M36,66 A2,2 0 1,1 36,70 A2,2 0 1,1 36,66 Z"/>
+    
+    <!-- Linha 4 da lista (sem checkmark - item pendente) -->
+    <path
+        android:fillColor="#E0E7FF"
+        android:pathData="M32,78 L32,86 L76,86 L76,78 Z"/>
+    
+    <!-- Círculo vazio para item pendente (usando stroke) -->
+    <path
+        android:strokeColor="#6366F1"
+        android:strokeWidth="2"
+        android:pathData="M36,80 A2,2 0 1,1 36,84 A2,2 0 1,1 36,80 Z"/>
+    
+</vector>

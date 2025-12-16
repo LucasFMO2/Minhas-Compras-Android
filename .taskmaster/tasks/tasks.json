@@ -1,0 +1,1759 @@
+{
+  "version": "1.0.0",
+  "project": "Minhas Compras MVP v3.0",
+  "created": "2024-11-07",
+  "sprints": [
+    {
+      "id": "sprint-1",
+      "name": "Semana 1: Funcionalidades Essenciais",
+      "startDate": "2024-11-07",
+      "endDate": "2024-11-11",
+      "status": "planned",
+      "tasks": [
+        {
+          "id": "task-1-1",
+          "title": "Busca e Filtros",
+          "description": "Implementar busca em tempo real e filtros (Todos/Pendentes/Comprados)",
+          "priority": "high",
+          "status": "pending",
+          "estimatedHours": 16,
+          "assignee": null,
+          "tags": [
+            "feature",
+            "ui",
+            "week1"
+          ],
+          "dependencies": [],
+          "checklist": [
+            "Adicionar campo de busca na tela principal",
+            "Implementar busca em tempo real",
+            "Criar filtros: Todos / Pendentes / Comprados",
+            "Adicionar indicador visual do filtro ativo",
+            "Implementar botão de limpar busca",
+            "Testar performance com muitos itens",
+            "Adicionar debounce na busca (300ms)"
+          ]
+        },
+        {
+          "id": "task-1-2",
+          "title": "Ordenação de Itens",
+          "description": "Implementar ordenação por nome, data e preço",
+          "priority": "medium",
+          "status": "pending",
+          "estimatedHours": 8,
+          "assignee": null,
+          "tags": [
+            "feature",
+            "ui",
+            "week1"
+          ],
+          "dependencies": [],
+          "checklist": [
+            "Criar menu de ordenação",
+            "Implementar ordenação por nome (A-Z)",
+            "Implementar ordenação por data (mais recente)",
+            "Implementar ordenação por preço (menor-maior)",
+            "Adicionar indicador visual da ordenação",
+            "Persistir preferência de ordenação",
+            "Testar ordenação com filtros"
+          ]
+        },
+        {
+          "id": "task-1-3",
+          "title": "Categorias Básicas",
+          "description": "Adicionar sistema de categorias aos itens",
+          "priority": "high",
+          "status": "pending",
+          "estimatedHours": 24,
+          "assignee": null,
+          "tags": [
+            "feature",
+            "database",
+            "migration",
+            "week1"
+          ],
+          "dependencies": [],
+          "checklist": [
+            "Adicionar campo categoria ao modelo ItemCompra",
+            "Criar migração do Room (versão 3)",
+            "Criar lista de categorias pré-definidas",
+            "Adicionar seleção de categoria no dialog",
+            "Exibir categoria no card do item (badge/chip)",
+            "Atualizar ViewModel para categorias",
+            "Migrar dados existentes (categoria padrão)",
+            "Testar migração sem perda de dados"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sprint-2",
+      "name": "Semana 2: Melhorias de UX",
+      "startDate": "2024-11-12",
+      "endDate": "2024-11-16",
+      "status": "planned",
+      "tasks": [
+        {
+          "id": "task-2-1",
+          "title": "Modo Escuro/Claro",
+          "description": "Implementar suporte a tema claro e escuro",
+          "priority": "medium",
+          "status": "pending",
+          "estimatedHours": 12,
+          "assignee": null,
+          "tags": [
+            "feature",
+            "ui",
+            "theme",
+            "week2"
+          ],
+          "dependencies": [],
+          "checklist": [
+            "Configurar tema claro e escuro",
+            "Adicionar toggle de tema na UI",
+            "Persistir preferência do tema",
+            "Testar todos os componentes com ambos os temas",
+            "Ajustar cores para contraste adequado"
+          ]
+        },
+        {
+          "id": "task-2-2",
+          "title": "Gestos e Ações Rápidas",
+          "description": "Implementar swipe para marcar comprado e deletar",
+          "priority": "medium",
+          "status": "pending",
+          "estimatedHours": 16,
+          "assignee": null,
+          "tags": [
+            "feature",
+            "ui",
+            "gestures",
+            "week2"
+          ],
+          "dependencies": [],
+          "checklist": [
+            "Implementar swipe para direita (marcar comprado)",
+            "Implementar swipe para esquerda (deletar)",
+            "Adicionar feedback visual durante swipe",
+            "Implementar Snackbar com Desfazer",
+            "Testar gestos em diferentes dispositivos",
+            "Ajustar sensibilidade dos gestos"
+          ]
+        },
+        {
+          "id": "task-2-3",
+          "title": "Melhorias no Dialog",
+          "description": "Adicionar autocompletar e sugestões de itens",
+          "priority": "low",
+          "status": "pending",
+          "estimatedHours": 8,
+          "assignee": null,
+          "tags": [
+            "improvement",
+            "ui",
+            "week2"
+          ],
+          "dependencies": [],
+          "checklist": [
+            "Implementar autocompletar de itens",
+            "Adicionar sugestões de itens frequentes",
+            "Melhorar validação de campos",
+            "Adicionar feedback visual de erros",
+            "Testar usabilidade"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sprint-3",
+      "name": "Semana 3: Backup e Polimento",
+      "startDate": "2024-11-17",
+      "endDate": "2024-11-21",
+      "status": "planned",
+      "tasks": [
+        {
+          "id": "task-3-1",
+          "title": "Backup e Restauração",
+          "description": "Implementar exportação/importação de dados em JSON",
+          "priority": "high",
+          "status": "pending",
+          "estimatedHours": 24,
+          "assignee": null,
+          "tags": [
+            "feature",
+            "data",
+            "backup",
+            "week3"
+          ],
+          "dependencies": [],
+          "checklist": [
+            "Criar tela/menu de configurações",
+            "Implementar exportação para JSON",
+            "Implementar importação de JSON",
+            "Adicionar validação de arquivo JSON",
+            "Implementar compartilhamento de lista (texto)",
+            "Adicionar dialog de confirmação para importação",
+            "Testar backup/restauração",
+            "Tratar erros de importação"
+          ]
+        },
+        {
+          "id": "task-3-2",
+          "title": "Histórico de Compras",
+          "description": "Salvar e reutilizar listas de compras anteriores",
+          "priority": "medium",
+          "status": "pending",
+          "estimatedHours": 16,
+          "assignee": null,
+          "tags": [
+            "feature",
+            "database",
+            "history",
+            "week3"
+          ],
+          "dependencies": [],
+          "checklist": [
+            "Criar modelo ListaHistorico",
+            "Adicionar DAO para histórico",
+            "Implementar salvamento automático quando lista completa",
+            "Criar tela de histórico",
+            "Implementar visualização de lista histórica",
+            "Implementar reutilização de lista histórica",
+            "Adicionar opção de deletar histórico",
+            "Testar fluxo completo"
+          ]
+        },
+        {
+          "id": "task-3-3",
+          "title": "Testes e Correções",
+          "description": "Implementar testes e corrigir bugs",
+          "priority": "high",
+          "status": "pending",
+          "estimatedHours": 16,
+          "assignee": null,
+          "tags": [
+            "testing",
+            "quality",
+            "week3"
+          ],
+          "dependencies": [
+            "task-3-1",
+            "task-3-2"
+          ],
+          "checklist": [
+            "Escrever testes unitários (ViewModel)",
+            "Escrever testes de UI (Compose Testing)",
+            "Corrigir bugs encontrados",
+            "Otimizar performance",
+            "Revisar acessibilidade",
+            "Revisar código",
+            "Atualizar documentação"
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "totalTasks": 9,
+    "totalEstimatedHours": 140,
+    "completedTasks": 0,
+    "inProgressTasks": 0,
+    "pendingTasks": 9
+  },
+  "master": {
+    "tasks": [
+      {
+        "id": "1",
+        "title": "Implement Item Categories and Database Migration",
+        "description": "Add a 'category' field to the ItemCompra entity, implement a Room database migration from version 2 to 3, and update the add/edit dialog to include a mandatory category selection from a predefined list.",
+        "details": "1. Modify the `ItemCompra` data class to include `val category: String`. 2. Increment the Room database version in your `@Database` annotation to `3`. 3. Create a `Migration(2, 3)` object. Inside `migrate()`, execute the SQL command: `ALTER TABLE ItemCompra ADD COLUMN category TEXT NOT NULL DEFAULT 'Outros'`. This fulfills RF-003.7 for existing data. 4. Add the new migration to your `Room.databaseBuilder`. 5. Create a `sealed class` or `enum` for the predefined categories (Frutas e Verduras, Laticínios, etc.) to ensure type safety. 6. In the Add/Edit Item Composable Dialog, replace the text input for category with a `ExposedDropdownMenuBox` populated with the predefined categories, making it a mandatory field.",
+        "testStrategy": "Write an automated Room migration test to ensure data is preserved and the new `category` column is added correctly with the 'Outros' default. Manually test by updating the app from a previous version and verifying old items have the default category. Test adding a new item and confirm the category is saved and displayed correctly on the item card.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Update ItemCompra Entity and Create Category Enum",
+            "description": "Modify the ItemCompra data class to include a new 'category' field and create a dedicated enum class to hold the predefined list of item categories, ensuring type safety.",
+            "dependencies": [],
+            "details": "In the `ItemCompra.kt` file, add a new property `val category: String` to the `ItemCompra` data class. Create a new Kotlin file, for instance `model/ItemCategory.kt`, and define an `enum class ItemCategory` containing the predefined values (e.g., FRUTAS_E_VERDURAS, LATICINIOS, CARNES, PADARIA, OUTROS).",
+            "status": "done",
+            "testStrategy": "Compile the project to ensure the data class and enum are correctly defined without errors. No runtime tests are needed for this model-only change.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-07T16:34:31.380Z"
+          },
+          {
+            "id": 2,
+            "title": "Define Room Database Migration from Version 2 to 3",
+            "description": "Create the specific Migration object that will handle the schema change from database version 2 to 3 by adding the new 'category' column to the ItemCompra table with a default value.",
+            "dependencies": [
+              1
+            ],
+            "details": "In a suitable location, like the `AppDatabase.kt` file or a dedicated migrations file, define a constant `val MIGRATION_2_3 = object : Migration(2, 3) { ... }`. Inside the `migrate` function override, execute the necessary SQL: `database.execSQL(\"ALTER TABLE ItemCompra ADD COLUMN category TEXT NOT NULL DEFAULT 'Outros'\")`.",
+            "status": "done",
+            "testStrategy": "Write an automated Room migration test using `MigrationTestHelper`. The test should create a version 2 database, insert data, run the migration to version 3, and then verify that the data is preserved and the 'category' column exists with the default value 'Outros'.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-07T16:37:05.569Z"
+          },
+          {
+            "id": 3,
+            "title": "Increment Database Version and Apply Migration to Builder",
+            "description": "Update the database version in the @Database annotation to 3 and configure the Room database builder to use the newly created MIGRATION_2_3.",
+            "dependencies": [
+              2
+            ],
+            "details": "Navigate to the `AppDatabase.kt` file. Change the version parameter in the `@Database` annotation to `version = 3`. Locate the `Room.databaseBuilder` instantiation (likely in a Hilt/Koin module or Application class) and chain the `.addMigrations(MIGRATION_2_3)` method call to it.",
+            "status": "done",
+            "testStrategy": "Launch the application after this change on an emulator with a version 2 database installed. Verify the app does not crash and that existing items are now queryable with the default category. This is a manual integration test.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-07T16:38:10.625Z"
+          },
+          {
+            "id": 4,
+            "title": "Update ViewModel to Handle Item Category",
+            "description": "Modify the ViewModel to manage the new 'category' property when creating or updating items, passing the category data through to the repository and data source.",
+            "dependencies": [
+              1
+            ],
+            "details": "In the primary `ViewModel` responsible for item manipulation, update the signatures of methods like `addItem` and `updateItem` to accept a `category: String` parameter. Ensure this new parameter is included in the `ItemCompra` object that is passed to the corresponding repository methods.",
+            "status": "done",
+            "testStrategy": "Unit test the ViewModel methods. Verify that when `addItem` or `updateItem` is called with a category, the repository's corresponding method is invoked with an `ItemCompra` object containing the correct category string.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-07T16:39:55.188Z"
+          },
+          {
+            "id": 5,
+            "title": "Implement Category Selection Dropdown in Add/Edit Dialog",
+            "description": "Update the Add/Edit item dialog UI to include a mandatory dropdown menu for category selection, populated with the predefined categories from the enum.",
+            "dependencies": [
+              1,
+              4
+            ],
+            "details": "In the Composable function for the Add/Edit item dialog, add a Material 3 `ExposedDropdownMenuBox`. Populate the dropdown items using `ItemCategory.values()`. Manage the selected category in the dialog's state and pass it to the ViewModel's `addItem`/`updateItem` function when the user saves the item. Make the field non-optional.",
+            "status": "done",
+            "testStrategy": "Perform a manual UI test. Open the add/edit dialog, confirm the dropdown is present and populated correctly. Verify that selecting a category and saving the item results in the item appearing in the list with the chosen category. Test that the form cannot be submitted without selecting a category.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-07T16:42:48.144Z"
+          }
+        ],
+        "updatedAt": "2025-11-07T16:42:48.144Z"
+      },
+      {
+        "id": "2",
+        "title": "Implement Backend Logic for Search and Filtering",
+        "description": "Update the DAO, Repository, and ViewModel to support real-time search by item name (case-insensitive) and filtering by status (All, Pending, Purchased).",
+        "details": "1. In `ItemDao`, modify the primary query to accept a search term and a filter status. Use `Flow<List<ItemCompra>>` for reactive updates. The query should use `LOWER(name) LIKE '%' || LOWER(:searchQuery) || '%'` for case-insensitivity. Handle the 'All' filter by omitting the `isChecked` condition. 2. In `ViewModel`, introduce two `MutableStateFlow<String>`: one for `searchQuery` and one for `filterState`. 3. Use the `combine` operator on these flows. Apply a `debounce(300L)` to the `searchQuery` flow to meet performance requirement RF-001.8. 4. Use `flatMapLatest` on the combined flow to call the repository method, which in turn calls the updated DAO query. This ensures the UI receives a new list whenever search or filter changes.",
+        "testStrategy": "Write JUnit tests for the ViewModel using Turbine to verify that changes to the `searchQuery` and `filterState` flows trigger a call to the repository with the correct parameters. Manually test the functionality on the device to ensure the list updates in real-time and that search and filters work correctly in combination.",
+        "priority": "high",
+        "dependencies": [
+          "1"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Update ItemCompraDao with Search and Filter Queries",
+            "description": "Add new overloaded queries to `ItemCompraDao` to support searching by item name (case-insensitive) and filtering by `isChecked` status. One query will handle search only, and the other will handle search combined with a status filter.",
+            "dependencies": [],
+            "details": "In `ItemCompraDao.kt`, add two new functions. 1. `fun getItems(searchQuery: String): Flow<List<ItemCompra>>` with `@Query(\"SELECT * FROM items WHERE LOWER(name) LIKE '%' || LOWER(:searchQuery) || '%'\")`. 2. `fun getItems(searchQuery: String, isChecked: Boolean): Flow<List<ItemCompra>>` with `@Query(\"SELECT * FROM items WHERE LOWER(name) LIKE '%' || LOWER(:searchQuery) || '%' AND isChecked = :isChecked\")`.",
+            "status": "done",
+            "testStrategy": "Write a Room database test to verify that both new DAO methods return the expected filtered and/or searched lists of items when provided with sample data.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-07T21:49:29.444Z"
+          },
+          {
+            "id": 2,
+            "title": "Create a Filtering Method in ItemCompraRepository",
+            "description": "Implement a new method in the `ItemCompraRepository` that takes search and filter parameters and calls the appropriate new DAO method based on the filter status.",
+            "dependencies": [
+              1
+            ],
+            "details": "In `ItemCompraRepository.kt`, create a new function `fun getItems(query: String, filter: String): Flow<List<ItemCompra>>`. This function will use a `when` statement on the `filter` string ('All', 'Pending', 'Purchased') to call the corresponding `itemCompraDao.getItems` method with the correct parameters (e.g., for 'Pending', call with `isChecked = false`).",
+            "status": "done",
+            "testStrategy": "Unit test the repository method using a mock DAO to ensure it calls the correct DAO function based on the provided filter string.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-07T21:51:11.739Z"
+          },
+          {
+            "id": 3,
+            "title": "Add Search and Filter StateFlows to ItemViewModel",
+            "description": "Introduce `MutableStateFlow`s in the `ItemViewModel` to hold the current search query and filter state. Also, add public functions to update these states from the UI.",
+            "dependencies": [],
+            "details": "In `ItemViewModel.kt`, add `private val _searchQuery = MutableStateFlow(\"\")` and `private val _filterState = MutableStateFlow(\"All\")`. Create public functions `onSearchQueryChanged(query: String)` and `onFilterChanged(filter: String)` that update the value of these flows.",
+            "status": "done",
+            "testStrategy": "In a ViewModel unit test, call the update functions and verify that the StateFlows emit the new values correctly using a library like Turbine.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-07T21:52:32.722Z"
+          },
+          {
+            "id": 4,
+            "title": "Combine Search and Filter Flows in ItemViewModel",
+            "description": "Use `combine`, `debounce`, and `flatMapLatest` operators to create a reactive stream that responds to changes in the search query and filter state, and fetches the updated list from the repository.",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "In `ItemViewModel.kt`, create a new private `val` that combines `_searchQuery.debounce(300L)` and `_filterState`. Use `flatMapLatest` on this combined flow to call the `repository.getItems(query, filter)` method. This will create the core reactive data fetching logic.",
+            "status": "done",
+            "testStrategy": "Use the Turbine library in a JUnit test to verify that changes to the input flows trigger a call to the repository method after the debounce period and with the correct, combined parameters.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-07T21:54:08.451Z"
+          },
+          {
+            "id": 5,
+            "title": "Expose Filtered List as StateFlow to the UI",
+            "description": "Replace the existing `allItems` `StateFlow` with the new reactive stream that incorporates search and filtering. The new flow must be converted to a `StateFlow` for the UI to consume.",
+            "dependencies": [
+              4
+            ],
+            "details": "Take the `Flow<List<ItemCompra>>` created in the previous subtask and apply the `.stateIn()` operator to convert it into a `StateFlow`. Assign this to the public `items` (or `allItems`) property in the `ItemViewModel`. The `stateIn` operator should be configured with `viewModelScope`, `SharingStarted.WhileSubscribed(5000)`, and an initial value of an empty list.",
+            "status": "done",
+            "testStrategy": "Manually test the UI to confirm that the list updates correctly when typing in the search bar and when changing the filter selection. Verify the debounce behavior prevents excessive queries during typing.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-07T21:55:19.689Z"
+          }
+        ],
+        "updatedAt": "2025-11-07T21:55:19.689Z"
+      },
+      {
+        "id": "3",
+        "title": "Implement Item Sorting Logic and Persistence",
+        "description": "Add logic to sort the shopping list by Name (A-Z), Date (newest first), or Price (lowest first). The user's sorting preference must be persisted across app sessions.",
+        "details": "1. Use `androidx.datastore.preferences.core.DataStore` to persist the user's sort preference. Create a `UserPreferencesRepository` to abstract DataStore interactions. 2. Define a `SortOrder` enum or sealed class (`BY_NAME`, `BY_DATE`, `BY_PRICE`). 3. In the `ViewModel`, expose a `StateFlow<SortOrder>` that reads from the `UserPreferencesRepository`. 4. In `ItemDao`, update the query to use a `CASE` statement for dynamic ordering: `ORDER BY CASE WHEN :sortOrder = 'BY_NAME' THEN name END ASC, CASE WHEN :sortOrder = 'BY_DATE' THEN id END DESC, CASE WHEN :sortOrder = 'BY_PRICE' THEN price END ASC`. 5. Integrate the `sortOrder` flow into the `combine` operator in the ViewModel alongside search and filter flows.",
+        "testStrategy": "Unit test the ViewModel to ensure that updating the sort preference results in the correct `SortOrder` being passed to the repository. Manually verify that all sorting options work correctly and in conjunction with search/filters. Close and reopen the app to confirm that the last selected sort order is correctly applied on startup.",
+        "priority": "medium",
+        "dependencies": [
+          "1"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define SortOrder Enum and Create UserPreferencesRepository with DataStore",
+            "description": "Establish the foundation for sorting by creating a `SortOrder` enum and a repository to persist the user's choice using Jetpack DataStore.",
+            "dependencies": [],
+            "details": "Create a `SortOrder` enum with values `BY_NAME`, `BY_DATE`, `BY_PRICE`. Implement a `UserPreferencesRepository` class that takes a `DataStore<Preferences>` as a dependency. This repository will expose a `Flow<SortOrder>` to read the saved preference and a `suspend fun updateSortOrder(sortOrder: SortOrder)` to write it. Provide the DataStore instance via Hilt/Dagger.",
+            "status": "done",
+            "testStrategy": "Unit test the repository to confirm that writing a `SortOrder` value can be correctly read back from the flow.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T02:25:31.620Z"
+          },
+          {
+            "id": 2,
+            "title": "Update ItemDao Query for Dynamic Sorting",
+            "description": "Modify the Room DAO query to dynamically order the shopping list items based on the selected sort order.",
+            "dependencies": [
+              1
+            ],
+            "details": "In `ItemDao`, update the main query that fetches items (`getItems`). Add a `sortOrder: String` parameter. Modify the query to include a dynamic `ORDER BY` clause, such as `ORDER BY CASE WHEN :sortOrder = 'BY_NAME' THEN name END ASC, CASE WHEN :sortOrder = 'BY_DATE' THEN id END DESC, CASE WHEN :sortOrder = 'BY_PRICE' THEN price END ASC`.",
+            "status": "done",
+            "testStrategy": "Manually verify with the Database Inspector that executing the query with different sort order strings returns the items in the expected order.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T02:26:07.425Z"
+          },
+          {
+            "id": 3,
+            "title": "Integrate SortOrder Flow into ViewModel's Combine Operator",
+            "description": "Incorporate the new sorting preference flow into the main ViewModel to reactively update the item list when the sort order changes.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Inject `UserPreferencesRepository` into the `ItemsViewModel`. Expose the repository's `sortOrder` flow. Update the `combine` operator that is already merging `searchQuery` and `filterState` to also include this new `sortOrder` flow. The combined flow will trigger a call to the updated `ItemDao` method with all three parameters.",
+            "status": "done",
+            "testStrategy": "Write a ViewModel unit test using Turbine to assert that when a new value is emitted from the mocked `sortOrder` flow, the repository's `getItems` method is called with the correct sorting parameter.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T02:27:07.933Z"
+          },
+          {
+            "id": 4,
+            "title": "Implement Sort Menu UI in TopAppBar",
+            "description": "Add a user-facing dropdown menu to the main screen's top app bar, allowing users to see and select the available sorting options.",
+            "dependencies": [
+              3
+            ],
+            "details": "In the `MainScreen` or relevant Composable, add an `IconButton` (e.g., with `Icons.Default.Sort`) to the `TopAppBar` actions. On click, display a `DropdownMenu`. Populate the menu with `DropdownMenuItem` for each `SortOrder` option (Name, Date, Price). The currently active sort option should be visually distinct.",
+            "status": "done",
+            "testStrategy": "Run the app and verify the sort icon and dropdown menu appear correctly. Manually check that the menu displays all options as designed.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T02:29:56.620Z"
+          },
+          {
+            "id": 5,
+            "title": "Connect Sort UI Actions to ViewModel",
+            "description": "Wire the UI sort menu to the ViewModel, enabling users to change the active sort order and have it persist.",
+            "dependencies": [
+              3,
+              4
+            ],
+            "details": "In the `MainScreen` Composable, add a new function to the ViewModel, `fun updateSortOrder(sortOrder: SortOrder)`. Inside this function, call the corresponding method in the `UserPreferencesRepository`. The `onClick` lambda for each `DropdownMenuItem` from the previous task should call this new ViewModel function with the appropriate `SortOrder` value.",
+            "status": "done",
+            "testStrategy": "Manually test the full flow: tap the sort icon, select a new sort option (e.g., Price), and verify the list re-sorts correctly. Close and reopen the app to confirm the sorting preference is persisted and correctly applied on launch.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T02:30:11.302Z"
+          }
+        ],
+        "updatedAt": "2025-11-08T02:30:11.302Z"
+      },
+      {
+        "id": "4",
+        "title": "Develop UI for Search, Filter, and Sort Controls",
+        "description": "Create the Jetpack Compose UI components on the main screen for user interaction with search, filter, and sort functionalities, connecting them to the ViewModel.",
+        "details": "1. In the main screen Composable, add a `TextField` with Material 3 styling for the search input. Its `value` should be collected from the `searchQuery` StateFlow in the ViewModel, and `onValueChange` should update it. 2. Implement a `Row` of `FilterChip` Composables for 'Todos', 'Pendentes', and 'Comprados'. The `selected` state of each chip should be based on the `filterState` in the ViewModel. `onClick` should update this state. 3. Add an `IconButton` to the `TopAppBar` which toggles a `DropdownMenu`. Populate the menu with items for each `SortOrder`. The `onClick` of each `DropdownMenuItem` should call a function in the ViewModel to update and persist the sort preference.",
+        "testStrategy": "Use Compose UI tests (`createComposeRule`) to verify that typing in the search bar updates the ViewModel state and that clicking filter chips and sort menu items triggers the corresponding ViewModel functions. Manually test the UI for responsiveness and visual correctness.",
+        "priority": "high",
+        "dependencies": [
+          "2",
+          "3"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement the Search Bar UI Component",
+            "description": "Add a Material 3 `OutlinedTextField` to the `MainScreen` composable for user search input. This component will be placed within the main content area, likely below the TopAppBar.",
+            "dependencies": [],
+            "details": "In `MainScreen.kt`, within the `Column` inside the `Scaffold`, add an `OutlinedTextField`. Style it with a placeholder (e.g., \"Pesquisar itens...\"), a leading icon (`Icons.Default.Search`), `singleLine = true`, and appropriate horizontal padding. The `value` and `onValueChange` will be hardcoded or empty for now.\n<info added on 2025-11-08T12:04:27.336Z>\n\"Implementation completed. The OutlinedTextField was added to ListaComprasScreen, positioned after the TopAppBar. It is connected to the ViewModel and its state is managed by the searchQuery StateFlow.\"\n</info added on 2025-11-08T12:04:27.336Z>",
+            "status": "done",
+            "testStrategy": "Visually inspect the rendered `OutlinedTextField` on a device or emulator to ensure it appears correctly styled and positioned on the main screen.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Create Sort Icon Button and Dropdown Menu UI",
+            "description": "Add an `IconButton` to the `TopAppBar` actions. Toggling this button will show or hide a `DropdownMenu` containing the available sorting options.",
+            "dependencies": [],
+            "details": "In the `actions` lambda of the `TopAppBar` in `MainScreen.kt`, add an `IconButton` with a sort icon. Use a `remember`ed mutable state (`var expanded by remember { mutableStateOf(false) }`) to control the `expanded` property of a `DropdownMenu`. Populate the menu with `DropdownMenuItem`s for each `SortOrder` (Name, Date, Price).\n<info added on 2025-11-08T12:04:36.676Z>\n```json\n\"Implementation completed. The sort menu icon in the TopAppBar was corrected to use `Icons.Default.Sort` instead of `Icons.Default.Add`. Additionally, the check icons for the selected sort option within the dropdown menu items were updated to use `Icons.Default.Check`.\"\n```\n</info added on 2025-11-08T12:04:36.676Z>",
+            "status": "done",
+            "testStrategy": "Manually test by tapping the sort icon in the `TopAppBar` to confirm the `DropdownMenu` appears and disappears. Verify that all sort options are visible in the menu.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Implement Filter Chips Row UI",
+            "description": "Add a `Row` of `FilterChip` composables to the `MainScreen` for filtering the list by 'Todos' (All), 'Pendentes' (Pending), and 'Comprados' (Purchased).",
+            "dependencies": [
+              1
+            ],
+            "details": "Below the search `OutlinedTextField` in `MainScreen.kt`, add a `Row` with `horizontalArrangement = Arrangement.SpaceAround` and `modifier = Modifier.fillMaxWidth()`. Inside it, create three `FilterChip` composables, each with a `label`. The `selected` and `onClick` properties will be implemented in a subsequent task.\n<info added on 2025-11-08T12:04:46.161Z>\nImplementation complete. A Row of FilterChip composables was added below the search bar. The three chips represent 'Todos' (FilterStatus.ALL), 'Pendentes' (FilterStatus.PENDING), and 'Comprados' (FilterStatus.PURCHASED). The chips are connected to the ViewModel via the `filterStatus` StateFlow.\n</info added on 2025-11-08T12:04:46.161Z>",
+            "status": "done",
+            "testStrategy": "Visually verify that the three filter chips are displayed in a row between the search bar and the item list, and that their labels are correct.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Connect Search Bar State to ViewModel",
+            "description": "Wire up the search `OutlinedTextField` to the `MainViewModel` to enable real-time state management and searching functionality.",
+            "dependencies": [
+              1
+            ],
+            "details": "In `MainScreen.kt`, collect the `searchQuery` StateFlow from the `MainViewModel` using `collectAsStateWithLifecycle()`. Bind this collected state to the `value` property of the `OutlinedTextField`. In the `onValueChange` lambda, call the corresponding ViewModel method, e.g., `viewModel.onSearchQueryChanged(it)`.\n<info added on 2025-11-08T12:04:58.688Z>\n{\n  \"text\": \"Implementation complete. The OutlinedTextField is connected to the ViewModel, collecting the searchQuery StateFlow using collectAsState() and updating the state via viewModel.onSearchQueryChanged(it) in the onValueChange callback. The search works in real-time with a 300ms debounce implemented in the ViewModel.\"\n}\n</info added on 2025-11-08T12:04:58.688Z>",
+            "status": "done",
+            "testStrategy": "Use a Compose UI test to input text into the search field and assert that the `searchQuery` state in the ViewModel is updated accordingly. Manually verify by typing in the app.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Connect Filter Chips and Sort Menu to ViewModel",
+            "description": "Connect the `onClick` actions for both the filter chips and the sort dropdown menu items to their respective state update functions in the `MainViewModel`.",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "In `MainScreen.kt`, collect `filterState` and `sortOrder` from the ViewModel. For the `FilterChip`s, set their `selected` property based on the collected `filterState` and call `viewModel.onFilterChanged()` in `onClick`. For the `DropdownMenuItem`s, call `viewModel.onSortOrderChanged()` in their `onClick` handlers and close the menu.\n<info added on 2025-11-08T12:05:09.808Z>\n```json\n\"Implementation complete. The FilterChips are now collecting the `filterStatus` StateFlow and calling `viewModel.onFilterStatusChanged()` on click. The sort menu was already connected and functioning correctly via `viewModel.setSortOrder()`. All states are being collected using `collectAsState()` for consistency with the rest of the code.\"\n```\n</info added on 2025-11-08T12:05:09.808Z>",
+            "status": "done",
+            "testStrategy": "Using UI tests, click on each filter chip and sort menu item, then verify that the ViewModel's `filterState` and `sortOrder` flows emit the expected new values. Manually confirm the list updates correctly after selection.",
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": "5",
+        "title": "Implement Swipe-to-Action Gestures for List Items",
+        "description": "Implement swipe gestures on list items: swipe-to-right to mark as purchased, and swipe-to-left to delete. A Snackbar with an 'Undo' option must be shown after deletion.",
+        "details": "1. In your `LazyColumn`, wrap the item Composable with `SwipeToDismissBox`. 2. Configure the `backgroundContent` to show a delete icon/background for start-to-end swipes and a checkmark icon/background for end-to-start swipes. 3. In the `confirmValueChange` lambda: if the direction is `DismissDirection.EndToStart` (swipe left), call `viewModel.deleteItem(item)` and show a `Snackbar` with an 'Desfazer' action. If `DismissDirection.StartToEnd` (swipe right), call `viewModel.toggleItemChecked(item)`. 4. In the `ViewModel`, create a function to temporarily hold the last deleted item. The 'Desfazer' action will call a function that re-inserts this item.",
+        "testStrategy": "Manually test by swiping items left and right, confirming the correct actions are triggered. Verify the 'Undo' Snackbar appears on deletion and that clicking it successfully restores the deleted item. Use `performTouchInput { swipeLeft() }` in a Compose UI test to automate verification of the delete action.",
+        "priority": "medium",
+        "dependencies": [
+          "1"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Update ListViewModel with Swipe Action and Undo Logic",
+            "description": "Add functions to the `ListViewModel` to handle item deletion, toggling the 'purchased' state, and a mechanism to undo a recent deletion. This provides the backend logic for the UI gestures.",
+            "dependencies": [],
+            "details": "In `ListViewModel.kt`, create a private `MutableStateFlow` to temporarily hold the last deleted `ItemCompra`. Create public functions `deleteItem(item: ItemCompra)`, which will move the item to the temporary holder and then delete it from the repository, and `toggleItemChecked(item: ItemCompra)`. Also, create an `undoDeleteItem()` function that re-inserts the item from the temporary holder back into the repository.",
+            "status": "done",
+            "testStrategy": "Write unit tests for the ViewModel using Turbine to verify that `deleteItem` removes an item from the main list state and `undoDeleteItem` restores it. Verify `toggleItemChecked` correctly updates the item's `isChecked` property.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Integrate SwipeToDismissBox into the List Item Composable",
+            "description": "In `ListScreen.kt`, wrap the existing composable that displays a single shopping list item with the `SwipeToDismissBox` composable to enable the basic swipe gesture functionality.",
+            "dependencies": [],
+            "details": "Locate the `LazyColumn` within `ListScreen.kt`. Wrap the item composable (e.g., `ItemCard`) inside a `SwipeToDismissBox`. You will need to create and remember a `DismissState` using `rememberDismissState()` for each item, passing it to the `SwipeToDismissBox`.",
+            "status": "done",
+            "testStrategy": "Manually test by swiping an item. At this stage, the item should just animate away without any action or background being visible. The goal is to confirm the basic swipe gesture is captured.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Implement Background Content for Swipe Gestures",
+            "description": "Create the visual background that is revealed during a swipe. It should display a delete icon on a red background for a left-swipe and a checkmark icon on a green background for a right-swipe.",
+            "dependencies": [
+              2
+            ],
+            "details": "Implement the `backgroundContent` lambda of `SwipeToDismissBox`. Use a `Box` composable. Inside, check the `state.dismissDirection`. If it is `DismissDirection.EndToStart` (swipe left), show a red background with `Icons.Default.Delete`. If it is `DismissDirection.StartToEnd` (swipe right), show a green background with `Icons.Default.Check`. Align the icons appropriately (e.g., `Alignment.CenterEnd` and `Alignment.CenterStart`).",
+            "status": "done",
+            "testStrategy": "Manually swipe items left and right to verify that the correct background color and icon are displayed corresponding to the swipe direction and that they are correctly aligned.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Connect Swipe Gestures to ViewModel and Show Snackbar",
+            "description": "Implement the logic within `confirmValueChange` to call the appropriate ViewModel functions based on the swipe direction. Upon deletion, a Snackbar must be shown with an 'Undo' option.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "In the `rememberDismissState` call, provide the `confirmValueChange` lambda. Inside, check the `it` value. If it's `DismissValue.DismissedToEnd`, call `viewModel.toggleItemChecked(item)`. If it's `DismissValue.DismissedToStart`, call `viewModel.deleteItem(item)`. For deletion, use a `SnackbarHostState` and a `LaunchedEffect` keyed on the deleted item state to call `snackbarHostState.showSnackbar` with a message and an `actionLabel` of 'Desfazer'. Return `false` to let the composable handle the animation.",
+            "status": "done",
+            "testStrategy": "Manually swipe an item right and verify it gets marked as purchased. Swipe an item left and verify it is removed from the list and a Snackbar appears with an 'Undo' button. The undo button will not be functional yet.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Implement the 'Undo' Action for Item Deletion",
+            "description": "Connect the 'Desfazer' (Undo) action on the Snackbar to the ViewModel logic, allowing the user to restore the most recently deleted item to the list.",
+            "dependencies": [
+              1,
+              4
+            ],
+            "details": "In the `LaunchedEffect` where `snackbarHostState.showSnackbar` is called, check the `SnackbarResult`. If the result is `SnackbarResult.ActionPerformed`, call the `viewModel.undoDeleteItem()` function that was created in the first subtask. This will re-insert the temporarily stored item back into the database, and the UI will update automatically via the StateFlow.",
+            "status": "done",
+            "testStrategy": "Perform a full swipe-to-delete action. When the Snackbar appears, tap the 'Desfazer' button. Verify that the deleted item reappears in the list in its original position. Test this multiple times to ensure state is handled correctly.",
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": "6",
+        "title": "Implement Dark/Light Theme Support",
+        "description": "Add support for both light and dark themes with a user-facing toggle. The selected theme preference must be persisted across app sessions.",
+        "details": "1. In `ui/theme/Color.kt`, define both `LightColorScheme` and `DarkColorScheme` using the Material 3 color system. Ensure color choices meet WCAG AA contrast ratios. 2. In `ui/theme/Theme.kt`, the main theme Composable should check `isSystemInDarkTheme()` and also allow overriding it with a persisted user preference. 3. Use `DataStore` to store the user's theme choice (e.g., an enum: LIGHT, DARK, SYSTEM). 4. Create a settings screen or add a toggle icon to the `TopAppBar`. This UI element will read the preference from DataStore via the ViewModel and allow the user to cycle through the options. 5. The root Composable of the app will read this preference and pass the `darkTheme` boolean to the theme wrapper.",
+        "testStrategy": "Manually switch between light, dark, and system modes and navigate through all screens of the app to check for visual consistency and identify any hardcoded colors. Relaunch the app to confirm the theme preference is correctly saved and applied. Use an accessibility scanner to verify color contrast.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define Dark and Light Color Schemes",
+            "description": "Define distinct color palettes for both light and dark themes using Material 3 standards in `Color.kt`. Ensure the color combinations meet accessibility contrast ratio guidelines.",
+            "dependencies": [],
+            "details": "In the `src/main/java/com/example/minhascompras2/ui/theme/Color.kt` file, define a new `private val DarkColorScheme = darkColorScheme(...)` using appropriate dark theme colors. Review and adjust the existing `LightColorScheme` for consistency. Verify that primary, secondary, surface, and background colors are well-defined for both schemes.",
+            "status": "done",
+            "testStrategy": "Manually apply each color scheme in a preview Composable to visually inspect the colors. Use an online contrast checker tool to verify that text on background colors meets WCAG AA standards.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T00:59:12.725Z"
+          },
+          {
+            "id": 2,
+            "title": "Implement DataStore for Theme Preference Persistence",
+            "description": "Set up Jetpack DataStore to persist the user's selected theme choice. Create a repository to abstract the read and write operations.",
+            "dependencies": [],
+            "details": "Create a new file, `ThemeRepository.kt`, to manage theme preferences. Use `PreferenceDataStore` to store the selected theme. Define an enum `ThemeSetting { LIGHT, DARK, SYSTEM }` and store its string representation. The repository should expose a `Flow<ThemeSetting>` to read the preference and a suspend function `saveThemeSetting(setting: ThemeSetting)` to update it.",
+            "status": "done",
+            "testStrategy": "Write a unit test for the `ThemeRepository` to verify that saving a theme setting can be correctly read back. The test can use `runTest` and a `testDataStore` instance.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T01:51:56.661Z"
+          },
+          {
+            "id": 3,
+            "title": "Integrate Theme Management into ViewModel",
+            "description": "Add logic to the main application ViewModel to manage the theme state. It should expose the current theme preference to the UI and provide a function to update it.",
+            "dependencies": [
+              2
+            ],
+            "details": "In the relevant ViewModel (e.g., `MainViewModel`), inject the `ThemeRepository`. Create a `StateFlow` that collects the theme preference `Flow` from the repository. Expose a public function, e.g., `updateTheme(setting: ThemeSetting)`, that calls the repository's save function within the `viewModelScope`.",
+            "status": "done",
+            "testStrategy": "Unit test the ViewModel using Turbine. Verify that the ViewModel's `StateFlow` correctly emits the initial value from the repository and that calling `updateTheme` triggers the repository's save method.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T01:15:11.638Z"
+          },
+          {
+            "id": 4,
+            "title": "Update Theme Composable and App Root to Use Persisted Preference",
+            "description": "Modify the main theme Composable and the root UI entry point to apply the theme based on the user's persisted preference or the system setting.",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "In `MainActivity.kt`, collect the theme `StateFlow` from the ViewModel. In `ui/theme/Theme.kt`, update the `MinhasCompras2Theme` composable to accept the `ThemeSetting` enum. Inside, use a `when` statement: for `LIGHT` force `darkTheme = false`, for `DARK` force `darkTheme = true`, and for `SYSTEM` use `isSystemInDarkTheme()`. Pass the appropriate color scheme (`LightColorScheme` or `DarkColorScheme`) to `MaterialTheme`.",
+            "status": "done",
+            "testStrategy": "Run the app and manually change the device's theme setting in the system UI. Verify the app theme changes accordingly when the preference is set to 'SYSTEM'. Hardcode the preference in the ViewModel to 'LIGHT' and 'DARK' to test those paths.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T01:15:32.067Z"
+          },
+          {
+            "id": 5,
+            "title": "Create a UI Toggle for Theme Selection in TopAppBar",
+            "description": "Add an icon button to the `TopAppBar` that allows the user to cycle through the available theme options (Light, Dark, System).",
+            "dependencies": [
+              3,
+              4
+            ],
+            "details": "Locate the `TopAppBar` composable in the main screen file. Add an `IconButton` to its `actions`. The icon should visually represent the current theme (e.g., sun, moon, brightness-auto). On click, call the ViewModel's `updateTheme` function to cycle through the `ThemeSetting` enum values. The icon and its content description should update based on the current theme state collected from the ViewModel.",
+            "status": "done",
+            "testStrategy": "Manually tap the theme toggle icon. Verify that the theme changes instantly and cycles through the three states. Close and reopen the app to ensure the last selected theme is correctly applied on startup, confirming persistence.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T01:15:55.976Z"
+          }
+        ],
+        "updatedAt": "2025-11-08T01:51:56.661Z"
+      },
+      {
+        "id": "7",
+        "title": "Implement Data Backup and Restore via JSON",
+        "description": "Implement functionality to export the entire shopping list to a user-specified JSON file and to import data from such a file. Include a text-based sharing option.",
+        "details": "1. Create a 'Settings' screen. 2. **Export**: Add an 'Exportar dados' button. On click, use `rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(\"application/json\"))` to launch the system file picker. In the callback, fetch all items from the repository, serialize the `List<ItemCompra>` to a JSON string using `kotlinx.serialization.Json`, and write to the chosen file's `Uri`. 3. **Import**: Add an 'Importar dados' button using `ActivityResultContracts.GetContent()`. After the user selects a file, show a confirmation `AlertDialog`. On confirmation, read the file, deserialize the JSON, validate its structure, and use a `@Transaction` in the DAO to delete all existing items and insert the imported ones. 4. **Share**: Add a 'Compartilhar lista' button. Format the current list into a user-friendly string and use an `ACTION_SEND` Intent to share it.",
+        "testStrategy": "Test the full export-import cycle: export data, delete an item, then import the file and verify the list is restored to its original state. Test importing a malformed or invalid JSON file to ensure robust error handling. Verify the text sharing feature works with common apps like WhatsApp and email.",
+        "priority": "high",
+        "dependencies": [
+          "1"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Settings Screen, Add Navigation, and Configure Serialization",
+            "description": "Create a new Composable for the 'Settings' screen. Set up navigation to this screen from the main UI, likely via an icon in the TopAppBar. Add the kotlinx.serialization library to the project and annotate the 'ItemCompra' data class as @Serializable.",
+            "dependencies": [],
+            "details": "Create a new file `SettingsScreen.kt` in the `ui` package. Add a new route to the NavHost. Add the `kotlinx-serialization-json` dependency in the `build.gradle.kts` file. Add the `@Serializable` annotation to the `ItemCompra` data class.",
+            "status": "done",
+            "testStrategy": "Verify that the settings screen is accessible from the main screen. Check that the project builds successfully after adding the new dependency and annotation.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-07T23:43:05.014Z"
+          },
+          {
+            "id": 2,
+            "title": "Implement Data Export to JSON File",
+            "description": "On the Settings screen, add an 'Exportar dados' button. This button will trigger a system file picker to allow the user to choose a location and name for the JSON backup file. The app will then write all shopping list items to this file.",
+            "dependencies": [
+              1
+            ],
+            "details": "In SettingsScreen, use `rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(\"application/json\"))`. In the ViewModel, create a function to fetch all `ItemCompra` from the repository, serialize the list to a JSON string using `kotlinx.serialization.Json`, and write it to the Uri returned by the file picker.",
+            "status": "done",
+            "testStrategy": "Manually trigger an export, save the file, and inspect its contents to ensure it is valid JSON and contains all the items from the list.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-07T23:46:52.638Z"
+          },
+          {
+            "id": 3,
+            "title": "Update DAO and Repository for Atomic Data Replacement",
+            "description": "Modify the data layer to support replacing the entire dataset within a single database transaction. This is a prerequisite for the import functionality to ensure data integrity.",
+            "dependencies": [
+              1
+            ],
+            "details": "In `ItemDao.kt`, create a new function annotated with `@Transaction`. This function, named something like `replaceAllItems`, will first call a query to `DELETE FROM items_compra` and then call the existing `insertAll` method. Expose this new DAO method through the `ItemRepository`.",
+            "status": "done",
+            "testStrategy": "Write a unit test for the repository method to verify that calling it correctly clears the old data and inserts the new data.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-07T23:51:15.037Z"
+          },
+          {
+            "id": 4,
+            "title": "Implement Data Import from JSON File with Confirmation",
+            "description": "Add an 'Importar dados' button to the Settings screen. This will open a file picker for the user to select a JSON file. After selection, a confirmation dialog must be shown before the app replaces the current list with the data from the file.",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Use `rememberLauncherForActivityResult(ActivityResultContracts.GetContent())`. Upon file selection, display an `AlertDialog` for confirmation. If confirmed, read the file's content, deserialize the JSON into `List<ItemCompra>`, and call the `replaceAllItems` function in the ViewModel. Include `try-catch` for JSON parsing errors.",
+            "status": "done",
+            "testStrategy": "Test the full export-import cycle. Export a list, modify the list in the app, then import the original file and verify the list is restored. Also, test importing an invalid or malformed JSON file to ensure the app handles the error gracefully.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-07T23:54:43.506Z"
+          },
+          {
+            "id": 5,
+            "title": "Implement 'Share List' as Plain Text",
+            "description": "Add a 'Compartilhar lista' button to the Settings screen. This feature will format the current shopping list into a human-readable text string and open the system's share sheet to send it to other apps.",
+            "dependencies": [
+              1
+            ],
+            "details": "In the ViewModel, create a function that gets the current list of items. Format this list into a string, for example, using a ' - [x] Item Name' format for checked items and ' - [ ] Item Name' for unchecked ones. Use an `ACTION_SEND` Intent with `type = \"text/plain\"` to trigger the share sheet.",
+            "status": "done",
+            "testStrategy": "Tap the share button and verify the share sheet appears. Share the content to a notes app or messaging app to confirm the text is formatted correctly.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-07T23:56:43.119Z"
+          }
+        ],
+        "updatedAt": "2025-11-07T23:56:43.119Z"
+      },
+      {
+        "id": "8",
+        "title": "Create Purchase History System",
+        "description": "Implement a system to automatically archive completed lists. Users must be able to view, delete, and reuse these historical lists to start a new shopping trip.",
+        "details": "1. **Data Model**: Create new Room entities: `ShoppingListHistory` (e.g., `listId: Long`, `completionDate: Long`) and `HistoryItem` (e.g., `itemId: Long`, `parentListId: Long`, `name: String`, etc.). Use a one-to-many relationship. 2. **Archiving Logic**: In the `ViewModel`, use a `derivedStateOf` or observe the list statistics. When the count of pending items becomes zero (and the list was not empty), trigger a repository function to save the current list to the history tables and then clear the main list. 3. **UI**: Create a new `HistoryScreen` Composable, accessible from the main menu. It will display a `LazyColumn` of `ShoppingListHistory` records. 4. Implement functionality to view items in a historical list, delete a history record, and 'Reuse' a list, which copies its items back to the main shopping list.",
+        "testStrategy": "Create a list, mark all items as purchased, and verify it is moved to the History screen and the main list is cleared. From the History screen, test the 'Reuse' feature and confirm the main list is populated with the correct items. Test the deletion of a historical list.",
+        "priority": "medium",
+        "dependencies": [
+          "1"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Room Entities and DAO for Purchase History",
+            "description": "Define the data model for storing historical shopping lists. This includes creating ShoppingListHistory and HistoryItem entities, a data class for their relationship, and a HistoryDao for database access.",
+            "dependencies": [],
+            "details": "Create `ShoppingListHistory.kt` (@Entity with id, completionDate, listName). Create `HistoryItem.kt` (@Entity mirroring `ItemCompra` but with a foreign key to `ShoppingListHistory`). Create `ShoppingListHistoryWithItems.kt` with @Embedded and @Relation. Create `HistoryDao.kt` with queries to insert a full history list (in a transaction), get all history summaries, get a single history list with items, and delete a history list.",
+            "status": "done",
+            "testStrategy": "Write Room unit tests to verify that the DAO can successfully insert, query, and delete history records. Test the transaction logic for inserting a list with its items.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Update AppDatabase and Repository for History Feature",
+            "description": "Add the new history entities and DAO to the Room database definition. Extend the repository to expose history-related data operations to the ViewModels.",
+            "dependencies": [
+              1
+            ],
+            "details": "In `AppDatabase.kt`, add `ShoppingListHistory` and `HistoryItem` to the `entities` array and declare the new `HistoryDao`. Increment the database version and add an empty migration since we are just adding new tables. In `ItemRepository.kt` (or a new `HistoryRepository`), add functions like `archiveCurrentList(items: List<ItemCompra>)`, `getHistoryLists(): Flow<List<ShoppingListHistory>>`, `deleteHistory(historyId: Long)`, and `reuseHistoryList(historyId: Long)`. The `archiveCurrentList` function should use the DAO to insert the new history and then clear the `ItemCompra` table.",
+            "status": "done",
+            "testStrategy": "After updating the app version, manually verify that the app launches without crashing and that existing data is preserved. Write unit tests for the new repository functions using a mock DAO to ensure correct logic.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Implement Automatic List Archiving in MainViewModel",
+            "description": "Implement the logic that automatically detects when a shopping list is complete (all items checked) and triggers the archiving process.",
+            "dependencies": [
+              2
+            ],
+            "details": "In `MainViewModel.kt`, create a derived state or use a `snapshotFlow` to monitor the list of items. When the list is not empty and all items have `isChecked = true`, call the `repository.archiveCurrentList()` function. This should also clear the current list from the UI by deleting from the `ItemCompra` table. Ensure this logic is efficient and does not trigger on an empty list.",
+            "status": "done",
+            "testStrategy": "Write a JUnit test for the `MainViewModel` using Turbine. Simulate a list of items, update them to be all checked, and verify that the repository's `archiveCurrentList` method is called exactly once.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Develop History Screen UI and ViewModel",
+            "description": "Build a new Jetpack Compose screen (`HistoryScreen.kt`) that displays a list of archived shopping trips. Add navigation to access this screen from the main UI.",
+            "dependencies": [
+              2
+            ],
+            "details": "Create a `HistoryViewModel.kt` to fetch data from the repository using `getHistoryLists()`. Create a `HistoryScreen.kt` Composable that collects the `StateFlow` from the ViewModel. Use a `LazyColumn` to display each `ShoppingListHistory` record in a Material Design `Card`, showing the list's completion date and item count. Add a new route to the app's `NavHost` and a menu item in `MainScreen`'s `TopAppBar` to navigate to the history screen.",
+            "status": "done",
+            "testStrategy": "Use `createComposeRule` to test the `HistoryScreen`. Provide a mock `HistoryViewModel` with sample data and verify that the `LazyColumn` displays the correct number of items. Manually test navigation to and from the screen.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Add View, Delete, and Reuse Functionality to History Screen",
+            "description": "Implement user actions for each archived list on the History Screen, allowing users to view list details, delete an archive, or reuse it for a new shopping trip.",
+            "dependencies": [
+              4
+            ],
+            "details": "On the `HistoryScreen`, for each list item card: 1. Add a delete `IconButton` that calls `viewModel.deleteHistory(historyId)`. 2. Add a 'Reuse' `Button` that calls `viewModel.reuseHistoryList(historyId)` and then navigates back to the main list screen. 3. Make the card clickable to expand and show its items. The 'Reuse' logic in the ViewModel will call the repository, which copies the `HistoryItem`s back to the main `ItemCompra` table.",
+            "status": "done",
+            "testStrategy": "Manually test all actions on the History Screen. Verify that deleting a list removes it. Verify that reusing a list populates the main shopping list correctly and navigates back. Use Compose UI tests to click the 'Delete' and 'Reuse' buttons and verify the corresponding ViewModel functions are invoked.",
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": "9",
+        "title": "Implement Unit/UI Tests and Final Polish",
+        "description": "Write unit and UI tests for the new features to ensure stability and correctness. Fix identified bugs, review code for quality, and verify accessibility compliance.",
+        "details": "1. **Unit Tests**: Using JUnit 4/5, write tests for ViewModels. Mock the Repository layer. Test state logic for search, filter, sort, and the undo-delete mechanism. 2. **UI Tests**: Using `createComposeRule`, write integration tests for critical user flows: a) Add an item with a category. b) Search for an item and verify the list filters. c) Swipe to delete and click undo. 3. **Accessibility**: Manually review the app with TalkBack enabled. Ensure all `IconButton`, `Image`, and other non-text elements have a `contentDescription`. Use the Layout Inspector's accessibility check. 4. **Performance**: Use the Android Studio Profiler to check for recomposition issues in `LazyColumn` and measure scroll performance with a list of over 100 items. Ensure database operations are off the main thread.",
+        "testStrategy": "Run all created tests and ensure they pass. Aim for the 30-40% code coverage target mentioned in the PRD. Perform a full regression test of all application features on an emulator and a physical device. Validate that there are no critical crashes and that performance is acceptable.",
+        "priority": "high",
+        "dependencies": [
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set Up Testing Dependencies and Environment",
+            "description": "Configure the project by adding all necessary testing libraries to the `build.gradle.kts` files. This includes JUnit 5, MockK for mocking, Turbine for testing flows, and the Compose Test Rule for UI testing.",
+            "dependencies": [],
+            "details": "In the app-level `build.gradle.kts`, add dependencies for `org.junit.jupiter:junit-jupiter-api`, `io.mockk:mockk`, `app.cash.turbine:turbine` for unit tests. For instrumentation tests, add `androidx.compose.ui:ui-test-junit4` and `androidx.compose.ui:ui-test-manifest`. Ensure correct test runner configuration.",
+            "status": "done",
+            "testStrategy": "After adding the dependencies, sync Gradle and create a single placeholder test file in both `test` and `androidTest` source sets. Run these empty tests to confirm the project builds and the test runners execute successfully.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Write Unit Tests for ViewModels",
+            "description": "Create unit tests for the ViewModels responsible for list management. Focus on testing state logic for search, filtering, sorting, and the undo-delete mechanism.",
+            "dependencies": [
+              1
+            ],
+            "details": "Using JUnit 5 and MockK, create a test class for `MainViewModel`. Mock the `ItemsRepository` dependency. Write individual tests using Turbine to verify that updating `searchQuery`, `filterState`, and `sortOrder` correctly combines and triggers the repository call. Test the `deleteItem` and `undoDelete` methods to ensure the state is managed correctly.",
+            "status": "done",
+            "testStrategy": "Run all JUnit tests and ensure they pass. Use code coverage tools to verify that the core logic within the ViewModel is being tested, aiming for high coverage on the state combination and action-handling logic.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Implement UI Tests for Critical User Flows",
+            "description": "Write instrumentation tests for the most critical user journeys using the Compose Test Rule. This will ensure that UI components are integrated correctly and key features work as expected from a user's perspective.",
+            "dependencies": [
+              1
+            ],
+            "details": "Using `createComposeRule`, write at least three separate UI tests. 1) Test adding a new item with a category and verify it appears in the list. 2) Test the search functionality by typing in a query and asserting that the list filters correctly. 3) Test the swipe-to-delete gesture on an item and then click the 'Undo' action on the Snackbar, verifying the item is restored. Add `testTag` modifiers to relevant Composables to facilitate these tests.",
+            "status": "done",
+            "testStrategy": "Execute the instrumentation tests on an emulator or physical device. Ensure all assertions pass and there are no crashes. These tests should serve as a regression suite for core functionality.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Perform Accessibility Audit and Add Content Descriptions",
+            "description": "Review the entire application for accessibility compliance. This involves adding descriptive text for non-text UI elements to ensure the app is usable with screen readers like TalkBack.",
+            "dependencies": [],
+            "details": "Manually navigate through all screens of the app with TalkBack enabled to identify issues. Systematically go through all Composable files and add a `contentDescription` parameter to every `IconButton`, `Icon`, and `Image`. Use descriptive text, for example, 'Sort list' instead of just 'Sort'. Use the Layout Inspector's accessibility checker to find any remaining issues.",
+            "status": "done",
+            "testStrategy": "After implementing changes, perform a full manual test with TalkBack on a physical device. Confirm that every interactive element is focusable and clearly announced. Verify that there are no unlabeled buttons or icons.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Profile Performance and Perform Final Polish",
+            "description": "Analyze the app's performance using the Android Studio Profiler, focusing on recomposition and database operations. Fix any identified bugs and conduct a final code quality review.",
+            "dependencies": [
+              2,
+              3,
+              4
+            ],
+            "details": "Use the Android Studio Profiler's ' recomposition' feature to analyze the main list screen during scrolling and data updates. Optimize any Composables that are recomposing unnecessarily. Populate the database with over 100 items to test `LazyColumn` scroll performance. Verify that all database calls are running on a background thread. Fix any remaining visual glitches or bugs found during testing.",
+            "status": "done",
+            "testStrategy": "Run the app on a low-to-mid-range physical device. Profile scrolling and interaction performance to ensure it meets an acceptable standard (e.g., minimal jank). Conduct a final, full regression test of all features to ensure no new bugs were introduced during the polish phase.",
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": "10",
+        "title": "Implementar Integração com Firebase Cloud Messaging (FCM)",
+        "description": "A integração com o Firebase Cloud Messaging foi implementada no código-fonte. A tarefa agora consiste em finalizar a configuração no console do Firebase para que as notificações push funcionem. O serviço, o manipulador de token/mensagem e a solicitação de permissão já estão implementados.",
+        "status": "done",
+        "dependencies": [
+          "1"
+        ],
+        "priority": "high",
+        "details": "O código para receber notificações push via FCM foi adicionado, incluindo o serviço de mensageria, criação de canal de notificação e solicitação de permissões em tempo de execução. A única etapa pendente é a configuração do projeto no Firebase Console e a adição do arquivo `google-services.json` ao projeto, conforme detalhado na última sub-tarefa.",
+        "testStrategy": "Após concluir a configuração do projeto no Firebase Console (sub-tarefa 6):\n1. **Verificação do Token**: Execute o aplicativo e verifique no Logcat (filtrando por 'MyFirebaseMsgService') se um token de registro do FCM foi gerado e logado por `onNewToken`. Copie este token para testes.\n2. **Teste em Primeiro Plano (Foreground)**: Com o aplicativo aberto e em primeiro plano, use a aba 'Cloud Messaging' no Console do Firebase para enviar uma mensagem de teste para o token do dispositivo. Verifique se `onMessageReceived` é invocado e se a notificação é exibida corretamente.\n3. **Teste em Segundo Plano (Background)**: Coloque o aplicativo em segundo plano. Envie outra mensagem de teste pelo console. Verifique se a notificação do sistema aparece na bandeja.\n4. **Ação de Toque**: Toque na notificação (tanto a gerada em primeiro plano quanto a de segundo plano) e confirme que o aplicativo abre na `MainActivity`.\n5. **Teste de Permissão**: Em um emulador ou dispositivo com Android 13+, desinstale e reinstale o app. Verifique se o diálogo de permissão para notificações é exibido na primeira inicialização. Teste os fluxos de concessão e negação da permissão.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Configurar dependências Gradle para o Firebase",
+            "description": "Adicionar as dependências necessárias do Firebase para o Cloud Messaging e configurar os plugins do Google Services.",
+            "dependencies": [],
+            "details": "O plugin `com.google.gms.google-services` foi aplicado nos arquivos `build.gradle.kts` da raiz do projeto e do módulo `app`. O Firebase BOM (`com.google.firebase:firebase-bom:33.7.0`) e a dependência do FCM (`com.google.firebase:firebase-messaging-ktx`) foram adicionados.",
+            "status": "done",
+            "testStrategy": null,
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implementar MyFirebaseMessagingService",
+            "description": "Criar o serviço responsável por manipular a geração de tokens e o recebimento de mensagens do FCM.",
+            "dependencies": [
+              1
+            ],
+            "details": "A classe `MyFirebaseMessagingService` foi criada. Ela sobrescreve `onNewToken()` para capturar e logar o token do dispositivo e `onMessageReceived()` para processar mensagens recebidas com o app em primeiro plano, utilizando um método `showNotification()` para exibir a notificação.",
+            "status": "done",
+            "testStrategy": null,
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Criar Canal de Notificação na classe Application",
+            "description": "Criar um canal de notificação para Android 8.0+ para garantir que as notificações possam ser exibidas.",
+            "dependencies": [],
+            "details": "Na classe `MinhasComprasApplication`, um canal de notificação com ID 'fcm_notifications' foi criado. Isso garante que o canal esteja disponível antes que qualquer notificação seja enviada.",
+            "status": "done",
+            "testStrategy": null,
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Registrar o serviço de mensageria no AndroidManifest",
+            "description": "Declarar o serviço de FCM no manifesto do aplicativo para que o sistema operacional possa gerenciá-lo.",
+            "dependencies": [],
+            "details": "O `MyFirebaseMessagingService` foi registrado no `AndroidManifest.xml` com o `intent-filter` para a ação `com.google.firebase.MESSAGING_EVENT`, permitindo que ele receba eventos do FCM.",
+            "status": "done",
+            "testStrategy": null,
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Implementar solicitação de permissão para notificações (Android 13+)",
+            "description": "Adicionar a lógica para solicitar a permissão `POST_NOTIFICATIONS` em tempo de execução em dispositivos com Android 13 ou superior.",
+            "dependencies": [],
+            "details": "Na `MainActivity`, foi implementada a lógica para verificar e solicitar a permissão `POST_NOTIFICATIONS` em tempo de execução, garantindo a conformidade com as exigências do Android 13 (API 33).",
+            "status": "done",
+            "testStrategy": null,
+            "parentId": "undefined"
+          },
+          {
+            "id": 6,
+            "title": "Configurar Projeto no Firebase Console e adicionar google-services.json",
+            "description": "Realizar a configuração final no Firebase Console, que é necessária para conectar o aplicativo ao serviço do Firebase.",
+            "dependencies": [],
+            "details": "É necessário criar um projeto no Firebase Console, registrar o aplicativo Android usando o `applicationId`: `com.example.minhascompras`, e baixar o arquivo `google-services.json`. Este arquivo deve ser colocado no diretório `app/` do projeto Android para finalizar a integração.",
+            "status": "pending",
+            "testStrategy": "Verificar se o arquivo `google-services.json` está presente no diretório `app/` e se o `applicationId` corresponde ao configurado no Firebase.",
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2025-12-09T21:25:21.583Z"
+      },
+      {
+        "id": "11",
+        "title": "RF-010: Múltiplas Listas",
+        "description": "Implementar sistema completo de múltiplas listas separadas, permitindo que usuários organizem suas compras por contexto (supermercado, farmácia, loja, etc.).",
+        "details": "Criar nova entidade ShoppingList no Room Database. Adicionar campo listId ao ItemCompra (relacionamento). Criar migração do Room Database (versão atual → nova). Lista padrão 'Minhas Compras' deve ser criada automaticamente. Tela de seleção/navegação entre listas (drawer ou bottom sheet). Dialog para criar nova lista com nome customizado. Dialog para renomear lista existente. Dialog de confirmação para deletar lista (com todos os itens). Indicador visual da lista ativa na UI. Persistir lista ativa selecionada entre sessões. Todas as funcionalidades existentes devem funcionar por lista. Histórico deve ser associado à lista específica.",
+        "testStrategy": "Testar criação de múltiplas listas. Verificar migração de dados existentes para lista padrão. Testar navegação entre listas. Verificar que deletar lista remove todos os itens associados. Testar performance com 10+ listas.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Criar entidade ShoppingList e atualizar ItemCompra",
+            "description": "Criar nova entidade ShoppingList no Room Database e adicionar campo listId ao ItemCompra para estabelecer relacionamento.",
+            "dependencies": [],
+            "details": "Criar arquivo `ShoppingList.kt` com @Entity contendo: id (Long, primaryKey), name (String), createdAt (Long), isDefault (Boolean). Atualizar `ItemCompra.kt` adicionando campo `listId: Long` com @ForeignKey referenciando ShoppingList. Criar enum ou sealed class para tipos de lista se necessário.\n<info added on 2025-12-08T19:04:33.548Z>\n#\n</info added on 2025-12-08T19:04:33.548Z>",
+            "status": "done",
+            "testStrategy": "Compilar projeto e verificar que entidades são criadas sem erros. Testar que relacionamento ForeignKey funciona corretamente.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-08T19:02:47.157Z"
+          },
+          {
+            "id": 2,
+            "title": "Criar migração do Room Database",
+            "description": "Criar migração do Room Database da versão atual para nova versão, migrando dados existentes para lista padrão.",
+            "dependencies": [
+              1
+            ],
+            "details": "Incrementar versão do database em @Database annotation. Criar MIGRATION_X_Y que: 1) Cria tabela ShoppingList, 2) Insere lista padrão 'Minhas Compras', 3) Adiciona coluna listId em ItemCompra, 4) Atualiza todos os itens existentes com listId da lista padrão. Adicionar migração ao Room.databaseBuilder.\n<info added on 2025-12-08T19:09:23.432Z>\nA migração MIGRATION_4_5 foi criada, elevando a versão do banco de dados de 4 para 5. A migração cria a tabela shopping_lists (campos: id, nome, dataCriacao, isDefault), insere a lista padrão 'Minhas Compras' com ID 1, adiciona a coluna listId à tabela itens_compra com valor padrão 1, atualiza todos os itens existentes para usar listId = 1, e cria o índice index_itens_compra_listId para performance. A migração foi adicionada ao builder do banco de dados.\n</info added on 2025-12-08T19:09:23.432Z>",
+            "status": "done",
+            "testStrategy": "Escrever teste de migração usando MigrationTestHelper. Verificar que dados existentes são preservados e associados à lista padrão. Testar em dispositivo com versão antiga do app.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-08T19:07:50.974Z"
+          },
+          {
+            "id": 3,
+            "title": "Criar DAO e Repository para ShoppingList",
+            "description": "Criar ShoppingListDao com queries CRUD e atualizar Repository para gerenciar múltiplas listas.",
+            "dependencies": [
+              1
+            ],
+            "details": "Criar `ShoppingListDao.kt` com funções: getAllLists(): Flow<List<ShoppingList>>, getListById(id: Long): Flow<ShoppingList>, insertList(list: ShoppingList): Long, updateList(list: ShoppingList), deleteList(id: Long). Atualizar `ItemCompraDao` para filtrar por listId. Criar ou atualizar Repository para expor operações de lista.\n<info added on 2025-12-08T19:14:31.031Z>\nImplementado `ShoppingListDao` com as seguintes operações: `getAllLists` (ordenado por `isDefault` DESC e `dataCriacao` DESC), `getListById` (versões Flow e síncrona), `getDefaultList` (versões Flow e síncrona), `insert`, `update`, `delete`, `deleteById`, `getListCount` e `getItemCountForList`. Foi criado o `ShoppingListRepository`, que expõe o `allLists` como um Flow, encapsula os métodos CRUD do DAO e implementa lógicas de negócio como a proteção contra exclusão da lista padrão e a função `ensureDefaultListExists` para garantir que sempre haja uma lista padrão. O DAO foi adicionado à classe `AppDatabase`.\n</info added on 2025-12-08T19:14:31.031Z>",
+            "status": "done",
+            "testStrategy": "Escrever testes unitários para DAO verificando CRUD operations. Testar que queries retornam dados corretos.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-08T19:13:26.255Z"
+          },
+          {
+            "id": 4,
+            "title": "Criar ViewModel para gerenciar listas",
+            "description": "Criar ShoppingListViewModel para gerenciar estado das listas e lista ativa selecionada.",
+            "dependencies": [
+              3
+            ],
+            "details": "Criar `ShoppingListViewModel.kt` com StateFlows: allLists, currentListId, currentList. Funções: createList(name: String), updateList(id: Long, name: String), deleteList(id: Long), setCurrentList(id: Long). Persistir currentListId usando DataStore. Inicializar com lista padrão se não houver lista ativa.\n<info added on 2025-12-08T19:19:14.320Z>\nCriado ShoppingListPreferencesManager usando DataStore para persistir activeListId entre sessões. Criado ShoppingListViewModel com: allLists Flow, activeListId Flow, activeList StateFlow, isLoading, UiMessages. Funções: setActiveList (selecionar lista ativa), createList (criar nova lista), renameList (renomear lista existente), deleteList (com proteção para lista padrão e contagem de itens). Init garante lista padrão e carrega lista ativa. Factory criada: ShoppingListViewModelFactory. MainActivity atualizado com imports, inicialização de ShoppingListRepository e ShoppingListPreferencesManager, criação do factory.\n</info added on 2025-12-08T19:19:14.320Z>",
+            "status": "done",
+            "testStrategy": "Escrever testes unitários para ViewModel usando MockK. Verificar que StateFlows emitem valores corretos.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-08T19:17:51.243Z"
+          },
+          {
+            "id": 5,
+            "title": "Atualizar ItemViewModel para filtrar por lista",
+            "description": "Modificar ItemViewModel para trabalhar apenas com itens da lista ativa.",
+            "dependencies": [
+              4
+            ],
+            "details": "Injetar ShoppingListViewModel no ItemViewModel. Atualizar queries para filtrar por currentListId. Observar mudanças em currentListId e atualizar lista de itens automaticamente. Garantir que todas as operações (add, update, delete) associam item à lista ativa.\n<info added on 2025-12-08T19:44:59.789Z>\nItemCompraDao atualizado com novas queries: getItensByList, searchItensByList, searchItensByListAndStatus, getItensByListAndStatus, deleteCompradosByList, deleteAllByList. ItemCompraRepository atualizado com os métodos correspondentes para filtrar e operar por listId. ListaComprasViewModel agora recebe ShoppingListPreferencesManager e observa activeListId via StateFlow. O fluxo `allItens` filtra pela lista ativa, e `itens` usa `combine` com activeListId para reatividade. As operações de inserir, deletar, exportar, importar e compartilhar (inserirItem, deletarComprados, deletarTodos, getAllItensForExport, importItens, getShareableText) foram ajustadas para trabalhar com a lista ativa. ListaComprasViewModelFactory e MainActivity foram atualizados para injetar o ShoppingListPreferencesManager.\n</info added on 2025-12-08T19:44:59.789Z>",
+            "status": "done",
+            "testStrategy": "Testar que ao mudar lista ativa, os itens exibidos mudam corretamente. Verificar que novos itens são associados à lista correta.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-08T19:43:50.844Z"
+          },
+          {
+            "id": 6,
+            "title": "Criar UI de seleção/navegação entre listas",
+            "description": "Implementar drawer ou bottom sheet para selecionar e navegar entre listas.",
+            "dependencies": [
+              4
+            ],
+            "details": "Criar `ListSelectorDrawer.kt` ou usar NavigationDrawer. Exibir lista de todas as listas com nome e contador de itens. Destacar lista ativa visualmente. Permitir toque para mudar lista ativa. Adicionar botão 'Nova Lista' no drawer. Integrar drawer na tela principal.\n<info added on 2025-12-08T20:25:03.831Z>\nA UI para seleção e navegação entre listas foi implementada no Navigation Drawer. Uma nova seção \"Listas de Compras\" foi adicionada, exibindo todas as listas disponíveis com um indicador visual para a lista ativa. O título da TopBar foi atualizado para refletir dinamicamente o nome da lista ativa (`activeList?.nome`). Foi incluído um botão \"Criar Nova Lista\" que abre um dialog para inserção do nome da nova lista. `ListaComprasScreen` foi atualizada para receber o `ShoppingListViewModel`, que por sua vez é criado e passado pela `MainActivity`.\n</info added on 2025-12-08T20:25:03.831Z>",
+            "status": "done",
+            "testStrategy": "Testar que drawer exibe todas as listas corretamente. Verificar que toque muda lista ativa e atualiza UI.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-08T20:23:25.026Z"
+          },
+          {
+            "id": 7,
+            "title": "Implementar dialogs de gerenciamento de listas",
+            "description": "Criar dialogs para criar, renomear e deletar listas.",
+            "dependencies": [
+              4,
+              6
+            ],
+            "details": "Criar `CreateListDialog.kt` com campo de texto para nome. Criar `RenameListDialog.kt` pré-preenchido com nome atual. Criar `DeleteListDialog.kt` com confirmação e aviso sobre deletar todos os itens. Conectar dialogs ao ViewModel para executar ações.\n<info added on 2025-12-08T20:29:15.601Z>\nImplementado o menu de opções (ícone de três pontos) em cada item da lista no drawer, exceto na lista padrão, que não pode ser renomeada ou deletada. O dialog de renomeação exibe o campo pré-preenchido com o nome atual e possui validação para impedir nomes vazios ou iguais ao original, habilitando o botão de confirmação apenas quando o nome é alterado. O dialog de exclusão apresenta uma confirmação, mostra a contagem de itens que serão deletados e um aviso sobre a ação ser irreversível, com o botão 'Deletar' destacado em cor de erro.\n</info added on 2025-12-08T20:29:15.601Z>",
+            "status": "done",
+            "testStrategy": "Testar criação de nova lista. Verificar que renomear atualiza nome corretamente. Testar que deletar remove lista e todos os itens associados.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-08T20:28:31.322Z"
+          },
+          {
+            "id": 8,
+            "title": "Atualizar histórico para associar à lista",
+            "description": "Modificar sistema de histórico para associar histórico à lista específica.",
+            "dependencies": [
+              2
+            ],
+            "details": "Atualizar entidade ShoppingListHistory adicionando campo listId. Atualizar queries de histórico para filtrar por listId. Garantir que ao arquivar lista, histórico é associado à lista correta. Atualizar tela de histórico para mostrar lista de origem.\n<info added on 2025-12-08T20:46:09.914Z>\nA entidade `ShoppingListHistory` foi atualizada com um campo `listId`, que pode ser nulo para o histórico antigo, e a migração `MIGRATION_5_6` foi criada para adicionar esta coluna na base de dados. O método `ItemCompraRepository.archiveCurrentList` agora recebe `listId` e `listName`, utilizando `deleteAllByList` para uma exclusão direcionada. Em `ListaComprasViewModel.arquivarLista`, o nome da lista é buscado para ser passado ao arquivar. A função `ItemCompraRepository.reuseHistoryList` também foi ajustada para receber o `listId` e associar corretamente os itens à lista ativa. O `HistoryViewModel` agora depende do `ShoppingListPreferencesManager` para obter o ID da lista ativa ao reutilizar, com as devidas atualizações em `HistoryViewModelFactory` e `MainActivity`.\n</info added on 2025-12-08T20:46:09.914Z>",
+            "status": "done",
+            "testStrategy": "Verificar que histórico é salvo com listId correto. Testar que histórico de diferentes listas é exibido separadamente.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-08T20:44:50.406Z"
+          },
+          {
+            "id": 9,
+            "title": "Adicionar indicador visual da lista ativa",
+            "description": "Adicionar indicador visual na UI mostrando qual lista está ativa.",
+            "dependencies": [
+              6
+            ],
+            "details": "Adicionar chip ou texto no TopAppBar mostrando nome da lista ativa. Adicionar ícone de lista ao lado. Tornar clicável para abrir drawer de seleção. Atualizar dinamicamente quando lista muda.\n<info added on 2025-12-08T20:51:54.512Z>\nForam implementados indicadores visuais para a lista ativa. No drawer de seleção, a lista ativa é destacada com um ícone de check (Icons.Default.Check) em cor primária, texto em negrito também na cor primária e um pequeno badge circular (6dp) em primaryContainer. Na TopBar, um badge circular maior (8dp) em primaryContainer foi adicionado ao lado do nome da lista ativa para reforçar a indicação. Com estes ajustes, a funcionalidade de múltiplas listas (Tarefa 11) é considerada completa.\n</info added on 2025-12-08T20:51:54.512Z>",
+            "status": "done",
+            "testStrategy": "Verificar que indicador exibe nome correto da lista ativa. Testar que atualiza quando lista muda.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-08T20:49:59.526Z"
+          }
+        ],
+        "updatedAt": "2025-12-08T20:49:59.526Z"
+      },
+      {
+        "id": "12",
+        "title": "RF-011: Widget na Tela Inicial",
+        "description": "Implementar widget Android na tela inicial que permite acesso rápido às funcionalidades principais sem abrir o app.",
+        "details": "Criar AppWidgetProvider para widget. Layout do widget com lista de itens pendentes (scrollável). Exibir contador de progresso (X/Y itens comprados). Botão 'Adicionar Item' que abre dialog no app. Atualização automática quando dados mudam (AppWidgetManager.updateAppWidget). Suporte a múltiplos widgets (um por lista). Configuração de qual lista o widget exibe. Tocar em item do widget marca como comprado. Widget deve funcionar em modo claro e escuro. Tamanhos: pequeno (2x1), médio (4x2), grande (4x4).",
+        "testStrategy": "Verificar que widget exibe dados corretos da lista selecionada. Testar atualização automática quando app modifica dados. Testar adicionar item via widget. Testar marcar item como comprado via widget. Verificar responsividade em diferentes tamanhos de tela.",
+        "priority": "medium",
+        "dependencies": [
+          "11"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Configuração da Estrutura Básica do App Widget",
+            "description": "Criar a estrutura fundamental para o widget, incluindo a classe AppWidgetProvider, o arquivo de metadados XML que define suas propriedades, e os layouts iniciais.",
+            "dependencies": [],
+            "details": "Criar uma nova classe `ShoppingListWidgetProvider` que herda de `AppWidgetProvider`. Criar um arquivo `res/xml/shopping_list_widget_info.xml` para definir `minWidth`, `minHeight`, `updatePeriodMillis`, `previewImage` e o `configure` activity. Criar os arquivos de layout base em `res/layout/` para o widget, como `widget_layout_medium.xml`, com placeholders para a lista e botões.\n<info added on 2025-12-13T01:12:18.093Z>\nImplementação concluída da estrutura básica do App Widget:\n\n1. ShoppingListWidgetProvider.kt: Classe principal do widget que herda de AppWidgetProvider, implementando métodos onUpdate, onDeleted, onEnabled, onDisabled e onReceive. Inclui lógica básica para carregar dados do banco de dados Room e atualizar o widget.\n\n2. shopping_list_widget_info.xml: Arquivo de metadados XML definindo propriedades do widget (minWidth, minHeight, updatePeriodMillis, initialLayout, configure activity, etc.). Configurado para tamanho médio (4x2 células) com suporte a redimensionamento.\n\n3. widget_layout_medium.xml: Layout inicial do widget com um cabeçalho mostrando o nome da lista e contador de progresso, uma ListView para exibir itens (será implementado na subtarefa 12.3) e um botão \"Adicionar Item\".\n\n4. WidgetConfigureActivity.kt: Placeholder da activity de configuração (será implementada completamente na subtarefa 12.2).\n\n5. AndroidManifest.xml: Registrado o receiver do widget com intent-filter e meta-data apontando para o arquivo XML de configuração.\n\n6. strings.xml: Adicionada string \"widget_description\" para a descrição do widget.\n\nO widget está funcionalmente básico e pronto para as próximas subtarefas que implementarão: configuração de lista, exibição de itens, interatividade e suporte a múltiplos tamanhos.\n</info added on 2025-12-13T01:12:18.093Z>",
+            "status": "done",
+            "testStrategy": "Verificar se o widget aparece na lista de widgets do sistema operacional Android. Adicionar o widget à tela inicial e verificar se o layout de placeholder é exibido corretamente.",
+            "updatedAt": "2025-12-13T01:12:20.477Z",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implementar Atividade de Configuração do Widget",
+            "description": "Desenvolver a tela de configuração que é aberta quando o usuário adiciona o widget, permitindo que ele selecione qual lista de compras o widget deve exibir.",
+            "dependencies": [
+              1
+            ],
+            "details": "Criar uma `Activity` chamada `WidgetConfigureActivity`. Nesta tela, buscar todas as listas de compras do usuário do banco de dados Room e exibi-las. Ao selecionar uma lista e confirmar, salvar a associação entre o `appWidgetId` e o `shoppingListId` (usando SharedPreferences). Após salvar, acionar a primeira atualização do widget.\n<info added on 2025-12-13T01:14:46.542Z>\nA implementação foi concluída através da `WidgetConfigureActivity.kt`, que utiliza Jetpack Compose para exibir as listas de compras obtidas do `ShoppingListRepository`. A interface trata estados de carregamento e de lista vazia, além de indicar qual é a lista padrão. Ao selecionar uma lista, a associação entre o `appWidgetId` e o `shoppingListId` é salva em SharedPreferences usando uma chave no formato \"widget_{appWidgetId}_list_id\". Em seguida, uma atualização imediata do widget é acionada. A activity foi registrada no `AndroidManifest.xml` com o filtro de intent `APPWIDGET_CONFIGURE`. Para permitir o acesso, a constante `WIDGET_PREFS_NAME` em `ShoppingListWidgetProvider.kt` foi tornada pública.\n</info added on 2025-12-13T01:14:46.542Z>",
+            "status": "done",
+            "testStrategy": "Testar que a tela de configuração é aberta ao adicionar um novo widget. Verificar se todas as listas de compras do usuário são listadas. Testar que, após a seleção, o widget é criado e associado à lista correta.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-13T01:14:47.276Z"
+          },
+          {
+            "id": 3,
+            "title": "Exibição da Lista de Itens no Widget",
+            "description": "Implementar o serviço e a fábrica necessários para popular a lista rolável do widget com os itens pendentes da lista de compras selecionada.",
+            "dependencies": [
+              2
+            ],
+            "details": "Criar uma classe que herda de `RemoteViewsService` e uma `RemoteViewsFactory`. A factory irá buscar os itens da lista configurada no banco de dados. Para cada item, criar uma `RemoteViews` para a linha da lista, exibindo o nome do item e um checkbox. Conectar este serviço ao `ListView` no layout do widget.\n<info added on 2025-12-13T01:17:24.208Z>\n1. **ShoppingListWidgetService.kt**: RemoteViewsService criado, que herda de `RemoteViewsService`, implementa `onGetViewFactory` para retornar `ShoppingListWidgetFactory` e foi registrado no AndroidManifest com a permissão `BIND_REMOTEVIEWS`.\n\n2. **ShoppingListWidgetFactory**: `RemoteViewsFactory` implementada para buscar itens pendentes (não comprados) do banco de dados Room, filtrando pelo `listId` configurado no widget. Implementa todos os métodos necessários e cria `RemoteViews` para cada item usando `widget_item.xml`.\n\n3. **widget_item.xml**: Layout para cada item da lista criado, contendo um `CheckBox` (sempre desmarcado, pois apenas pendentes são exibidos) e um `TextView` para o nome do item.\n\n4. **ShoppingListWidgetProvider.kt**: Atualizado para conectar o serviço ao `ListView` usando `setRemoteAdapter`, configurar a `empty view` e chamar `notifyAppWidgetViewDataChanged` para atualizar a lista.\n\n5. **widget_layout_medium.xml**: Layout do widget atualizado com um `FrameLayout` que contém o `ListView` e a `empty view`.\n\nA lista de itens pendentes agora é exibida corretamente no widget, com scroll automático quando há muitos itens. A interatividade (marcar como comprado) será implementada na subtarefa 12.4.\n</info added on 2025-12-13T01:17:24.208Z>",
+            "status": "done",
+            "testStrategy": "Verificar se a lista de itens pendentes da lista selecionada é exibida corretamente no widget. Testar a funcionalidade de rolagem. Confirmar que itens já comprados não aparecem na lista.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-13T01:17:25.510Z"
+          },
+          {
+            "id": 4,
+            "title": "Implementar Interatividade: Marcar Item e Adicionar Novo",
+            "description": "Adicionar as ações de clique no widget: marcar um item como comprado e abrir a tela para adicionar um novo item à lista.",
+            "dependencies": [
+              3
+            ],
+            "details": "Na `RemoteViewsFactory`, para cada item da lista, adicionar um `PendingIntent` que envia um broadcast com o `appWidgetId` e o `itemId`. No `onReceive` do `AppWidgetProvider`, capturar este broadcast, atualizar o status do item no banco de dados e notificar a atualização do widget. Criar outro `PendingIntent` para o botão 'Adicionar Item' que abre um dialog ou activity no app principal, passando o `listId`.\n<info added on 2025-12-13T01:21:20.719Z>\nImplementação da interatividade do widget concluída.\n\nEm ShoppingListWidgetProvider.kt, foram adicionadas as constantes ACTION_ITEM_CLICKED, ACTION_ADD_ITEM, EXTRA_ITEM_ID e EXTRA_LIST_ID. A lógica em onReceive foi atualizada para processar esses broadcasts personalizados. A função markItemAsPurchased localiza o item no banco de dados, marca-o como comprado (comprado = true), atualiza o registro e notifica o widget para recarregar. A função openAppToAddItem abre a MainActivity com os extras necessários para exibir o diálogo de adição de item na lista correta.\n\nEm ShoppingListWidgetService.kt, a RemoteViewsFactory foi atualizada para que cada item da lista (tanto o nome quanto a checkbox) tenha um PendingIntent que envia um broadcast com a ação ACTION_ITEM_CLICKED, incluindo o appWidgetId e o itemId. Foi utilizado um request code único para cada item para evitar conflitos de PendingIntent.\n\nA função updateAppWidget em ShoppingListWidgetProvider.kt foi atualizada para incluir um PendingIntent no botão \"Adicionar Item\" que dispara o broadcast ACTION_ADD_ITEM, e outro PendingIntent no cabeçalho do widget que abre a MainActivity. Ambos foram configurados com as flags FLAG_UPDATE_CURRENT e FLAG_IMMUTABLE.\n\nNa MainActivity.kt, foi adicionada a lógica para processar os extras \"open_add_dialog\" e \"list_id\" vindos do intent do widget, garantindo que a lista correta seja ativada antes de passar o controle para a ListaComprasScreen com a instrução para exibir o diálogo.\n\nFinalmente, a ListaComprasScreen.kt foi ajustada para aceitar um parâmetro opcional initialShowDialog, que inicializa o estado showDialog, permitindo que o diálogo de adição seja exibido imediatamente quando solicitado pelo widget.\n</info added on 2025-12-13T01:21:20.719Z>",
+            "status": "done",
+            "testStrategy": "Tocar em um item no widget deve marcá-lo como comprado e removê-lo da lista do widget. Clicar no botão 'Adicionar Item' deve abrir a interface correta no app. Verificar que a contagem de progresso (X/Y) é atualizada.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-13T01:21:22.384Z"
+          },
+          {
+            "id": 5,
+            "title": "Suporte a Redimensionamento, Temas e Atualização Automática",
+            "description": "Finalizar o widget implementando suporte para múltiplos tamanhos, adaptação aos temas claro/escuro do sistema, e garantir que ele se atualize automaticamente quando os dados são modificados pelo app.",
+            "dependencies": [
+              4
+            ],
+            "details": "Criar layouts alternativos para os tamanhos 2x1 (pequeno) e 4x4 (grande). Utilizar atributos de tema (como `?android:attr/textColor`) nos layouts para suportar os modos claro e escuro. Implementar um mecanismo (ex: BroadcastReceiver) para que o app principal notifique o widget sobre alterações de dados, acionando `AppWidgetManager.notifyAppWidgetViewDataChanged()` e `AppWidgetManager.updateAppWidget()` para forçar a atualização visual.\n<info added on 2025-12-13T01:25:23.942Z>\nImplementação concluída:\n\n1.  **Layouts para múltiplos tamanhos:**\n    *   `widget_layout_small.xml`: Layout compacto para tamanho 2x1 (110dp x 40dp mínimo)\n    *   `widget_layout_medium.xml`: Layout padrão para tamanho 4x2 (250dp x 110dp)\n    *   `widget_layout_large.xml`: Layout expandido para tamanho 4x4 (250dp x 250dp)\n    *   `widget_item_small.xml`: Layout de item compacto para widget pequeno\n\n2.  **Detecção automática de tamanho:**\n    *   Atualizado `ShoppingListWidgetProvider.updateAppWidget()` para detectar o tamanho do widget usando `AppWidgetManager.getAppWidgetOptions()`\n    *   Seleção automática do layout apropriado baseado em células (2x1, 4x2, 4x4+)\n    *   Factory atualizada para usar layout de item correto baseado no tamanho\n\n3.  **Suporte a temas claro/escuro:**\n    *   Todos os layouts usam atributos de tema do sistema como `?android:attr/colorBackground` e `?android:attr/textColorPrimary` para suportar automaticamente os modos claro e escuro.\n\n4.  **Sistema de atualização automática:**\n    *   Criada função estática `ShoppingListWidgetProvider.updateAllWidgets()` para atualizar todos os widgets.\n    *   Adicionadas chamadas no `ListaComprasViewModel` após todas as operações de modificação de dados (adicionar, atualizar, deletar, etc.).\n    *   Adicionada ação `ACTION_UPDATE_WIDGET` no `onReceive()` para processar broadcasts de atualização.\n\n5.  **Configuração do widget:**\n    *   Atualizado `shopping_list_widget_info.xml` com `minWidth=\"110dp\"`, `minHeight=\"40dp\"` e `resizeMode=\"horizontal|vertical\"` para permitir redimensionamento completo.\n</info added on 2025-12-13T01:25:23.942Z>",
+            "status": "done",
+            "testStrategy": "Testar o redimensionamento do widget na tela inicial e verificar se o layout se adapta. Mudar o tema do sistema e confirmar que as cores do widget se ajustam. Modificar a lista no app (adicionar, remover, marcar itens) e verificar se o widget reflete as mudanças em poucos segundos.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-13T01:25:29.678Z"
+          }
+        ],
+        "updatedAt": "2025-12-13T01:25:29.678Z"
+      },
+      {
+        "id": "13",
+        "title": "RF-012: Estatísticas Avançadas",
+        "description": "Implementar sistema completo de estatísticas e análises com gráficos, histórico por período e insights sobre padrões de compra.",
+        "details": "Nova tela StatisticsScreen acessível do menu. Gráfico de linha mostrando gastos ao longo do tempo. Gráfico de pizza por categoria de gastos. Gráfico de barras comparando períodos. Filtros de período: Semana, Mês, 3 Meses, Ano, Personalizado. Lista de itens mais comprados (top 10-20). Estatísticas de frequência (quantas vezes item foi comprado). Comparação de gastos entre períodos (aumento/diminuição %). Média de gastos por período. Exportar estatísticas como imagem ou PDF (opcional). Filtro por lista específica ou todas as listas.",
+        "testStrategy": "Verificar que gráficos são renderizados corretamente e responsivos. Testar que dados são calculados corretamente do histórico. Verificar performance aceitável mesmo com muito histórico. Testar que filtros funcionam corretamente e atualizam gráficos.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Adicionar biblioteca de gráficos e criar StatisticsViewModel",
+            "description": "Adicionar biblioteca MPAndroidChart ou similar e criar ViewModel para estatísticas.",
+            "dependencies": [],
+            "details": "Adicionar dependência `com.github.PhilJay:MPAndroidChart` no build.gradle.kts. Criar `StatisticsViewModel.kt` que injeta repositório de histórico. Criar funções para calcular estatísticas: getSpendingOverTime(period), getCategoryBreakdown(period), getTopItems(limit), getPeriodComparison(period1, period2).\n<info added on 2025-12-09T21:35:38.975Z>\nCom base nas queries básicas já adicionadas (`getHistoryByDateRange`, `getTotalSpending`), o foco é criar ou otimizar queries agregadas no `HistoryDao` para que o banco de dados realize o processamento pesado, aliviando a carga do `StatisticsViewModel`.\n\nNovas queries a serem implementadas:\n1.  **getSpendingOverTime(startDate, endDate)**: Criar uma query que retorne uma lista de pontos de dados (data, valor total) com os gastos agrupados por dia, semana ou mês, utilizando `GROUP BY` e `SUM()`.\n2.  **getCategoryBreakdown(startDate, endDate)**: Uma única query que retorne a soma total dos gastos para cada categoria, agrupando por `categoryName`.\n3.  **getTopItems(startDate, endDate, limit)**: Query que agrupe por item, calcule o gasto total (`SUM(price * quantity)`) para cada um, ordene de forma decrescente e retorne os `limit` primeiros resultados.\n\nEsses novos métodos do DAO devem ser expostos através do `ItemCompraRepository`.\n</info added on 2025-12-09T21:35:38.975Z>",
+            "status": "done",
+            "testStrategy": "Verificar que biblioteca é adicionada corretamente. Escrever testes unitários para funções de cálculo de estatísticas.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-09T21:35:43.658Z"
+          },
+          {
+            "id": 2,
+            "title": "Criar queries de histórico para estatísticas",
+            "description": "Atualizar HistoryDao com queries otimizadas para cálculos estatísticos.",
+            "dependencies": [],
+            "details": "Adicionar queries em HistoryDao: getHistoryByDateRange(startDate, endDate): Flow<List<ShoppingListHistory>>, getHistoryByCategory(category, period): Flow<List<HistoryItem>>, getTotalSpending(period): Flow<Double>. Otimizar queries com índices se necessário para performance.",
+            "status": "done",
+            "testStrategy": "Testar que queries retornam dados corretos para diferentes períodos. Verificar performance com grande volume de dados.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-09T21:35:49.566Z"
+          },
+          {
+            "id": 3,
+            "title": "Implementar gráfico de linha (gastos ao longo do tempo)",
+            "description": "Criar componente de gráfico de linha mostrando gastos ao longo do tempo.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Criar `SpendingLineChart.kt` Composable usando MPAndroidChart. Agrupar dados por dia/semana/mês conforme período selecionado. Configurar eixos X (tempo) e Y (valor). Adicionar animação suave. Permitir zoom e pan. Exibir valores ao tocar em pontos.\n<info added on 2025-12-10T01:29:15.125Z>\nImplementação concluída utilizando a biblioteca `vico compose-charts`, nativa do Compose, em vez da planejada MPAndroidChart. O Composable `SpendingLineChart.kt` foi criado no diretório `ui/components/`.\n\nOs dados do tipo `SpendingDataPoint` são convertidos para `FloatEntry`, o formato requerido pela Vico. Os eixos foram configurados para exibir datas (`dd/MM` no eixo X) e valores em moeda (`R$` no eixo Y), utilizando `SimpleDateFormat` e `NumberFormat` com o locale `pt-BR` para manter a consistência com o restante da aplicação.\n\nFuncionalidades interativas como marcador (tooltip) ao tocar, zoom e scroll horizontal foram habilitadas. A estilização segue o `MaterialTheme.colorScheme` do projeto e um estado de exibição para o caso de não haver dados foi implementado.\n</info added on 2025-12-10T01:29:15.125Z>",
+            "status": "done",
+            "testStrategy": "Verificar que gráfico renderiza corretamente com dados reais. Testar interatividade (zoom, pan, touch).",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-10T01:29:16.438Z"
+          },
+          {
+            "id": 4,
+            "title": "Implementar gráfico de pizza (gastos por categoria)",
+            "description": "Criar componente de gráfico de pizza mostrando distribuição de gastos por categoria.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Criar `CategoryPieChart.kt` Composable. Agrupar itens do histórico por categoria. Calcular percentual de cada categoria. Configurar cores distintas para cada categoria. Adicionar legenda. Exibir valor ao tocar em fatia.\n<info added on 2025-12-10T01:50:20.224Z>\nO Composable `CategoryPieChart.kt` foi criado no diretório `ui/components/`, utilizando a biblioteca vico compose-charts. Foi implementado um mapa de cores específico para 9 categorias com uma cor de fallback, e os dados de `CategoryBreakdown` são convertidos para o formato exigido pela biblioteca. O gráfico exibe fatias proporcionais aos gastos, com labels de percentual para fatias maiores que 5% para garantir a legibilidade. Uma legenda customizada foi adicionada abaixo do gráfico, mostrando um ícone colorido, o nome da categoria, o valor em moeda (R$) e o percentual correspondente. A estilização utiliza `MaterialTheme.colorScheme`, um estado de \"empty state\" é exibido quando não há dados, e a formatação de moeda é feita com `NumberFormat.getCurrencyInstance(Locale(\"pt\", \"BR\"))`.\n</info added on 2025-12-10T01:50:20.224Z>",
+            "status": "done",
+            "testStrategy": "Verificar que percentuais são calculados corretamente. Testar que cores são distintas e legenda é clara.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-10T01:50:21.444Z"
+          },
+          {
+            "id": 5,
+            "title": "Implementar gráfico de barras (comparação de períodos)",
+            "description": "Criar componente de gráfico de barras comparando gastos entre períodos.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Criar `PeriodComparisonBarChart.kt` Composable. Comparar períodos lado a lado (ex: este mês vs mês anterior). Calcular diferença percentual. Exibir valores nas barras. Adicionar cores diferentes para aumento/diminuição.\n<info added on 2025-12-10T01:59:20.376Z>\nO Composable `PeriodComparisonBarChart.kt` foi criado no diretório `ui/components/` utilizando a biblioteca `vico compose-charts`. A implementação compara dois períodos com séries de barras lado a lado, onde o período atual usa cores dinâmicas (verde para aumento, vermelho para diminuição) e o período anterior serve como referência em cinza. Os valores são exibidos em tooltips (markers) e a variação é mostrada em moeda (R$) e percentual. A interface inclui uma legenda, lida com estados vazios (empty state), e utiliza `MaterialTheme` para consistência visual. A formatação de moeda é feita com `NumberFormat`.\n</info added on 2025-12-10T01:59:20.376Z>",
+            "status": "done",
+            "testStrategy": "Verificar que comparação é calculada corretamente. Testar com diferentes combinações de períodos.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-10T01:59:21.923Z"
+          },
+          {
+            "id": 6,
+            "title": "Implementar filtros de período",
+            "description": "Criar UI de filtros para selecionar período de análise.",
+            "dependencies": [
+              1
+            ],
+            "details": "Criar `PeriodFilterChips.kt` com opções: Semana, Mês, 3 Meses, Ano, Personalizado. Para Personalizado, adicionar DatePicker. Atualizar ViewModel quando filtro muda. Recalcular todas as estatísticas baseado no período selecionado.\n<info added on 2025-12-10T02:02:36.766Z>\nSubtask concluída:\n\n1. Criado PeriodFilterChips.kt Composable em ui/components/\n   - Exibe chips selecionáveis para períodos pré-definidos\n   - Usa FilterChip do Material 3\n\n2. Períodos implementados:\n   - Semana: últimos 7 dias\n   - Mês: último mês\n   - 3 Meses: últimos 3 meses\n   - Ano: último ano\n   - Personalizado: permite selecionar data inicial e final\n\n3. Funcionalidades implementadas:\n   - Chips visuais com estado selecionado/não selecionado\n   - DatePickerDialog para período personalizado (dois pickers sequenciais)\n   - Validação: data final deve ser >= data inicial\n   - Exibição do período selecionado quando for personalizado\n   - Callback onPeriodSelected para atualizar ViewModel\n\n4. UX:\n   - Layout horizontal com chips espaçados\n   - Feedback visual claro do chip selecionado\n   - Formatação de datas em pt-BR (dd/MM/yyyy)\n   - Botões de confirmar/cancelar nos DatePickers\n\n5. Integração:\n   - Recebe selectedPeriod do ViewModel\n   - Chama onPeriodSelected quando período muda\n   - Compatível com PeriodType e Period do ViewModel\n\nPróximo passo: Implementar lista de itens mais comprados (subtask 13.7).\n</info added on 2025-12-10T02:02:36.766Z>",
+            "status": "done",
+            "testStrategy": "Testar que cada filtro atualiza estatísticas corretamente. Verificar que DatePicker funciona para período personalizado.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-10T02:02:38.139Z"
+          },
+          {
+            "id": 7,
+            "title": "Implementar lista de itens mais comprados",
+            "description": "Criar lista mostrando top 10-20 itens mais comprados com frequência.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Criar função no ViewModel: getTopItems(limit: Int, period: Period): Flow<List<TopItem>>. Calcular frequência de cada item no histórico. Ordenar por frequência decrescente. Criar `TopItemsList.kt` Composable exibindo nome, frequência e último preço.\n<info added on 2025-12-10T02:06:26.828Z>\nO Composable `TopItemsList.kt` foi criado no diretório `ui/components/`, utilizando `LazyColumn` com `Cards` para exibir os itens mais comprados. Cada item na lista mostra seu ranking com destaque visual, nome, frequência de compra (com tratamento de plural para \"vez\" e \"vezes\") e o último preço formatado com `NumberFormat`. A implementação inclui um estado de vazio para quando não há dados e utiliza `ResponsiveUtils` para garantir um layout responsivo e consistente com o `MaterialTheme.colorScheme`.\n</info added on 2025-12-10T02:06:26.828Z>",
+            "status": "done",
+            "testStrategy": "Verificar que itens são ordenados corretamente por frequência. Testar que limite funciona (top 10, 20).",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-10T02:06:28.401Z"
+          },
+          {
+            "id": 8,
+            "title": "Criar tela StatisticsScreen completa",
+            "description": "Criar tela completa de estatísticas integrando todos os componentes.",
+            "dependencies": [
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "details": "Criar `StatisticsScreen.kt` com Scaffold. Adicionar TopAppBar com título e filtros. Layout scrollável com: gráfico de linha, gráfico de pizza, gráfico de barras, lista de top itens. Adicionar loading states. Adicionar empty state quando não há dados. Adicionar navegação do menu principal.\n<info added on 2025-12-10T02:14:48.778Z>\nA tela `StatisticsScreen.kt` foi implementada no diretório `ui/screens/`, integrando todos os componentes de visualização de dados. A estrutura utiliza um `Scaffold` com `TopAppBar` e uma `LazyColumn` para exibir o gráfico de linha (`SpendingLineChart`), o gráfico de pizza (`CategoryPieChart`), o gráfico de barras (`PeriodComparisonBarChart`) e a lista de itens mais comprados (`TopItemsList`).\n\nA lógica de dados é gerenciada pelo `StatisticsViewModel`, que usa `LaunchedEffect` e a função `combine` para carregar múltiplos `Flows` em paralelo, reagindo a mudanças no `PeriodFilterChips`. A navegação foi totalmente configurada, com a adição da rota `Screen.Statistics` e uma entrada no `NavigationDrawer`. A experiência do usuário inclui um estado de carregamento centralizado com `CircularProgressIndicator`, tratamento de estados vazios para cada componente e um layout responsivo.\n</info added on 2025-12-10T02:14:48.778Z>",
+            "status": "done",
+            "testStrategy": "Testar navegação para tela de estatísticas. Verificar que todos os componentes são exibidos corretamente. Testar com dados vazios e com muitos dados.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-10T02:14:50.796Z"
+          },
+          {
+            "id": 9,
+            "title": "Otimizar performance e adicionar cache",
+            "description": "Otimizar cálculos de estatísticas e adicionar cache para melhor performance.",
+            "dependencies": [
+              8
+            ],
+            "details": "Implementar cache de estatísticas calculadas. Recalcular apenas quando dados mudam. Usar coroutines e Flow para cálculos assíncronos. Adicionar debounce para filtros. Otimizar queries do banco com índices. Adicionar paginação se necessário para top items.\n<info added on 2025-12-10T02:19:11.783Z>\nImplementado sistema de cache em memória para os cálculos de `spendingOverTime`, `categoryBreakdown`, `topItems` e `periodComparison`, com chaves baseadas no período selecionado (startDate + endDate). O cache é verificado antes de executar queries e populado automaticamente após novos cálculos.\nAdicionado um debounce de 300ms nas mudanças de período, utilizando `kotlinx.coroutines.flow.debounce`, para evitar recálculos excessivos durante a seleção de datas.\nRealizadas otimizações de UI com `derivedStateOf` para estados derivados, `remember` para valores calculados e `LaunchedEffect` com chaves específicas para reduzir recomposições desnecessárias.\nCriado um método público `clearCache()` para permitir a invalidação manual, que pode ser chamado quando novos dados são adicionados ao histórico.\nA performance foi notavelmente melhorada, com o cache reduzindo drasticamente o tempo de resposta e o debounce melhorando a responsividade da interface.\nPróximos passos consistem em testar a performance com um volume maior de dados reais e ajustar, se necessário.\n</info added on 2025-12-10T02:19:11.783Z>",
+            "status": "done",
+            "testStrategy": "Testar performance com histórico grande (1000+ registros). Verificar que UI permanece responsiva. Medir tempo de cálculo.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-10T02:19:13.592Z"
+          }
+        ],
+        "updatedAt": "2025-12-10T02:19:13.592Z"
+      },
+      {
+        "id": "14",
+        "title": "RF-013: Notificações Inteligentes",
+        "description": "Implementar sistema de notificações que ajuda usuários a não esquecer suas compras e mantém engajamento.",
+        "details": "Sistema de notificações usando NotificationManager. Canal de notificações configurado (Android 8.0+). Lembrete diário configurável (horário personalizado). Notificação quando todos os itens forem marcados como comprados. Lembrete de itens pendentes há X dias (configurável, padrão 7). Tela de configurações de notificações em SettingsScreen. Toggle para habilitar/desabilitar cada tipo de notificação. WorkManager para agendar notificações recorrentes. Notificação com ação rápida 'Abrir App'. (Opcional) Notificação baseada em geofencing (localização).",
+        "testStrategy": "Verificar que notificações são exibidas no horário configurado. Testar que usuário pode habilitar/desabilitar cada tipo. Verificar que notificações não são excessivas ou intrusivas. Testar que ações rápidas funcionam corretamente.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Configuração Base de Notificações e Canais",
+            "description": "Configurar as permissões necessárias para notificações, inicializar o NotificationManager e criar os canais de notificação para diferentes tipos de alertas (Android 8.0+).",
+            "dependencies": [],
+            "details": "Incluir permissões no AndroidManifest.xml. Criar uma classe helper ou módulo para gerenciar canais de notificação. Definir um canal padrão e, opcionalmente, canais específicos para 'Lembrete Diário', 'Compra Concluída' e 'Itens Pendentes'. As notificações devem ser configuradas para exibir um ícone e um som padrão.\n<info added on 2025-12-10T19:12:51.217Z>\nFoi criado o `NotificationChannelManager.kt` no pacote `data/` para gerenciar de forma centralizada os canais de notificação. Esta classe singleton implementa três canais: `CHANNEL_DAILY_REMINDER` (importância padrão), `CHANNEL_PURCHASE_COMPLETE` (importância padrão) e `CHANNEL_PENDING_ITEMS` (importância baixa, para ser menos intrusivo). A classe `MinhasComprasApplication.kt` foi atualizada para chamar `NotificationChannelManager.createAllChannels(this)` em seu método `onCreate()`, garantindo que os canais sejam criados na inicialização do aplicativo. A permissão `POST_NOTIFICATIONS` já estava configurada corretamente no `AndroidManifest.xml`.\n</info added on 2025-12-10T19:12:51.217Z>",
+            "status": "done",
+            "testStrategy": "Verificar se as permissões são solicitadas/concedidas corretamente. Confirmar a criação dos canais de notificação em dispositivos Android 8.0+ através das configurações do sistema. Enviar uma notificação de teste para cada canal e verificar sua exibição e comportamento básicos.",
+            "updatedAt": "2025-12-10T19:12:52.833Z",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implementar Lembrete Diário Recorrente via WorkManager",
+            "description": "Desenvolver um Worker para agendar e disparar uma notificação de lembrete diário em um horário configurável pelo usuário, utilizando o WorkManager para garantir a recorrência.",
+            "dependencies": [
+              1
+            ],
+            "details": "Criar uma subclasse de `CoroutineWorker` para a notificação diária. O Worker deve consultar as preferências do usuário para determinar o horário e se a notificação está ativa. Agendar o Worker usando `PeriodicWorkRequest` com atraso inicial baseado no horário configurado e um intervalo diário. A notificação deve incluir um lembrete geral sobre compras pendentes. Utilizar o `NotificationManager` configurado no subtask 1.\n<info added on 2025-12-10T19:19:05.182Z>\nImplementação concluída com os seguintes passos: A dependência do WorkManager (`androidx.work:work-runtime-ktx`) foi adicionada aos arquivos `libs.versions.toml` e `build.gradle.kts`. Foi criado o `NotificationPreferencesManager.kt`, utilizando DataStore para gerenciar as configurações do lembrete diário (`dailyReminderEnabled`, `dailyReminderHour`, `dailyReminderMinute`). O DAO `ItemCompraDao.kt` foi atualizado com um novo método `countPendingItems()` para contar itens não comprados. O `DailyReminderWorker.kt` foi desenvolvido para consultar as preferências do usuário, contar os itens pendentes e exibir uma notificação no canal `CHANNEL_DAILY_REMINDER`, retornando `Result.success()` para manter o agendamento periódico. Para gerenciar o agendamento, foi criado o `DailyReminderScheduler.kt`, que utiliza `PeriodicWorkRequest` com um intervalo de 24 horas. A inicialização do agendador foi adicionada ao método `onCreate` da classe `MinhasComprasApplication.kt`.\n</info added on 2025-12-10T19:19:05.182Z>\n<info added on 2025-12-10T19:43:07.289Z>\nFoi realizada uma correção para garantir a precisão do horário do lembrete diário, substituindo o `PeriodicWorkRequest` por uma cadeia de `OneTimeWorkRequest`. Em `DailyReminderScheduler.kt`, o novo método `calculateDelayUntilNextTime()` calcula o atraso exato em milissegundos até o próximo horário configurado, agendando para hoje ou para o dia seguinte, conforme necessário. Em `DailyReminderWorker.kt`, o worker agora reagenda a si mesmo para o próximo dia após a execução, chamando um novo método `rescheduleNextReminder()`. Foi adicionada também uma verificação de horário com tolerância de ±30 minutos como segurança, garantindo que a notificação seja disparada no horário exato definido pelo usuário.\n</info added on 2025-12-10T19:43:07.289Z>",
+            "status": "done",
+            "testStrategy": "Agendar o lembrete diário para um horário próximo e verificar seu disparo. Alterar o horário nas configurações e confirmar que o agendamento é atualizado. Desabilitar a notificação e verificar que ela não é mais disparada. Testar a persistência do agendamento após o reinício do dispositivo.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-10T19:19:10.852Z"
+          },
+          {
+            "id": 3,
+            "title": "Desenvolver Lógica para Notificações de Conclusão de Compra e Itens Pendentes",
+            "description": "Criar a lógica para disparar notificações quando uma lista de compras tem todos os seus itens marcados como comprados e para lembrar o usuário de itens que estão pendentes há X dias (configurável).",
+            "dependencies": [
+              1
+            ],
+            "details": "Para 'Compra Concluída': Implementar um listener ou observador na camada de dados que detecta quando todos os itens de uma `ShoppingList` (`ItemCompra`) são marcados como comprados. Esta notificação deve ser disparada uma única vez por conclusão. Para 'Itens Pendentes': Criar um segundo Worker (ou estender o diário, se aplicável) que, periodicamente (e.g., semanalmente ou diariamente se for um check), verifica itens pendentes há mais de `X` dias (o `X` sendo uma preferência do usuário, padrão 7 dias) e dispara uma notificação consolidada. Ambas as notificações devem ser personalizáveis com base nas preferências do usuário (habilitar/desabilitar).\n<info added on 2025-12-10T19:51:23.340Z>\nA implementação foi concluída. As seguintes alterações foram realizadas:\n\n1.  **Preferências**: Adicionadas novas chaves em `NotificationPreferencesManager.kt` para controlar as notificações de compra concluída (`purchaseCompleteEnabled`), itens pendentes (`pendingItemsEnabled`) e o tempo para considerar um item pendente (`pendingItemsDays`).\n2.  **DAO**: `ItemCompraDao.kt` foi estendido com os métodos `countPendingItemsByList` e `getPendingItemsOlderThan` para consultar o estado dos itens.\n3.  **Notificação de Compra Concluída**: Criada a classe `PurchaseCompleteNotifier.kt`, responsável por verificar se todos os itens de uma lista foram comprados. A verificação é disparada no `ListaComprasViewModel.toggleComprado()`. A notificação utiliza o canal `CHANNEL_PURCHASE_COMPLETE`.\n4.  **Notificação de Itens Pendentes**: Implementado o `PendingItemsWorker.kt`, um worker diário que busca por itens pendentes com base na configuração do usuário, agrupando-os por lista em uma notificação consolidada. Utiliza o canal `CHANNEL_PENDING_ITEMS`.\n5.  **Agendamento**: O `PendingItemsScheduler.kt` foi criado para gerenciar o agendamento do worker de itens pendentes, e sua inicialização foi adicionada em `MinhasComprasApplication.kt`.\n6.  **Integração**: O `ListaComprasViewModelFactory` foi atualizado em `MainActivity.kt` para prover o contexto necessário às notificações no ViewModel.\n</info added on 2025-12-10T19:51:23.340Z>",
+            "status": "done",
+            "testStrategy": "Marcar todos os itens de uma lista como comprados e verificar a notificação de 'Compra Concluída'. Criar uma lista com itens pendentes por mais de 7 dias e simular a execução do Worker para verificar o lembrete de 'Itens Pendentes'. Testar diferentes valores para 'X' dias e verificar a lógica. Desabilitar cada tipo de notificação individualmente e confirmar que não são disparadas.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-10T19:51:26.217Z"
+          },
+          {
+            "id": 4,
+            "title": "Integrar Configurações na SettingsScreen e Persistência",
+            "description": "Adicionar à `SettingsScreen` opções de configuração para cada tipo de notificação, incluindo um toggle para habilitar/desabilitar e campos para personalizar horários/dias.",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Modificar `SettingsScreen` (ou componente similar) para incluir uma seção de 'Notificações'. Adicionar toggles para 'Lembrete Diário', 'Compra Concluída' e 'Itens Pendentes'. Para o lembrete diário, incluir um seletor de horário. Para itens pendentes, incluir um campo numérico para definir 'X' dias. Utilizar `SharedPreferences` ou o Room Database (preferencialmente, se o `SettingsManager` puder ser adaptado para Android ou se for um novo `SettingsManager` para Android) para persistir as preferências do usuário. A alteração dessas configurações deve atualizar o agendamento do WorkManager e a lógica de disparo.\n<info added on 2025-12-10T20:03:02.452Z>\nImplementação concluída. Foi criado um `NotificationViewModel`, seguindo o padrão do `ThemeViewModel`, que gerencia as preferências de notificação através de um `NotificationPreferencesManager` utilizando DataStore para persistência. A `SettingsScreen` foi atualizada com uma nova seção \"Notificações\" contendo cards para \"Lembrete Diário\" (com switch e seletor de horário via `TimePickerDialog`), \"Compra Concluída\" (com switch) e \"Itens Pendentes\" (com switch e seletor de dias via `AlertDialog` com `OutlinedTextField` validado). A integração foi realizada na `MainActivity`, e as alterações nas configurações atualizam automaticamente os agendadores (`DailyReminderScheduler` e `PendingItemsScheduler`).\n</info added on 2025-12-10T20:03:02.452Z>",
+            "status": "done",
+            "testStrategy": "Navegar até a `SettingsScreen` e verificar a presença de todas as opções de notificação. Alterar cada configuração (toggle, horário, número de dias) e verificar se o estado é salvo corretamente e carregado após reiniciar o app. Modificar um toggle e confirmar que o comportamento da notificação correspondente é alterado.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-10T20:03:03.475Z"
+          },
+          {
+            "id": 5,
+            "title": "Implementar Ação Rápida 'Abrir App' e (Opcional) Geofencing",
+            "description": "Adicionar uma ação rápida 'Abrir App' às notificações para que o usuário possa acessar rapidamente o aplicativo. Opcionalmente, pesquisar e implementar uma notificação baseada em geofencing para quando o usuário se aproxima de um local de compra.",
+            "dependencies": [
+              1
+            ],
+            "details": "Para 'Abrir App': Em todas as notificações criadas nos subtasks anteriores, adicionar um `PendingIntent` que lança a `MainActivity` do aplicativo quando a notificação é tocada. Para 'Geofencing' (opcional): Pesquisar a API de Geofencing do Google Play Services. Implementar a detecção de entrada/saída de regiões pré-definidas (e.g., supermercados comuns) e disparar uma notificação contextual (e.g., 'Você está perto do supermercado! Sua lista 'Compras do Mês' tem 10 itens pendentes'). Considerar permissões de localização e consumo de bateria.\n<info added on 2025-12-10T19:58:06.493Z>\nVerificação e correção concluídas. Foi confirmado que a ação \"Abrir App\" já estava implementada corretamente nas notificações dos workers: `DailyReminderWorker`, `PurchaseCompleteNotifier` e `PendingItemsWorker`. Um ajuste foi realizado para evitar conflitos, atribuindo `requestCodes` únicos a cada `PendingIntent` (2001, 2002 e 2003, respectivamente). A configuração dos Intents foi validada, utilizando as flags `FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK` e `FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE` para compatibilidade com Android 12+, além de `setAutoCancel(true)`. A implementação opcional de Geofencing foi adiada para uma futura versão devido à sua complexidade. A ação \"Abrir App\" está totalmente implementada e funcional.\n</info added on 2025-12-10T19:58:06.493Z>",
+            "status": "done",
+            "testStrategy": "Disparar uma notificação e tocar na ação rápida 'Abrir App' para confirmar que o aplicativo é aberto corretamente. Para geofencing (se implementado): Simular a entrada e saída de uma região de geofence (usando emuladores ou ferramentas de desenvolvedor) e verificar o disparo da notificação correspondente.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-10T19:58:07.895Z"
+          }
+        ],
+        "updatedAt": "2025-12-10T20:03:03.475Z"
+      },
+      {
+        "id": "15",
+        "title": "RF-014: Melhorias no Dialog (Autocompletar)",
+        "description": "Melhorar o dialog de adicionar/editar itens com autocompletar inteligente e sugestões baseadas em histórico.",
+        "details": "Autocompletar no campo 'Nome' usando itens do histórico. Sugestões ordenadas por frequência (itens mais comprados primeiro). Sugestão de preço baseada na última compra do item. Sugestão de quantidade baseada na última compra. Sugestão de categoria baseada no item mais similar. Validação em tempo real com feedback visual. Mensagens de erro claras e específicas. Indicador visual de campos obrigatórios. Botão 'Limpar' para resetar formulário.",
+        "testStrategy": "Verificar que autocompletar sugere itens relevantes enquanto usuário digita. Testar que sugestões são ordenadas por relevância (frequência). Verificar que validação previne submissão de dados inválidos. Testar que feedback de erros é claro e ajuda o usuário.",
+        "priority": "low",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": "16",
+        "title": "RF-015: Scanner de Código de Barras",
+        "description": "Implementar funcionalidade de scanner de código de barras para adicionar itens rapidamente escaneando produtos.",
+        "details": "Integração com biblioteca de leitura de código de barras (ML Kit ou ZXing). Botão de scanner no dialog de adicionar item. Tela de scanner com preview da câmera. Feedback visual quando código é detectado. Integração com API de produtos (OpenFoodFacts ou similar). Buscar nome, categoria e informações do produto. Preencher campos do dialog automaticamente. Permitir edição manual após escanear. Tratamento de produtos não encontrados. Suporte a múltiplos formatos (EAN-13, UPC, etc.). Permissões de câmera solicitadas adequadamente. Modo offline com cache de produtos escaneados.",
+        "testStrategy": "Verificar que scanner detecta códigos de barras corretamente. Testar que informações do produto são buscadas e preenchidas. Verificar que funciona em diferentes condições de iluminação. Testar tratamento adequado de produtos não encontrados.",
+        "priority": "low",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Adicionar dependências ML Kit e configurar permissões",
+            "description": "Adicionar biblioteca ML Kit Barcode Scanning e configurar permissões de câmera.",
+            "dependencies": [],
+            "details": "Adicionar `com.google.mlkit:barcode-scanning` no build.gradle.kts. Adicionar permissão CAMERA no AndroidManifest.xml. Criar função para solicitar permissão em runtime (Android 6.0+). Verificar se permissão foi concedida antes de abrir scanner.",
+            "status": "pending",
+            "testStrategy": "Verificar que permissão é solicitada corretamente. Testar comportamento quando permissão é negada.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Criar tela de scanner com preview da câmera",
+            "description": "Implementar tela de scanner com preview da câmera usando CameraX.",
+            "dependencies": [
+              1
+            ],
+            "details": "Adicionar dependência `androidx.camera:camera-camera2` e `androidx.camera:camera-lifecycle`. Criar `BarcodeScannerScreen.kt` com PreviewView. Configurar CameraX Preview use case. Adicionar overlay visual indicando área de scan. Adicionar botão de fechar/voltar.",
+            "status": "pending",
+            "testStrategy": "Verificar que preview da câmera é exibido corretamente. Testar em diferentes dispositivos e orientações.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Integrar ML Kit Barcode Scanner",
+            "description": "Integrar ML Kit para detectar e ler códigos de barras em tempo real.",
+            "dependencies": [
+              2
+            ],
+            "details": "Criar `BarcodeAnalyzer.kt` implementando ImageAnalysis.Analyzer. Configurar BarcodeScannerOptions para formatos (EAN-13, UPC, etc.). Processar frames da câmera. Detectar códigos e extrair valor. Emitir resultado via callback ou StateFlow. Adicionar debounce para evitar múltiplas detecções do mesmo código.",
+            "status": "pending",
+            "testStrategy": "Testar detecção de diferentes formatos de código de barras. Verificar que debounce funciona corretamente.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Criar serviço de busca de produtos (OpenFoodFacts API)",
+            "description": "Criar serviço para buscar informações de produtos usando OpenFoodFacts API.",
+            "dependencies": [],
+            "details": "Adicionar dependência Retrofit ou Ktor para HTTP. Criar `ProductApiService.kt` com interface para OpenFoodFacts API. Criar data classes para resposta da API (Product, ProductInfo). Implementar função `getProductByBarcode(barcode: String): Product?`. Adicionar tratamento de erros (produto não encontrado, timeout, etc.).",
+            "status": "pending",
+            "testStrategy": "Testar busca com código de barras válido. Verificar tratamento de produto não encontrado. Testar com diferentes códigos.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Implementar cache de produtos escaneados",
+            "description": "Criar sistema de cache local para produtos já escaneados.",
+            "dependencies": [
+              4
+            ],
+            "details": "Criar entidade `ProductCache` no Room Database com campos: barcode (String, primaryKey), name (String), category (String), price (Double?), lastScanned (Long). Criar ProductCacheDao com queries. Atualizar serviço para verificar cache antes de buscar na API. Salvar resultado da API no cache.",
+            "status": "pending",
+            "testStrategy": "Verificar que cache é consultado antes da API. Testar que produtos são salvos no cache corretamente.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 6,
+            "title": "Integrar scanner com dialog de adicionar item",
+            "description": "Conectar scanner ao dialog de adicionar item, preenchendo campos automaticamente.",
+            "dependencies": [
+              3,
+              4,
+              5
+            ],
+            "details": "Adicionar botão de scanner no `AdicionarItemDialog.kt`. Navegar para `BarcodeScannerScreen` quando clicado. Ao detectar código, buscar produto na API ou cache. Preencher campos do dialog: nome, categoria, preço (se disponível). Retornar ao dialog com dados preenchidos. Permitir edição manual após preenchimento automático.",
+            "status": "pending",
+            "testStrategy": "Testar fluxo completo: abrir scanner, escanear código, verificar que campos são preenchidos. Testar edição manual após preenchimento.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 7,
+            "title": "Implementar feedback visual e tratamento de erros",
+            "description": "Adicionar feedback visual durante scan e tratamento adequado de erros.",
+            "dependencies": [
+              3,
+              6
+            ],
+            "details": "Adicionar indicador visual quando código é detectado (vibração, som, overlay verde). Exibir loading enquanto busca produto na API. Mostrar mensagem quando produto não é encontrado. Permitir adicionar item manualmente mesmo sem produto encontrado. Adicionar botão 'Tentar novamente' em caso de erro de rede.",
+            "status": "pending",
+            "testStrategy": "Testar feedback visual durante detecção. Verificar tratamento de todos os casos de erro.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 8,
+            "title": "Otimizar performance e bateria",
+            "description": "Otimizar uso de câmera e processamento para melhor performance e economia de bateria.",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Configurar resolução de câmera adequada (não precisa de máxima). Pausar análise quando tela não está visível. Reduzir frequência de análise de frames. Otimizar processamento de imagens. Adicionar lifecycle awareness para liberar recursos.",
+            "status": "pending",
+            "testStrategy": "Monitorar uso de bateria durante scan. Verificar que recursos são liberados corretamente.",
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": "17",
+        "title": "RF-016: Compartilhamento Colaborativo",
+        "description": "Implementar sistema completo de compartilhamento e edição colaborativa de listas em tempo real usando Supabase como backend.",
+        "details": "Sistema de autenticação (email/senha ou OAuth). Perfil de usuário com nome e foto. Compartilhar lista via link ou email. Convites para colaborar em listas. Sincronização em tempo real de alterações. Indicador visual de quem está editando (presence). Resolução de conflitos quando múltiplos usuários editam. Histórico de alterações (quem fez o quê). Permissões: visualizar, editar, administrador. Notificações push quando lista é modificada. Modo offline com sincronização posterior. Migração de dados locais para cloud.",
+        "testStrategy": "Verificar que múltiplos usuários podem editar simultaneamente sem conflitos. Testar que alterações aparecem em tempo real para todos. Verificar que sincronização funciona corretamente após modo offline. Testar que sistema de permissões funciona adequadamente.",
+        "priority": "low",
+        "dependencies": [
+          "11"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Configurar projeto Supabase e adicionar dependências",
+            "description": "Configurar projeto Supabase e adicionar SDK do Supabase ao projeto Android.",
+            "dependencies": [],
+            "details": "Criar projeto no Supabase. Obter URL e anon key. Adicionar dependência `io.github.jan-tennert.supabase:supabase-kt` no build.gradle.kts. Configurar cliente Supabase no Application class ou módulo DI. Adicionar configurações de segurança (Row Level Security).",
+            "status": "pending",
+            "testStrategy": "Verificar que cliente Supabase é inicializado corretamente. Testar conexão com Supabase.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Criar schema de banco de dados no Supabase",
+            "description": "Criar tabelas no Supabase para usuários, listas compartilhadas e colaboradores.",
+            "dependencies": [
+              1
+            ],
+            "details": "Criar tabela `users` (id, email, name, avatar_url, created_at). Criar tabela `shared_lists` (id, owner_id, name, created_at, updated_at). Criar tabela `list_collaborators` (list_id, user_id, role: viewer/editor/admin, invited_by, joined_at). Criar tabela `shared_items` (id, list_id, name, quantity, price, category, is_checked, created_by, updated_at). Configurar Row Level Security policies.",
+            "status": "pending",
+            "testStrategy": "Verificar que tabelas são criadas corretamente. Testar que RLS policies funcionam adequadamente.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Implementar sistema de autenticação",
+            "description": "Implementar autenticação de usuários usando Supabase Auth.",
+            "dependencies": [
+              1
+            ],
+            "details": "Criar `AuthRepository.kt` com funções: signUp(email, password), signIn(email, password), signOut(), getCurrentUser(). Criar `AuthViewModel.kt` para gerenciar estado de autenticação. Criar telas `LoginScreen.kt` e `SignUpScreen.kt`. Implementar OAuth (Google, Apple) se necessário. Persistir sessão do usuário.",
+            "status": "pending",
+            "testStrategy": "Testar fluxo completo de registro e login. Verificar que sessão é persistida corretamente.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Criar repositório de sincronização",
+            "description": "Criar repositório para sincronizar dados locais com Supabase.",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Criar `SyncRepository.kt` com funções: uploadList(list: ShoppingList), downloadList(listId: String), syncList(listId: String). Implementar lógica de merge/resolução de conflitos. Detectar mudanças locais vs remotas. Usar timestamps para determinar versão mais recente.",
+            "status": "pending",
+            "testStrategy": "Testar upload e download de listas. Verificar que conflitos são resolvidos corretamente.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Implementar sincronização em tempo real",
+            "description": "Implementar sincronização em tempo real usando Supabase Realtime.",
+            "dependencies": [
+              4
+            ],
+            "details": "Configurar Supabase Realtime subscriptions. Subscrever mudanças em `shared_lists` e `shared_items`. Atualizar UI automaticamente quando mudanças são recebidas. Implementar debounce para evitar atualizações excessivas. Tratar reconexão após perda de conexão.",
+            "status": "pending",
+            "testStrategy": "Testar que mudanças aparecem em tempo real para todos os usuários. Verificar reconexão após perda de internet.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 6,
+            "title": "Implementar sistema de compartilhamento",
+            "description": "Criar funcionalidade para compartilhar listas via link ou email.",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Criar função `shareList(listId: String, emails: List<String>?)`. Gerar link único para compartilhamento. Enviar convites por email se fornecido. Criar `ShareListDialog.kt` com opções: link, email. Implementar deep linking para abrir lista compartilhada.",
+            "status": "pending",
+            "testStrategy": "Testar compartilhamento via link. Verificar que convites por email são enviados. Testar deep linking.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 7,
+            "title": "Implementar sistema de permissões",
+            "description": "Implementar sistema de permissões (viewer, editor, admin) para colaboradores.",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Criar enum `CollaboratorRole` (VIEWER, EDITOR, ADMIN). Verificar permissões antes de permitir ações. VIEWER: apenas visualizar. EDITOR: adicionar/editar/deletar itens. ADMIN: gerenciar colaboradores e deletar lista. Atualizar UI baseado em permissões do usuário.",
+            "status": "pending",
+            "testStrategy": "Testar que cada role tem permissões corretas. Verificar que UI reflete permissões adequadamente.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 8,
+            "title": "Implementar indicador de presence (quem está editando)",
+            "description": "Mostrar indicador visual de quais usuários estão editando a lista.",
+            "dependencies": [
+              5
+            ],
+            "details": "Criar tabela `user_presence` no Supabase (list_id, user_id, last_seen). Atualizar last_seen periodicamente quando usuário está na tela. Subscrever mudanças em user_presence via Realtime. Exibir avatares ou nomes de usuários ativos na UI. Remover após timeout (ex: 30 segundos sem atualização).",
+            "status": "pending",
+            "testStrategy": "Verificar que presence é atualizado corretamente. Testar que indicadores aparecem/desaparecem adequadamente.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 9,
+            "title": "Implementar modo offline com sincronização",
+            "description": "Permitir uso offline e sincronizar mudanças quando conexão retorna.",
+            "dependencies": [
+              4
+            ],
+            "details": "Detectar estado de conexão (NetworkCallback ou ConnectivityManager). Armazenar mudanças locais em fila quando offline. Marcar itens como 'pending sync'. Sincronizar automaticamente quando conexão retorna. Resolver conflitos entre mudanças offline e online. Exibir indicador de sincronização na UI.",
+            "status": "pending",
+            "testStrategy": "Testar uso completo offline. Verificar que mudanças são sincronizadas quando conexão retorna. Testar resolução de conflitos.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 10,
+            "title": "Implementar migração de dados locais para cloud",
+            "description": "Criar funcionalidade para migrar listas locais existentes para Supabase.",
+            "dependencies": [
+              3,
+              4
+            ],
+            "details": "Criar `MigrationService.kt` para migrar dados. Detectar listas locais não sincronizadas. Perguntar ao usuário se deseja migrar. Upload de listas e itens para Supabase. Associar listas migradas ao usuário. Marcar listas como sincronizadas localmente.",
+            "status": "pending",
+            "testStrategy": "Testar migração de múltiplas listas. Verificar que dados são preservados corretamente. Testar com dados grandes.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 11,
+            "title": "Implementar histórico de alterações",
+            "description": "Criar sistema para rastrear quem fez quais alterações na lista.",
+            "dependencies": [
+              2
+            ],
+            "details": "Criar tabela `list_changes` (id, list_id, item_id, user_id, action: created/updated/deleted, timestamp, old_value, new_value). Registrar todas as alterações. Criar tela `ChangeHistoryScreen.kt` para exibir histórico. Filtrar por usuário ou período. Exibir de forma legível (ex: 'João adicionou Leite').",
+            "status": "pending",
+            "testStrategy": "Verificar que todas as alterações são registradas. Testar que histórico é exibido corretamente.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 12,
+            "title": "Implementar notificações push",
+            "description": "Enviar notificações push quando lista é modificada por outros usuários.",
+            "dependencies": [
+              2,
+              5
+            ],
+            "details": "Configurar Firebase Cloud Messaging (FCM) ou Supabase Push Notifications. Registrar token do dispositivo no Supabase. Criar função no backend (Edge Function) para enviar notificações. Enviar notificação quando: item é adicionado/editado/deletado, novo colaborador é adicionado. Permitir usuário configurar preferências de notificação.",
+            "status": "pending",
+            "testStrategy": "Testar que notificações são recebidas quando lista é modificada. Verificar que preferências funcionam.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 13,
+            "title": "Criar UI de gerenciamento de colaboradores",
+            "description": "Criar interface para gerenciar colaboradores de uma lista.",
+            "dependencies": [
+              3,
+              7
+            ],
+            "details": "Criar `CollaboratorsScreen.kt` mostrando lista de colaboradores. Exibir nome, email, role, data de entrada. Permitir mudar role (apenas admin). Permitir remover colaborador (apenas admin). Adicionar botão para convidar novos colaboradores. Mostrar owner da lista.",
+            "status": "pending",
+            "testStrategy": "Testar adicionar/remover colaboradores. Verificar que apenas admin pode gerenciar. Testar mudança de roles.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 14,
+            "title": "Integrar colaboração na UI existente",
+            "description": "Integrar funcionalidades de colaboração na UI existente do app.",
+            "dependencies": [
+              5,
+              7,
+              8
+            ],
+            "details": "Atualizar `ListaComprasScreen.kt` para mostrar indicadores de presence. Adicionar badge 'Compartilhada' em listas compartilhadas. Mostrar avatares de colaboradores ativos. Atualizar dialogs para mostrar quem criou/editou item. Adicionar menu para gerenciar compartilhamento. Integrar sincronização automática.",
+            "status": "pending",
+            "testStrategy": "Testar que UI reflete estado de colaboração corretamente. Verificar que indicadores aparecem adequadamente.",
+            "parentId": "undefined"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "lastModified": "2025-12-13T01:25:29.682Z",
+      "taskCount": 17,
+      "completedCount": 14,
+      "tags": [
+        "master"
+      ]
+    }
+  }
+}

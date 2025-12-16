@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "579885460358",
+    "project_id": "minhascompras-756e9",
+    "storage_bucket": "minhascompras-756e9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:579885460358:android:706003c7c16ef4b1579a07",
+        "android_client_info": {
+          "package_name": "com.example.minhascompras"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCflmKxri3zpc1gRY80ULtJp_kcYFmqSEQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

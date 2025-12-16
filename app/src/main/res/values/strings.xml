@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Minhas Compras</string>
+    <string name="adicionar_item">Adicionar Item</string>
+    <string name="nome_item">Nome do item</string>
+    <string name="quantidade">Quantidade</string>
+    <string name="adicionar">Adicionar</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="deletar">Deletar</string>
+    <string name="deletar_comprados">Deletar Comprados</string>
+    <string name="lista_vazia">Sua lista está vazia!\nAdicione um item para começar.</string>
+    <string name="confirmar_deletar_comprados">Deseja deletar todos os itens comprados?</string>
+    <string name="sim">Sim</string>
+    <string name="nao">Não</string>
+</resources>

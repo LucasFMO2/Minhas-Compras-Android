@@ -1,0 +1,31 @@
+{
+	"mcpServers": {
+		"task-master-ai": {
+			"type": "stdio",
+			"command": "npx",
+			"args": [
+				"-y",
+				"task-master-ai"
+			],
+			"env": {
+				"GOOGLE_API_KEY": "AIzaSyA8_nlfKAx1wG79mTtWTds9Ju1gp-mfW4A",
+				
+			}
+		},
+		"Navegador": {
+			"command": "npx",
+			"args": [
+				"-y",
+				"@agentdeskai/browser-tools-server@1.2.0"
+			]
+		},
+		"Sequential Thinking": {
+			"type": "stdio",
+			"command": "npx",
+			"args": [
+				"-y",
+				"@modelcontextprotocol/server-sequential-thinking"
+			]
+		}
+	}
+}

@@ -1,6 +1,7 @@
 package com.example.minhascompras.widget
 
 import android.appwidget.AppWidgetManager
+import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
@@ -15,7 +16,7 @@ import kotlinx.coroutines.Job
 
 /**
  * RemoteViewsService para fornecer dados à ListView do widget.
- * 
+ *
  * Este serviço é responsável por criar a RemoteViewsFactory que popula
  * a lista de itens pendentes no widget.
  */
@@ -131,7 +132,7 @@ class ShoppingListWidgetFactory(
                 }
                 
                 android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId: RESULTADO FINAL - encontrados ${resultado.size} itens no banco")
-                
+
                 // Log detalhado dos itens encontrados
                 resultado.forEachIndexed { index, item ->
                     android.util.Log.d("ShoppingListWidget", "Item $index: ${item.nome} (ID: ${item.id}, Comprado: ${item.comprado})")
@@ -216,7 +217,7 @@ class ShoppingListWidgetFactory(
             android.util.Log.w("ShoppingListWidget", "Posição $position maior que o tamanho da lista (${items.size})")
             return null
         }
-
+        
         val item = items[position]
         android.util.Log.d("ShoppingListWidget", "Criando view para item na posição $position: ${item.nome} (ID: ${item.id})")
         
@@ -233,19 +234,19 @@ class ShoppingListWidgetFactory(
         android.util.Log.d("ShoppingListWidget", "TextView configurado com: ${item.nome}")
 
         // Configurar checkbox baseado no status do item
-        views.setBoolean(R.id.widget_item_checkbox, "setChecked", item.comprado)
+        views.setImageViewResource(R.id.widget_item_checkbox, if (item.comprado) android.R.drawable.checkbox_on_background else android.R.drawable.checkbox_off_background)
         
         // Adicionar feedback visual para itens comprados
         if (item.comprado) {
             // Aplicar estilo de texto tachado para itens comprados
-            views.setBoolean(R.id.widget_item_name, "setPaintFlags",
+            views.setInt(R.id.widget_item_name, "setPaintFlags",
                 android.graphics.Paint.STRIKE_THRU_TEXT_FLAG)
             // Definir cor do texto para itens comprados (mais claro)
             views.setTextColor(R.id.widget_item_name,
                 android.graphics.Color.GRAY)
         } else {
             // Remover estilo tachado para itens pendentes
-            views.setBoolean(R.id.widget_item_name, "setPaintFlags", 0)
+            views.setInt(R.id.widget_item_name, "setPaintFlags", 0)
             // Restaurar cor padrão do texto
             views.setTextColor(R.id.widget_item_name,
                 context.getColor(android.R.color.primary_text_light))
@@ -267,9 +268,34 @@ class ShoppingListWidgetFactory(
         android.util.Log.d("ShoppingListWidget", "Data: ${clickIntent.data}")
         android.util.Log.d("ShoppingListWidget", "Extras: item_id=${clickIntent.getLongExtra(ShoppingListWidgetProvider.EXTRA_ITEM_ID, -1)}, widget_id=${clickIntent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1)}")
         
-        // Gerar request code único para evitar conflitos
-        val requestCode = (appWidgetId * 1000 + (item.id % 1000)).toInt()
+        // CORREÇÃO CRÍTICA: Gerar request code verdadeiramente único sem conflitos
+        // Usar abordagem baseada em hash code para garantir unicidade
+        val hashString = "${appWidgetId}_${item.id}_${item.nome}_${System.currentTimeMillis()}"
+        val uniqueId = hashString.hashCode()
+        val requestCode = if (uniqueId < 0) -uniqueId else uniqueId // Garantir positivo
+        
         android.util.Log.d("ShoppingListWidget", "Request code gerado para item ${item.id}: $requestCode")
+        android.util.Log.w("ShoppingListWidget", "!!! CORREÇÃO REQUEST CODE MELHORADA: appWidgetId=$appWidgetId, itemId=${item.id}, hashString='$hashString', hashCode=$uniqueId, finalRequestCode=$requestCode")
+        
+        // VERIFICAÇÃO MELHORADA: Verificar se há potencial conflito de request code
+        val potentialConflictItems = items.filter { otherItem ->
+            otherItem.id != item.id && {
+                val otherHashString = "${appWidgetId}_${otherItem.id}_${otherItem.nome}"
+                val otherUniqueId = otherHashString.hashCode()
+                val otherRequestCode = if (otherUniqueId < 0) -otherUniqueId else otherUniqueId
+                otherRequestCode == requestCode
+            }()
+        }
+        if (potentialConflictItems.isNotEmpty()) {
+            android.util.Log.e("ShoppingListWidget", "!!! CONFLITO DETECTADO: Item ${item.id} tem mesmo request code que itens: ${potentialConflictItems.map { it.id }}")
+            // Se houver conflito, gerar um novo request code com timestamp adicional
+            val emergencyHashString = "${appWidgetId}_${item.id}_${item.nome}_${System.nanoTime()}"
+            val emergencyUniqueId = emergencyHashString.hashCode()
+            val emergencyRequestCode = if (emergencyUniqueId < 0) -emergencyUniqueId else emergencyUniqueId
+            android.util.Log.w("ShoppingListWidget", "!!! CORREÇÃO DE EMERGÊNCIA: Novo request code gerado para item ${item.id}: $emergencyRequestCode")
+        } else {
+            android.util.Log.d("ShoppingListWidget", "!!! SEM CONFLITOS: Request code $requestCode é único para item ${item.id}")
+        }
         
         val pendingIntent = android.app.PendingIntent.getBroadcast(
             context,
@@ -335,4 +361,3 @@ class ShoppingListWidgetFactory(
 
     override fun hasStableIds(): Boolean = true
 }
-

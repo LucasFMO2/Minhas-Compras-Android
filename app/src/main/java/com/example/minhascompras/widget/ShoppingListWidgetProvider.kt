@@ -68,23 +68,60 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
         android.util.Log.d("ShoppingListWidget", "Intent source: ${intent.`package`}")
         android.util.Log.d("ShoppingListWidget", "Intent extras bundle: ${intent.extras?.javaClass}")
         
-        // Log detalhado para ACTION_ITEM_CLICKED
-        if (intent.action == ACTION_ITEM_CLICKED) {
+        // VALIDAÇÃO CRÍTICA: Verificar action ANTES do super.onReceive()
+        val originalAction = intent.action
+        android.util.Log.w("ShoppingListWidget", "!!! VALIDAÇÃO CRÍTICA: Action ANTES do super.onReceive(): $originalAction")
+        
+        // VALIDAÇÃO DE SEGURANÇA ANTES DO PROCESSAMENTO
+        val isAuthorizedAction = originalAction != null && (originalAction.startsWith("com.example.minhascompras.widget.") ||
+            originalAction == "android.appwidget.action.APPWIDGET_UPDATE")
+        android.util.Log.w("ShoppingListWidget", "!!! VALIDAÇÃO DE SEGURANÇA: Action autorizado? $isAuthorizedAction")
+        
+        if (!isAuthorizedAction) {
+            android.util.Log.e("ShoppingListWidget", "!!! BLOQUEADO: Action não autorizado ANTES do processamento: $originalAction")
+            return
+        }
+        
+        // Log detalhado para ACTION_ITEM_CLICKED ANTES do super.onReceive()
+        if (originalAction == ACTION_ITEM_CLICKED) {
             val itemId = intent.getLongExtra(EXTRA_ITEM_ID, -1L)
             val widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
-            android.util.Log.d("ShoppingListWidget", "!!! ACTION_ITEM_CLICKED DETECTADO !!!")
+            android.util.Log.d("ShoppingListWidget", "!!! ACTION_ITEM_CLICKED DETECTADO ANTES DO PROCESSAMENTO !!!")
             android.util.Log.d("ShoppingListWidget", "Item ID: $itemId, Widget ID: $widgetId")
-        } else {
-            android.util.Log.d("ShoppingListWidget", "Action recebido NÃO é ACTION_ITEM_CLICKED: ${intent.action}")
+            
+            // VALIDAÇÃO: Verificar se os extras estão corretos
+            android.util.Log.w("ShoppingListWidget", "!!! VALIDAÇÃO EXTRAS ANTES: itemId válido=${itemId != -1L}, widgetId válido=${widgetId != AppWidgetManager.INVALID_APPWIDGET_ID}")
+            
+            // VALIDAÇÃO ADICIONAL: Verificar se o widget existe
+            val appWidgetManager = AppWidgetManager.getInstance(context)
+            val widgetIds = appWidgetManager.getAppWidgetIds(
+                android.content.ComponentName(context, ShoppingListWidgetProvider::class.java)
+            )
+            val widgetExists = widgetId in widgetIds
+            android.util.Log.w("ShoppingListWidget", "!!! VALIDAÇÃO WIDGET: Widget $widgetId existe? $widgetExists")
+            android.util.Log.w("ShoppingListWidget", "!!! Widgets disponíveis: ${widgetIds.contentToString()}")
+            
+            if (!widgetExists) {
+                android.util.Log.e("ShoppingListWidget", "!!! BLOQUEADO: Widget $widgetId não existe mais")
+                return
+            }
         }
         
         super.onReceive(context, intent)
-
-        // Adicionar validação de segurança
-        if (intent.action == null || !intent.action!!.startsWith("com.example.minhascompras.widget.") &&
-            intent.action != "android.appwidget.action.APPWIDGET_UPDATE") {
-            android.util.Log.w("ShoppingListWidget", "Action não autorizada ignorada: ${intent.action}")
-            return
+        
+        android.util.Log.w("ShoppingListWidget", "!!! PÓS super.onReceive(): Action ainda é ${intent.action}")
+        
+        // Log detalhado para ACTION_ITEM_CLICKED APÓS processamento
+        if (intent.action == ACTION_ITEM_CLICKED) {
+            val itemId = intent.getLongExtra(EXTRA_ITEM_ID, -1L)
+            val widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
+            android.util.Log.d("ShoppingListWidget", "!!! ACTION_ITEM_CLICKED PROCESSADO COM SUCESSO !!!")
+            android.util.Log.d("ShoppingListWidget", "Item ID: $itemId, Widget ID: $widgetId")
+            
+            // VALIDAÇÃO: Verificar se os extras estão corretos APÓS processamento
+            android.util.Log.w("ShoppingListWidget", "!!! VALIDAÇÃO EXTRAS APÓS: itemId válido=${itemId != -1L}, widgetId válido=${widgetId != AppWidgetManager.INVALID_APPWIDGET_ID}")
+        } else {
+            android.util.Log.d("ShoppingListWidget", "Action recebido NÃO é ACTION_ITEM_CLICKED: ${intent.action}")
         }
 
         android.util.Log.d("ShoppingListWidget", "Action autorizada processada: ${intent.action}")
@@ -143,6 +180,38 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
         android.util.Log.d("ShoppingListWidget", "Tentando alternar status do item $itemId no widget $appWidgetId")
         android.util.Log.d("ShoppingListWidget", "Thread atual: ${Thread.currentThread().name}")
         
+        // VALIDAÇÃO MELHORADA: Verificar estado atual do item ANTES da alteração
+        val validationScope = kotlinx.coroutines.CoroutineScope(
+            kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.IO
+        )
+        validationScope.launch {
+            try {
+                val database = AppDatabase.getDatabase(context)
+                val itemDao = database.itemCompraDao()
+                val itemBefore = itemDao.getItemById(itemId)
+                android.util.Log.w("ShoppingListWidget", "!!! VALIDAÇÃO ANTES: Item $itemId existe: ${itemBefore != null}")
+                if (itemBefore != null) {
+                    android.util.Log.w("ShoppingListWidget", "!!! VALIDAÇÃO ANTES: Nome: ${itemBefore.nome}, Status: ${itemBefore.comprado}, Lista: ${itemBefore.listId}")
+                }
+                
+                // VALIDAÇÃO ADICIONAL: Verificar se o widget está configurado corretamente
+                val prefs = context.getSharedPreferences(WIDGET_PREFS_NAME, Context.MODE_PRIVATE)
+                val listId = prefs.getLong("widget_${appWidgetId}_list_id", -1L)
+                android.util.Log.w("ShoppingListWidget", "!!! VALIDAÇÃO WIDGET: Widget $appWidgetId configurado para lista $listId")
+                
+                if (listId != -1L && itemBefore != null) {
+                    // Verificar se o item pertence à lista configurada no widget
+                    if (itemBefore.listId == listId) {
+                        android.util.Log.w("ShoppingListWidget", "!!! VALIDAÇÃO WIDGET: Item $itemId pertence à lista $listId do widget $appWidgetId ✓")
+                    } else {
+                        android.util.Log.e("ShoppingListWidget", "!!! ERRO WIDGET: Item $itemId (lista ${itemBefore.listId}) não pertence à lista $listId do widget $appWidgetId")
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("ShoppingListWidget", "Erro na validação antes da alteração", e)
+            }
+        }
+        
         // Usar um CoroutineScope com SupervisorJob para garantir controle sobre a execução
         val scope = kotlinx.coroutines.CoroutineScope(
             kotlinx.coroutines.SupervisorJob() +
@@ -162,25 +231,77 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
                 if (item != null) {
                     // Alternar status (toggle)
                     val newStatus = !item.comprado
+                    android.util.Log.w("ShoppingListWidget", "!!! ALTERAÇÃO: Item ${item.nome} (ID: $itemId) status $item.comprado -> $newStatus")
+                    
+                    // VALIDAÇÃO MELHORADA: Verificar estado ANTES da atualização
+                    android.util.Log.d("ShoppingListWidget", "!!! VALIDAÇÃO ANTES DA ATUALIZAÇÃO: Verificando estado atual no banco...")
+                    val verificationBefore = itemDao.getItemById(itemId)
+                    android.util.Log.w("ShoppingListWidget", "!!! VALIDAÇÃO ANTES DA ATUALIZAÇÃO: Status atual no banco: ${verificationBefore?.comprado}")
+                    
+                    // VALIDAÇÃO: Verificar imediatamente após a atualização
                     itemDao.updateItemStatus(itemId, newStatus)
                     android.util.Log.d("ShoppingListWidget", "Item ${item.nome} status alterado para: $newStatus")
+                    
+                    // Verificação imediata para confirmar a alteração no banco
+                    kotlinx.coroutines.delay(50) // Pequena pausa para garantir persistência
+                    val verificationItem = itemDao.getItemById(itemId)
+                    android.util.Log.w("ShoppingListWidget", "!!! VALIDAÇÃO DEPOIS: Item $itemId status no banco: ${verificationItem?.comprado}")
+                    
+                    if (verificationItem?.comprado != newStatus) {
+                        android.util.Log.e("ShoppingListWidget", "!!! ERRO CRÍTICO: Status no banco não confere! Esperado: $newStatus, Actual: ${verificationItem?.comprado}")
+                        
+                        // TENTATIVA DE CORREÇÃO: Tentar atualizar novamente
+                        android.util.Log.w("ShoppingListWidget", "!!! TENTATIVA DE CORREÇÃO: Tentando atualizar novamente...")
+                        try {
+                            itemDao.updateItemStatus(itemId, newStatus)
+                            kotlinx.coroutines.delay(100)
+                            val retryVerification = itemDao.getItemById(itemId)
+                            android.util.Log.w("ShoppingListWidget", "!!! TENTATIVA DE CORREÇÃO: Status após retry: ${retryVerification?.comprado}")
+                        } catch (e: Exception) {
+                            android.util.Log.e("ShoppingListWidget", "!!! ERRO NA TENTATIVA DE CORREÇÃO", e)
+                        }
+                    } else {
+                        android.util.Log.w("ShoppingListWidget", "!!! SUCESSO: Status atualizado corretamente no banco!")
+                    }
                     
                     // Mudar para thread principal para atualizações de UI
                     withContext(kotlinx.coroutines.Dispatchers.Main) {
                         try {
                             val appWidgetManager = AppWidgetManager.getInstance(context)
                             
-                            // ESTRATÉGIA OTIMIZADA: Atualização eficiente sem delays desnecessários
+                            // ESTRATÉGIA OTIMIZADA: Atualização eficiente com validação completa
                             
                             // PRIMEIRO: Notificar mudança de dados imediatamente
                             android.util.Log.d("ShoppingListWidget", "Notificando mudança de dados para widget $appWidgetId")
                             appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widget_items_list)
                             
+                            // Pequena pausa para garantir processamento
+                            kotlinx.coroutines.delay(100)
+                            
                             // SEGUNDO: Atualizar widget principal (progresso, contadores, etc.)
                             android.util.Log.d("ShoppingListWidget", "Atualizando widget $appWidgetId após alternar status")
                             updateAppWidget(context, appWidgetManager, appWidgetId)
                             
-                            android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId atualizado com sucesso após alternar status")
+                            // Pequena pausa para garantir processamento
+                            kotlinx.coroutines.delay(100)
+                            
+                            // TERCEIRO: Notificação final para garantir sincronização completa
+                            android.util.Log.d("ShoppingListWidget", "Notificação final para widget $appWidgetId")
+                            appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widget_items_list)
+                            
+                            // VALIDAÇÃO FINAL: Verificar se o widget ainda existe
+                            val widgetIds = appWidgetManager.getAppWidgetIds(
+                                android.content.ComponentName(context, ShoppingListWidgetProvider::class.java)
+                            )
+                            val widgetStillExists = appWidgetId in widgetIds
+                            android.util.Log.w("ShoppingListWidget", "!!! VALIDAÇÃO FINAL: Widget $appWidgetId ainda existe? $widgetStillExists")
+                            
+                            if (widgetStillExists) {
+                                android.util.Log.d("ShoppingListWidget", "Widget $appWidgetId atualizado com sucesso após alternar status")
+                            } else {
+                                android.util.Log.w("ShoppingListWidget", "Widget $appWidgetId foi removido durante a atualização")
+                            }
+                            
                             android.util.Log.d("ShoppingListWidget", "=== FIM: toggleItemStatus ===")
                         } catch (e: Exception) {
                             android.util.Log.e("ShoppingListWidget", "Erro ao atualizar widget após alternar status", e)

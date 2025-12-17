@@ -48,6 +48,7 @@ import com.example.minhascompras.ui.viewmodel.ListaComprasViewModel
 import com.example.minhascompras.ui.viewmodel.ShoppingListViewModel
 import com.example.minhascompras.ui.viewmodel.UpdateViewModel
 import com.example.minhascompras.ui.viewmodel.UpdateState
+import com.example.minhascompras.data.ItemCategory
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
@@ -73,6 +74,16 @@ fun ListaComprasScreen(
     var itemParaEditar by remember { mutableStateOf<ItemCompra?>(null) }
     var itemParaDeletar by remember { mutableStateOf<ItemCompra?>(null) }
     var itemSelecionado by remember { mutableStateOf<ItemCompra?>(null) }
+    
+    // Estados para validação de formulário
+    var nomeItem by remember { mutableStateOf("") }
+    var quantidade by remember { mutableStateOf("1") }
+    var preco by remember { mutableStateOf("") }
+    var categoriaSelecionada by remember { mutableStateOf(ItemCategory.OUTROS.displayName) }
+    var nomeError by remember { mutableStateOf(false) }
+    var quantidadeError by remember { mutableStateOf(false) }
+    var precoError by remember { mutableStateOf(false) }
+    var categoriaError by remember { mutableStateOf(false) }
 
     // Usar allItens para estatísticas (lista completa, sem filtro)
     val totalItens = allItens.size
@@ -1115,7 +1126,7 @@ fun ListaComprasScreen(
 
     if (showDialog || itemParaEditar != null) {
         AdicionarItemDialog(
-            onDismiss = { 
+            onDismiss = {
                 showDialog = false
                 itemParaEditar = null
                 itemSelecionado = null
@@ -1139,7 +1150,41 @@ fun ListaComprasScreen(
                     showDialog = false
                 }
             },
-            itemEdicao = itemParaEditar
+            itemEdicao = itemParaEditar,
+            itemNamesByFrequency = viewModel.itemNamesByFrequency.collectAsState().value,
+            onItemNameChanged = { /* Já é tratado internamente no ViewModel */ },
+            onLoadItemSuggestions = { viewModel.loadItemNamesByFrequency() },
+            onItemSelected = { selectedItem ->
+                // Preencher campos automaticamente quando item é selecionado
+                scope.launch {
+                    val recentItem = viewModel.getMostRecentItemByName(selectedItem)
+                    recentItem?.let { item ->
+                        // Atualizar apenas os campos que não estão preenchidos
+                        if (quantidade.isBlank()) {
+                            quantidade = item.quantidade.toString()
+                        }
+                        if (preco.isBlank()) {
+                            preco = item.preco?.toString() ?: ""
+                        }
+                        if (categoriaSelecionada == ItemCategory.OUTROS.displayName) {
+                            categoriaSelecionada = item.categoria
+                        }
+                    }
+                }
+            },
+            onClearForm = {
+                // Limpar formulário quando botão Limpar for clicado
+                scope.launch {
+                    nomeItem = ""
+                    quantidade = "1"
+                    preco = ""
+                    categoriaSelecionada = ItemCategory.OUTROS.displayName
+                    nomeError = false
+                    quantidadeError = false
+                    precoError = false
+                    categoriaError = false
+                }
+            }
         )
     }
 

@@ -1,13 +1,17 @@
 package com.example.minhascompras.ui.components
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.example.minhascompras.data.ItemCategory
 import com.example.minhascompras.data.ItemCompra
@@ -19,19 +23,47 @@ fun AdicionarItemDialog(
     onDismiss: () -> Unit,
     onConfirm: (String, Int, Double?, String) -> Unit,
     itemEdicao: ItemCompra? = null,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    itemNamesByFrequency: List<String> = emptyList(),
+    onItemNameChanged: (String) -> Unit = {},
+    onLoadItemSuggestions: () -> Unit = {},
+    onItemSelected: (String) -> Unit = {},
+    onClearForm: () -> Unit = {}
 ) {
     var nomeItem by remember { mutableStateOf(itemEdicao?.nome ?: "") }
     var quantidade by remember { mutableStateOf(itemEdicao?.quantidade?.toString() ?: "1") }
     var preco by remember { mutableStateOf(itemEdicao?.preco?.toString() ?: "") }
     var categoriaSelecionada by remember { mutableStateOf(itemEdicao?.categoria ?: ItemCategory.OUTROS.displayName) }
     var expanded by remember { mutableStateOf(false) }
+    var showSuggestions by remember { mutableStateOf(false) }
+    
+    // Estados para validação
+    var nomeError by remember { mutableStateOf(false) }
+    var quantidadeError by remember { mutableStateOf(false) }
+    var precoError by remember { mutableStateOf(false) }
+    var categoriaError by remember { mutableStateOf(false) }
     
     LaunchedEffect(itemEdicao) {
         nomeItem = itemEdicao?.nome ?: ""
         quantidade = itemEdicao?.quantidade?.toString() ?: "1"
         preco = itemEdicao?.preco?.toString() ?: ""
         categoriaSelecionada = itemEdicao?.categoria ?: ItemCategory.OUTROS.displayName
+    }
+    
+    LaunchedEffect(nomeItem) {
+        onItemNameChanged(nomeItem)
+        if (nomeItem.length >= 2) {
+            showSuggestions = true
+        } else {
+            showSuggestions = false
+        }
+    }
+    
+    // Carregar sugestões quando o item é selecionado
+    LaunchedEffect(nomeItem) {
+        if (nomeItem.isNotEmpty()) {
+            onItemSelected(nomeItem)
+        }
     }
 
     AlertDialog(
@@ -60,42 +92,92 @@ fun AdicionarItemDialog(
                 verticalArrangement = Arrangement.spacedBy(ResponsiveUtils.getMediumSpacing()),
                 modifier = modifier.fillMaxWidth()
             ) {
-                // Campo Nome
-                OutlinedTextField(
-                    value = nomeItem,
-                    onValueChange = { nomeItem = it },
-                    label = { 
-                        Text(
-                            "Nome do item",
-                            style = MaterialTheme.typography.labelLarge.copy(
-                                fontSize = ResponsiveUtils.getLabelFontSize()
+                // Campo Nome com Autocompletar
+                ExposedDropdownMenuBox(
+                    expanded = showSuggestions && itemNamesByFrequency.isNotEmpty(),
+                    onExpandedChange = {
+                        if (it) onLoadItemSuggestions()
+                        showSuggestions = it
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    OutlinedTextField(
+                        value = nomeItem,
+                        onValueChange = {
+                            nomeItem = it
+                            showSuggestions = it.length >= 2
+                        },
+                        label = {
+                            Text(
+                                "Nome do item *",
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    fontSize = ResponsiveUtils.getLabelFontSize()
+                                )
                             )
-                        ) 
-                    },
-                    placeholder = { 
-                        Text(
-                            "Ex: Leite, Pão, Arroz...",
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontSize = ResponsiveUtils.getBodyFontSize()
+                        },
+                        placeholder = {
+                            Text(
+                                "Ex: Leite, Pão, Arroz...",
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontSize = ResponsiveUtils.getBodyFontSize()
+                                )
                             )
-                        ) 
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.ShoppingCart,
-                            contentDescription = "Ícone de carrinho de compras",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        focusedLabelColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-                    ),
-                    shape = MaterialTheme.shapes.medium
-                )
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(),
+                        singleLine = true,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.ShoppingCart,
+                                contentDescription = "Ícone de carrinho de compras",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        trailingIcon = {
+                            if (showSuggestions && itemNamesByFrequency.isNotEmpty()) {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = showSuggestions)
+                            }
+                        },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = if (nomeError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                            focusedLabelColor = if (nomeError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = if (nomeError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                        ),
+                        shape = MaterialTheme.shapes.medium,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(onNext = { showSuggestions = false })
+                    )
+                    
+                    // Dropdown com sugestões
+                    ExposedDropdownMenu(
+                        expanded = showSuggestions && itemNamesByFrequency.isNotEmpty(),
+                        onDismissRequest = { showSuggestions = false },
+                        modifier = Modifier.heightIn(max = 200.dp)
+                    ) {
+                        val filteredSuggestions = itemNamesByFrequency.filter {
+                            nome -> nome.lowercase().contains(nomeItem.lowercase())
+                        }.take(5)
+                        
+                        filteredSuggestions.forEach { suggestion ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        suggestion,
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            fontSize = ResponsiveUtils.getBodyFontSize()
+                                        )
+                                    )
+                                },
+                                onClick = {
+                                    nomeItem = suggestion
+                                    showSuggestions = false
+                                    onItemSelected(suggestion)
+                                }
+                            )
+                        }
+                    }
+                }
                 
                 // Dropdown de Categoria
                 ExposedDropdownMenuBox(

@@ -121,10 +121,32 @@ interface ItemCompraDao {
     @Query("UPDATE itens_compra SET comprado = :comprado WHERE id = :itemId")
     suspend fun updateItemStatus(itemId: Long, comprado: Boolean)
 
+    @Query("""
+        SELECT nome, COUNT(*) as frequency
+        FROM itens_compra
+        WHERE nome IS NOT NULL AND nome != ''
+        GROUP BY nome
+        ORDER BY frequency DESC, nome ASC
+    """)
+    suspend fun getItemNamesByFrequency(): List<ItemNameFrequency>
+
+    @Query("""
+        SELECT * FROM itens_compra
+        WHERE LOWER(nome) = LOWER(:itemName) COLLATE NOCASE
+        ORDER BY dataCriacao DESC
+        LIMIT 1
+    """)
+    suspend fun getMostRecentItemByName(itemName: String): ItemCompra?
+
     @Transaction
     suspend fun replaceAllItems(items: List<ItemCompra>) {
         deleteAll()
         insertAll(items)
     }
 }
+
+data class ItemNameFrequency(
+    val nome: String,
+    val frequency: Int
+)
 

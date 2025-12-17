@@ -406,6 +406,31 @@ class ListaComprasViewModel(
 
         return builder.toString()
     }
+    
+    // Métodos para autocompletar
+    private val _itemNamesByFrequency = MutableStateFlow<List<String>>(emptyList())
+    val itemNamesByFrequency: StateFlow<List<String>> = _itemNamesByFrequency.asStateFlow()
+    
+    fun loadItemNamesByFrequency() {
+        viewModelScope.launch {
+            try {
+                val names = repository.getItemNamesByFrequency()
+                _itemNamesByFrequency.value = names
+            } catch (e: Exception) {
+                Logger.e("ListaComprasViewModel", "Erro ao carregar nomes de itens por frequência", e)
+                _itemNamesByFrequency.value = emptyList()
+            }
+        }
+    }
+    
+    suspend fun getMostRecentItemByName(itemName: String): ItemCompra? {
+        return try {
+            repository.getMostRecentItemByName(itemName)
+        } catch (e: Exception) {
+            Logger.e("ListaComprasViewModel", "Erro ao buscar item mais recente por nome: $itemName", e)
+            null
+        }
+    }
 }
 
 class ListaComprasViewModelFactory(

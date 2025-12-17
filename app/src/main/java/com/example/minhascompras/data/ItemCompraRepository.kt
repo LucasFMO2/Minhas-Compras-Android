@@ -230,5 +230,14 @@ class ItemCompraRepository(
     fun getTotalSpending(startDate: Long, endDate: Long): Flow<Double> {
         return historyDao.getTotalSpending(startDate, endDate)
     }
+    
+    // Métodos para autocompletar e sugestões
+    suspend fun getItemNamesByFrequency(): List<String> {
+        return itemCompraDao.getItemNamesByFrequency().map { it.nome }
+    }
+    
+    suspend fun getMostRecentItemByName(itemName: String): ItemCompra? {
+        return itemCompraDao.getMostRecentItemByName(itemName)
+    }
 }
 

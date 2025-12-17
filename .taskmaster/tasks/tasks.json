@@ -1446,8 +1446,75 @@
         "testStrategy": "Verificar que autocompletar sugere itens relevantes enquanto usuário digita. Testar que sugestões são ordenadas por relevância (frequência). Verificar que validação previne submissão de dados inválidos. Testar que feedback de erros é claro e ajuda o usuário.",
         "priority": "low",
         "dependencies": [],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Criar Consultas no DAO para Histórico e Sugestões",
+            "description": "Adicionar métodos ao ItemCompraDao para buscar o histórico de nomes de itens, ordenados por frequência, e para obter os dados da última compra de um item específico (preço, quantidade, categoria).",
+            "dependencies": [],
+            "details": "Implementar duas novas queries no `ItemCompraDao`. A primeira deve retornar uma `List<String>` com nomes de itens únicos, agrupados e ordenados pela contagem (frequência). A segunda deve aceitar um nome de item e retornar o `ItemCompra` mais recente correspondente.\n<info added on 2025-12-17T11:47:04.948Z>\nAs consultas no DAO e Repository foram implementadas. Estão disponíveis os métodos `getItemNamesByFrequency()` para retornar nomes de itens únicos ordenados por frequência (mais comprados primeiro) e `getMostRecentItemByName()` para obter o item mais recente com base no nome. Os métodos correspondentes no Repository facilitam o acesso pela UI. As consultas SQL utilizam `GROUP BY` e `ORDER BY` para otimização de performance.\n</info added on 2025-12-17T11:47:04.948Z>",
+            "status": "done",
+            "testStrategy": "Criar testes unitários para o DAO para garantir que a consulta de frequência ordena corretamente os itens e que a consulta do item mais recente retorna os dados esperados.",
+            "updatedAt": "2025-12-17T11:47:40.523Z",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implementar Autocompletar no Campo 'Nome'",
+            "description": "Substituir o campo de texto (EditText) do nome do item por um AutoCompleteTextView no dialog de adição/edição, e configurá-lo para usar o histórico de itens como fonte de sugestões.",
+            "dependencies": [
+              1
+            ],
+            "details": "Alterar o layout `dialog_add_item.xml` para usar um `AutoCompleteTextView`. No `ItemCompraDialog` ou no `ViewModel` associado, carregar a lista de nomes do histórico (criada na tarefa 1) e configurar um `ArrayAdapter` para alimentar o `AutoCompleteTextView`.\n<info added on 2025-12-17T11:53:56.102Z>\nImplementado o autocompletar no campo 'Nome' do `AdicionarItemDialog`, que foi modificado para usar um `ExposedDropdownMenuBox` para as sugestões. A integração ocorre na `ListaComprasScreen`, que passa os dados do ViewModel para o dialog através dos novos parâmetros `itemNamesByFrequency`, `onItemNameChanged` e `onLoadItemSuggestions`. A filtragem dinâmica das sugestões é acionada após o usuário digitar no mínimo 2 caracteres, sendo limitada às 5 sugestões mais relevantes. O dropdown com as sugestões só é exibido quando há itens correspondentes disponíveis.\n</info added on 2025-12-17T11:53:56.102Z>",
+            "status": "done",
+            "testStrategy": "Teste manual: abrir o dialog, começar a digitar o nome de um item comprado anteriormente e verificar se a lista de sugestões aparece e está ordenada por frequência de compra.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-17T11:54:32.634Z"
+          },
+          {
+            "id": 3,
+            "title": "Implementar Sugestões Automáticas ao Selecionar Item",
+            "description": "Ao selecionar um item da lista de autocompletar, preencher automaticamente os campos de preço, quantidade e categoria com base nos dados da última compra daquele item.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Adicionar um `OnItemClickListener` ao `AutoCompleteTextView`. Quando um item for selecionado, usar o método do DAO (criado na tarefa 1) para buscar o último registro de compra. Utilizar os dados retornados para preencher os campos de preço, quantidade e selecionar a categoria correspondente.\n<info added on 2025-12-17T12:57:03.617Z>\nAs sugestões automáticas foram implementadas ao selecionar um item. Para isso, um callback `onItemSelected` foi adicionado ao `AdicionarItemDialog`, com a lógica de preenchimento sendo tratada na `ListaComprasScreen`. O método `getMostRecentItemByName` do ViewModel é utilizado para buscar os dados históricos. Os campos são preenchidos apenas se estiverem vazios para não sobrescrever dados existentes, funcionando tanto na criação de novos itens quanto na edição dos já existentes.\n</info added on 2025-12-17T12:57:03.617Z>",
+            "status": "done",
+            "testStrategy": "Teste manual: selecionar um item da lista de sugestões e verificar se os campos de preço, quantidade e categoria são preenchidos corretamente com os valores da última vez que o item foi comprado.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-17T12:58:02.250Z"
+          },
+          {
+            "id": 4,
+            "title": "Adicionar Validação em Tempo Real com Feedback Visual",
+            "description": "Implementar validação em tempo real para os campos do formulário, exibindo mensagens de erro claras e indicadores visuais para campos obrigatórios ou inválidos.",
+            "dependencies": [
+              2
+            ],
+            "details": "Utilizar `TextWatcher` nos campos de nome, preço e quantidade. Usar a propriedade `error` do `TextInputLayout` para mostrar mensagens como 'Campo obrigatório' ou 'Valor inválido'. Adicionar um asterisco (*) no 'hint' dos campos obrigatórios para indicá-los visualmente.\n<info added on 2025-12-17T12:50:34.220Z>\nA validação em tempo real foi implementada, incluindo estados de erro com mensagens específicas para os campos de nome, quantidade, preço e categoria. Os campos inválidos são destacados visualmente com a cor vermelha. O botão de confirmação agora permanece desabilitado até que todos os campos obrigatórios sejam preenchidos corretamente, e uma validação final também foi adicionada ao seu evento `onClick`.\n</info added on 2025-12-17T12:50:34.220Z>",
+            "status": "done",
+            "testStrategy": "Tentar salvar um item com o nome vazio e verificar se a mensagem de erro apropriada é exibida. Digitar texto não numérico no campo de preço e confirmar que a validação impede o envio e mostra um erro.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-17T12:51:54.440Z"
+          },
+          {
+            "id": 5,
+            "title": "Adicionar Botão 'Limpar' para Resetar Formulário",
+            "description": "Incluir um botão no dialog que permita ao usuário limpar todos os campos do formulário (nome, preço, quantidade, categoria) e remover quaisquer mensagens de erro exibidas.",
+            "dependencies": [
+              2,
+              4
+            ],
+            "details": "Adicionar um `ImageButton` com um ícone de 'limpar' ou 'resetar' ao layout `dialog_add_item.xml`. Configurar um `OnClickListener` para este botão que defina o texto dos `EditText`s como vazio, redefina a seleção do `Spinner` de categoria e limpe as mensagens de erro dos `TextInputLayout`s.\n<info added on 2025-12-17T13:05:45.784Z>\nImplementado um botão 'Limpar' em `dialog_add_item.xml`, posicionado ao lado do botão de cancelar. A visibilidade do botão é controlada dinamicamente, sendo exibido apenas quando o formulário contém dados. Foi criada a função `onClearForm` que limpa todos os campos (nome, preço, quantidade), reseta a seleção da categoria e remove as mensagens de erro. A funcionalidade é aplicada tanto para a adição de novos itens quanto para a edição de itens existentes.\n</info added on 2025-12-17T13:05:45.784Z>",
+            "status": "done",
+            "testStrategy": "Preencher todos os campos do formulário, incluindo alguns com erros, e clicar no botão 'Limpar'. Verificar se todos os campos são esvaziados e se as mensagens de erro desaparecem.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-17T13:05:53.309Z"
+          }
+        ],
+        "updatedAt": "2025-12-17T13:05:53.309Z"
       },
       {
         "id": "16",
@@ -1457,7 +1524,7 @@
         "testStrategy": "Verificar que scanner detecta códigos de barras corretamente. Testar que informações do produto são buscadas e preenchidas. Verificar que funciona em diferentes condições de iluminação. Testar tratamento adequado de produtos não encontrados.",
         "priority": "low",
         "dependencies": [],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -1555,7 +1622,8 @@
             "testStrategy": "Monitorar uso de bateria durante scan. Verificar que recursos são liberados corretamente.",
             "parentId": "undefined"
           }
-        ]
+        ],
+        "updatedAt": "2025-12-17T13:10:40.974Z"
       },
       {
         "id": "17",
@@ -1748,9 +1816,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-12-13T01:25:29.682Z",
+      "lastModified": "2025-12-17T13:10:40.981Z",
       "taskCount": 17,
-      "completedCount": 14,
+      "completedCount": 15,
       "tags": [
         "master"
       ]

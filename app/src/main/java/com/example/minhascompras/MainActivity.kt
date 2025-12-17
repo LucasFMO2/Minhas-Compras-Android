@@ -219,7 +219,6 @@ class MainActivity : ComponentActivity() {
                             }
                         }
 
-                        
                         NavHost(
                             navController = navController,
                             startDestination = Screen.ListaCompras.route
@@ -229,7 +228,7 @@ class MainActivity : ComponentActivity() {
                                     viewModel = viewModel,
                                     shoppingListViewModel = shoppingListViewModel,
                                     updateViewModel = updateViewModel,
-                                    initialShowDialog = shouldOpenAddDialog,
+                                    initialShowDialog = false,
                                     onNavigateToSettings = {
                                         try {
                                             navController.navigate(Screen.Settings.route)

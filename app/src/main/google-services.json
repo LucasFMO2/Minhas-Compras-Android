@@ -1,0 +1,40 @@
+{
+  "project_info": [
+    {
+      "project_number": "000000000000",
+      "project_id": "minhas-compras-android",
+      "storage_bucket": "minhas-compras-android.appspot.com"
+    },
+    {
+      "client_info": [
+        {
+          "mobilesdk_app_id": "1:000000000000:android:000000000000",
+          "client_type": 1,
+          "android_client_info": [
+            {
+              "package_name": "com.example.minhascompras",
+              "certificate_hash": "00000000000000000000000000000000000000000"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "api_key": [
+        {
+          "current_key": "AIzaSy00000000000000000000000000000000"
+        }
+      ]
+    },
+    {
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        },
+        "analytics_service": {
+          "status": 1
+        }
+      }
+    }
+  ]
+}

@@ -49,6 +49,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
+import android.util.Log
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -73,11 +74,19 @@ fun ListaComprasScreen(
     val itensComprados = allItens.count { it.comprado }
     val temItensComprados = itensComprados > 0
     
-    // Calcular total a pagar (itens não comprados)
-    val totalAPagar = remember(allItens) {
+    // Calcular totais separados
+    val totalGeral = remember(allItens) {
+        allItens.sumOf { (it.preco ?: 0.0) * it.quantidade }
+    }
+    
+    val totalPago = remember(allItens) {
         allItens
-            .filter { !it.comprado }
+            .filter { it.comprado }
             .sumOf { (it.preco ?: 0.0) * it.quantidade }
+    }
+    
+    val totalAPagar = remember(totalGeral, totalPago) {
+        totalGeral - totalPago
     }
     val formatador = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
     
@@ -610,7 +619,7 @@ fun ListaComprasScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
         bottomBar = {
-            if (allItens.isNotEmpty() && totalAPagar > 0) {
+            if (allItens.isNotEmpty()) {
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -624,25 +633,61 @@ fun ListaComprasScreen(
                             color = MaterialTheme.colorScheme.primary,
                             thickness = 2.dp
                         )
+                        
+                        // Três valores em linha
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                .padding(horizontal = 8.dp, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = "Total a Pagar:",
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                text = formatador.format(totalAPagar),
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
+                            // Total Geral
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    text = "Total",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = formatador.format(totalGeral),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                           
+                            // A Pagar
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    text = "A Pagar",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = formatador.format(totalAPagar),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.Medium,
+                                    color = if (totalAPagar > 0)
+                                        MaterialTheme.colorScheme.error
+                                    else
+                                        MaterialTheme.colorScheme.primary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
                         }
                     }
                 }
@@ -917,22 +962,36 @@ fun ListaComprasScreen(
                 itemSelecionado = null
             },
             onConfirm = { nome, quantidade, preco, categoria ->
-                itemParaEditar?.let { item ->
-                    // Editar item existente
-                    viewModel.atualizarItem(
-                        item.copy(
-                            nome = nome,
-                            quantidade = quantidade,
-                            preco = preco,
-                            categoria = categoria
+                android.util.Log.d("MinhasCompras", "=== ADICIONAR ITEM DIALOG: onConfirm iniciado ===")
+                android.util.Log.d("MinhasCompras", "Parâmetros: nome=$nome, quantidade=$quantidade, preco=$preco, categoria=$categoria")
+                android.util.Log.d("MinhasCompras", "itemEdicao: ${itemParaEditar?.nome}")
+                
+                try {
+                    itemParaEditar?.let { item ->
+                        android.util.Log.d("MinhasCompras", "Editando item existente: ${item.nome}")
+                        // Editar item existente
+                        viewModel.atualizarItem(
+                            item.copy(
+                                nome = nome,
+                                quantidade = quantidade,
+                                preco = preco,
+                                categoria = categoria
+                            )
                         )
-                    )
-                    itemParaEditar = null
-                    itemSelecionado = null
-                } ?: run {
-                    // Adicionar novo item
-                    viewModel.inserirItem(nome, quantidade, preco, categoria)
-                    showDialog = false
+                        android.util.Log.d("MinhasCompras", "Item editado com sucesso: ${item.nome}")
+                        itemParaEditar = null
+                        itemSelecionado = null
+                    } ?: run {
+                        android.util.Log.d("MinhasCompras", "Adicionando novo item: $nome")
+                        // Adicionar novo item
+                        viewModel.inserirItem(nome, quantidade, preco, categoria)
+                        android.util.Log.d("MinhasCompras", "Item adicionado com sucesso: $nome")
+                        showDialog = false
+                    }
+                    android.util.Log.d("MinhasCompras", "=== ADICIONAR ITEM DIALOG: onConfirm concluído com sucesso ===")
+                } catch (e: Exception) {
+                    android.util.Log.e("MinhasCompras", "ERRO FATAL ao adicionar/editar item: ${e.message}", e)
+                    android.util.Log.e("MinhasCompras", "Stack trace: ${e.stackTraceToString()}")
                 }
             },
             itemEdicao = itemParaEditar

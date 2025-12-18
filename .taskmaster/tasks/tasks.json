@@ -952,7 +952,7 @@
         "testStrategy": "Testar criação de múltiplas listas. Verificar migração de dados existentes para lista padrão. Testar navegação entre listas. Verificar que deletar lista remove todos os itens associados. Testar performance com 10+ listas.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -1071,7 +1071,7 @@
             "updatedAt": "2025-12-18T14:23:29.018Z"
           }
         ],
-        "updatedAt": "2025-12-18T14:23:29.018Z"
+        "updatedAt": "2025-12-18T16:59:59.152Z"
       },
       {
         "id": "12",
@@ -1525,7 +1525,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-12-18T14:23:29.023Z",
+      "lastModified": "2025-12-18T16:59:59.158Z",
       "taskCount": 17,
       "completedCount": 9,
       "tags": [

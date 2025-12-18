@@ -5,13 +5,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
+import androidx.compose.ui.Alignment
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.minhascompras.data.ItemCategory
 import com.example.minhascompras.data.ItemCompra
 import com.example.minhascompras.ui.utils.ResponsiveUtils
+import java.text.NumberFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -248,6 +252,43 @@ fun AdicionarItemDialog(
                         },
                         shape = MaterialTheme.shapes.medium
                     )
+                }
+                
+                // Cálculo em tempo real do total
+                if (preco.isNotBlank() && quantidade.isNotBlank()) {
+                    val qty = quantidade.toIntOrNull() ?: 1
+                    val price = preco.toDoubleOrNull() ?: 0.0
+                    val total = qty * price
+                    
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = ResponsiveUtils.getSmallSpacing()),
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                    )
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Total do item:",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontSize = ResponsiveUtils.getBodyFontSize()
+                            ),
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        
+                        Text(
+                            text = NumberFormat.getCurrencyInstance(Locale("pt", "BR")).format(total),
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
             }
         },

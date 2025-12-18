@@ -10,10 +10,11 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 @Database(
     entities = [
         ItemCompra::class,
+        ShoppingList::class,
         ShoppingListHistory::class,
         HistoryItem::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -34,6 +35,27 @@ abstract class AppDatabase : RoomDatabase() {
 
         val MIGRATION_3_4 = object : Migration(3, 4) {
             override fun migrate(database: SupportSQLiteDatabase) {
+                // Criar tabela de shopping lists PRIMEIRO
+                database.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS shopping_lists (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        nome TEXT NOT NULL,
+                        dataCriacao INTEGER NOT NULL,
+                        isAtiva INTEGER NOT NULL DEFAULT 1,
+                        ordem INTEGER NOT NULL DEFAULT 0
+                    )
+                    """.trimIndent()
+                )
+                
+                // Inserir lista padrão com id=1
+                database.execSQL(
+                    """
+                    INSERT OR IGNORE INTO shopping_lists (id, nome, dataCriacao, isAtiva, ordem)
+                    VALUES (1, 'Lista de Compras Padrão', ${System.currentTimeMillis()}, 1, 0)
+                    """.trimIndent()
+                )
+                
                 // Criar tabela de histórico de listas
                 database.execSQL(
                     """
@@ -65,6 +87,31 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Garantir que a tabela shopping_lists exista
+                database.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS shopping_lists (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        nome TEXT NOT NULL,
+                        dataCriacao INTEGER NOT NULL,
+                        isAtiva INTEGER NOT NULL DEFAULT 1,
+                        ordem INTEGER NOT NULL DEFAULT 0
+                    )
+                    """.trimIndent()
+                )
+                
+                // Inserir lista padrão com id=1 se não existir
+                database.execSQL(
+                    """
+                    INSERT OR IGNORE INTO shopping_lists (id, nome, dataCriacao, isAtiva, ordem)
+                    VALUES (1, 'Lista de Compras Padrão', ${System.currentTimeMillis()}, 1, 0)
+                    """.trimIndent()
+                )
+            }
+        }
+
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = try {
@@ -73,7 +120,7 @@ abstract class AppDatabase : RoomDatabase() {
                         AppDatabase::class.java,
                         "compras_database"
                     )
-                    .addMigrations(MIGRATION_2_3, MIGRATION_3_4)
+                    .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                     .fallbackToDestructiveMigration() // Fallback seguro em caso de erro de migração
                     .build()
                 } catch (e: Exception) {

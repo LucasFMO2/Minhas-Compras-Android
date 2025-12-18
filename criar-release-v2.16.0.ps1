@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 
 $version = "v2.16.0"
 $tag = "v2.16.0"
-$owner = "Lucasfmo1"
+$owner = "mfc46224-jpg"
 $repoName = "Minhas-Compras-Android"
 $apkPath = "app-release-v2.16.0.apk"
 $notesFile = "release-notes-v2.16.0.md"

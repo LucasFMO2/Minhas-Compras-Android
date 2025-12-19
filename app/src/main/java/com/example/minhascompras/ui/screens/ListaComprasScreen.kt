@@ -966,13 +966,29 @@ fun ListaComprasScreen(
                 android.util.Log.d("MinhasCompras", "Parâmetros: nome=$nome, quantidade=$quantidade, preco=$preco, categoria=$categoria")
                 android.util.Log.d("MinhasCompras", "itemEdicao: ${itemParaEditar?.nome}")
                 
+                // Validação adicional dos parâmetros
+                if (nome.isBlank()) {
+                    android.util.Log.w("MinhasCompras", "Nome do item está em branco")
+                    return@AdicionarItemDialog
+                }
+                
+                if (quantidade <= 0) {
+                    android.util.Log.w("MinhasCompras", "Quantidade inválida: $quantidade")
+                    return@AdicionarItemDialog
+                }
+                
+                if (preco != null && preco < 0) {
+                    android.util.Log.w("MinhasCompras", "Preço inválido: $preco")
+                    return@AdicionarItemDialog
+                }
+                
                 try {
                     itemParaEditar?.let { item ->
                         android.util.Log.d("MinhasCompras", "Editando item existente: ${item.nome}")
                         // Editar item existente
                         viewModel.atualizarItem(
                             item.copy(
-                                nome = nome,
+                                nome = nome.trim(),
                                 quantidade = quantidade,
                                 preco = preco,
                                 categoria = categoria
@@ -984,7 +1000,7 @@ fun ListaComprasScreen(
                     } ?: run {
                         android.util.Log.d("MinhasCompras", "Adicionando novo item: $nome")
                         // Adicionar novo item
-                        viewModel.inserirItem(nome, quantidade, preco, categoria)
+                        viewModel.inserirItem(nome.trim(), quantidade, preco, categoria)
                         android.util.Log.d("MinhasCompras", "Item adicionado com sucesso: $nome")
                         showDialog = false
                     }
@@ -992,6 +1008,19 @@ fun ListaComprasScreen(
                 } catch (e: Exception) {
                     android.util.Log.e("MinhasCompras", "ERRO FATAL ao adicionar/editar item: ${e.message}", e)
                     android.util.Log.e("MinhasCompras", "Stack trace: ${e.stackTraceToString()}")
+                    
+                    // Tentar mostrar uma mensagem para o usuário (se possível)
+                    try {
+                        scope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = "Erro ao adicionar item: ${e.message}",
+                                actionLabel = "OK",
+                                duration = SnackbarDuration.Long
+                            )
+                        }
+                    } catch (snackbarException: Exception) {
+                        android.util.Log.e("MinhasCompras", "Erro ao mostrar snackbar: ${snackbarException.message}", snackbarException)
+                    }
                 }
             },
             itemEdicao = itemParaEditar

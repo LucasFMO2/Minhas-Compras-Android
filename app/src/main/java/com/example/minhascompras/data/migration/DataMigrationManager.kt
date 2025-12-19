@@ -10,6 +10,7 @@ import com.example.minhascompras.data.update.UpdateLogger
 import com.example.minhascompras.utils.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
 
 /**
  * Gerenciador de migrações de dados para compatibilidade com v2.16.0 e versões futuras
@@ -115,8 +116,8 @@ class DataMigrationManager(private val context: Context) {
             Logger.e("DataMigrationManager", "Erro durante verificação de migração", e)
             logger.e("migration", "Erro na verificação de migração", e)
             logger.logOperationEnd(
-                operationId, "database_migration_check", "migration", 
-                false, 0, mapOf("error" to e.message)
+                operationId, "database_migration_check", "migration",
+                false, 0, mapOf("error" to (e.message ?: "Unknown error"))
             )
             
             MigrationResult(
@@ -499,13 +500,13 @@ class DataMigrationManager(private val context: Context) {
             // Verificar se tabelas existem e têm dados válidos
             try {
                 val itemDao = db.itemCompraDao()
-                val itemCount = itemDao.getAllItems().size
+                val itemCount = itemDao.getAllItemsCount()
                 if (itemCount < 0) {
                     issues.add("Contagem de itens inválida: $itemCount")
                 }
                 
                 val historyDao = db.historyDao()
-                val historyCount = historyDao.getAllHistory().size
+                val historyCount = historyDao.getAllHistoryCount()
                 if (historyCount < 0) {
                     issues.add("Contagem de histórico inválida: $historyCount")
                 }

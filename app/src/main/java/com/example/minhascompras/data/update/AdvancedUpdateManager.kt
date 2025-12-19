@@ -207,7 +207,7 @@ class AdvancedUpdateManager(private val context: Context) {
                 
                 if (attempts < MAX_UPDATE_ATTEMPTS) {
                     // Pausa entre tentativas
-                    delay(2000 * attempts)
+                    delay((2000 * attempts).toLong())
                 }
             }
             

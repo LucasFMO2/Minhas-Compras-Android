@@ -125,7 +125,7 @@ class BackupManager(private val context: Context) {
                 try {
                     extractBackupInfo(file)
                 } catch (e: Exception) {
-                    Logger.w("BackupManager", "Erro ao ler info do backup: ${file.name}", e)
+                    Logger.w("BackupManager", "Erro ao ler info do backup: ${file.name}")
                     null
                 }
             }?.sortedByDescending { it.timestamp }

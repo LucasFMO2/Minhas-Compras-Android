@@ -6,6 +6,8 @@ import android.content.pm.PackageManager
 import android.os.Build
 import com.example.minhascompras.utils.Logger
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
@@ -61,7 +63,9 @@ class UpdateLogger(private val context: Context) {
         }
         
         // Limpar logs antigos ao inicializar
-        cleanupOldLogs()
+        GlobalScope.launch(Dispatchers.IO) {
+            cleanupOldLogs()
+        }
     }
     
     /**
@@ -98,7 +102,7 @@ class UpdateLogger(private val context: Context) {
         } else {
             details
         }
-        log(LEVEL_ERROR, category, message, errorDetails)
+        log(LEVEL_ERROR, category, message, errorDetails as Map<String, Any>)
     }
     
     /**
@@ -114,7 +118,7 @@ class UpdateLogger(private val context: Context) {
         } else {
             details
         }
-        log(LEVEL_CRITICAL, category, message, errorDetails)
+        log(LEVEL_CRITICAL, category, message, errorDetails as Map<String, Any>)
     }
     
     /**
@@ -196,9 +200,9 @@ class UpdateLogger(private val context: Context) {
         statusCode?.let { networkDetails["status_code"] = it }
         duration?.let { networkDetails["duration_ms"] = it }
         bytesTransferred?.let { networkDetails["bytes_transferred"] = it }
-        error?.let { 
+        error?.let {
             networkDetails["error_type"] = it::class.java.simpleName
-            networkDetails["error_message"] = it.message
+            networkDetails["error_message"] = it.message ?: ""
         }
         
         val level = when {
@@ -405,7 +409,7 @@ class UpdateLogger(private val context: Context) {
             "model" to Build.MODEL,
             "android_version" to Build.VERSION.RELEASE,
             "api_level" to Build.VERSION.SDK_INT.toString(),
-            "architecture" to Build.SUPPORTED_ABIS.firstOrNull() ?: "unknown"
+            "architecture" to if (Build.SUPPORTED_ABIS.isNotEmpty()) Build.SUPPORTED_ABIS[0] else "unknown"
         )
     }
     
@@ -413,21 +417,21 @@ class UpdateLogger(private val context: Context) {
      * Obtém logs recentes da memória
      */
     suspend fun getRecentLogs(limit: Int = 50): List<UpdateLogEntry> {
-        return memoryLogs.takeLast(limit)
+        return memoryLogs.toList().takeLast(limit)
     }
     
     /**
      * Obtém logs de uma categoria específica
      */
     suspend fun getLogsByCategory(category: String, limit: Int = 100): List<UpdateLogEntry> {
-        return memoryLogs.filter { it.category == category }.takeLast(limit)
+        return memoryLogs.filter { it.category == category }.toList().takeLast(limit)
     }
     
     /**
      * Obtém logs de um nível específico ou superior
      */
     suspend fun getLogsByMinLevel(minLevel: Int, limit: Int = 100): List<UpdateLogEntry> {
-        return memoryLogs.filter { it.level >= minLevel }.takeLast(limit)
+        return memoryLogs.filter { it.level >= minLevel }.toList().takeLast(limit)
     }
     
     /**
@@ -441,8 +445,8 @@ class UpdateLogger(private val context: Context) {
         
         try {
             val filteredLogs = memoryLogs.filter { log ->
-                val timeMatch = startTime?.let { log.timestamp >= it } ?: true &&
-                              endTime?.let { log.timestamp <= it } ?: true
+                val timeMatch = (startTime?.let { log.timestamp >= it } ?: true) &&
+                                  (endTime?.let { log.timestamp <= it } ?: true)
                 val categoryMatch = categories?.let { log.category in it } ?: true
                 
                 timeMatch && categoryMatch
@@ -546,7 +550,19 @@ data class UpdateLogEntry(
                         is Number -> put(key, value)
                         is Boolean -> put(key, value)
                         is List<*> -> put(key, JSONArray(value))
-                        is Map<*, *> -> put(key, JSONObject(value))
+                        is Map<*, *> -> {
+                            val mapValue = value as Map<String, Any>
+                            put(key, JSONObject().apply {
+                                mapValue.forEach { (k, v) ->
+                                    when (v) {
+                                        is String -> put(k, v)
+                                        is Number -> put(k, v)
+                                        is Boolean -> put(k, v)
+                                        else -> put(k, v.toString())
+                                    }
+                                }
+                            })
+                        }
                         else -> put(key, value.toString())
                     }
                 }

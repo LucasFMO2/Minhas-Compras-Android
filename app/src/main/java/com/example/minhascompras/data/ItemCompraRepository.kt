@@ -90,26 +90,72 @@ class ItemCompraRepository(
     }
 
     suspend fun insert(item: ItemCompra): Long {
-        val id = itemCompraDao.insert(item)
-        // Sincronizar com Supabase se disponível e usuário autenticado
-        if (syncService.isAvailable() && authService.isAuthenticated()) {
-            val userId = authService.getCurrentUserId()
-            val insertedItem = item.copy(id = id)
-            syncService.syncItemToSupabase(insertedItem, userId).onFailure {
-                // Log do erro, mas não falha a operação local
+        android.util.Log.d("ItemCompraRepository", "=== INSERT INICIADO ===")
+        android.util.Log.d("ItemCompraRepository", "Item a ser inserido: $item")
+        
+        return try {
+            android.util.Log.d("ItemCompraRepository", "Iniciando inserção no DAO")
+            val id = itemCompraDao.insert(item)
+            android.util.Log.d("ItemCompraRepository", "Item inserido no DAO com ID: $id")
+            
+            // Sincronizar com Supabase se disponível e usuário autenticado
+            android.util.Log.d("ItemCompraRepository", "Verificando sincronização com Supabase")
+            android.util.Log.d("ItemCompraRepository", "SyncService disponível: ${syncService.isAvailable()}")
+            android.util.Log.d("ItemCompraRepository", "Usuário autenticado: ${authService.isAuthenticated()}")
+            
+            if (syncService.isAvailable() && authService.isAuthenticated()) {
+                android.util.Log.d("ItemCompraRepository", "Iniciando sincronização com Supabase")
+                val userId = authService.getCurrentUserId()
+                android.util.Log.d("ItemCompraRepository", "UserID: $userId")
+                val insertedItem = item.copy(id = id)
+                syncService.syncItemToSupabase(insertedItem, userId).onFailure { exception ->
+                    android.util.Log.w("ItemCompraRepository", "Erro na sincronização com Supabase (não crítico)", exception)
+                    // Log do erro, mas não falha a operação local
+                }
+                android.util.Log.d("ItemCompraRepository", "Sincronização com Supabase concluída")
+            } else {
+                android.util.Log.d("ItemCompraRepository", "Pulando sincronização com Supabase (não disponível ou usuário não autenticado)")
             }
+            
+            android.util.Log.d("ItemCompraRepository", "=== INSERT CONCLUÍDO COM SUCESSO ===")
+            return id
+        } catch (e: Exception) {
+            android.util.Log.e("ItemCompraRepository", "ERRO CRÍTICO AO INSERIR ITEM: ${e.message}", e)
+            android.util.Log.e("ItemCompraRepository", "Stack trace: ${e.stackTraceToString()}")
+            android.util.Log.e("ItemCompraRepository", "=== INSERT FALHOU ===")
+            throw e // Propagar exceção para tratamento superior
         }
-        return id
     }
 
     suspend fun update(item: ItemCompra) {
-        itemCompraDao.update(item)
-        // Sincronizar com Supabase se disponível e usuário autenticado
-        if (syncService.isAvailable() && authService.isAuthenticated()) {
-            val userId = authService.getCurrentUserId()
-            syncService.syncItemToSupabase(item, userId).onFailure {
-                // Log do erro, mas não falha a operação local
+        android.util.Log.d("ItemCompraRepository", "=== UPDATE INICIADO ===")
+        android.util.Log.d("ItemCompraRepository", "Item a ser atualizado: $item")
+        
+        try {
+            android.util.Log.d("ItemCompraRepository", "Iniciando atualização no DAO")
+            itemCompraDao.update(item)
+            android.util.Log.d("ItemCompraRepository", "Item atualizado no DAO com sucesso")
+            
+            // Sincronizar com Supabase se disponível e usuário autenticado
+            android.util.Log.d("ItemCompraRepository", "Verificando sincronização com Supabase")
+            if (syncService.isAvailable() && authService.isAuthenticated()) {
+                android.util.Log.d("ItemCompraRepository", "Iniciando sincronização com Supabase")
+                val userId = authService.getCurrentUserId()
+                syncService.syncItemToSupabase(item, userId).onFailure { exception ->
+                    android.util.Log.w("ItemCompraRepository", "Erro na sincronização com Supabase (não crítico)", exception)
+                    // Log do erro, mas não falha a operação local
+                }
+                android.util.Log.d("ItemCompraRepository", "Sincronização com Supabase concluída")
+            } else {
+                android.util.Log.d("ItemCompraRepository", "Pulando sincronização com Supabase (não disponível ou usuário não autenticado)")
             }
+            
+            android.util.Log.d("ItemCompraRepository", "=== UPDATE CONCLUÍDO COM SUCESSO ===")
+        } catch (e: Exception) {
+            android.util.Log.e("ItemCompraRepository", "ERRO CRÍTICO AO ATUALIZAR ITEM: ${e.message}", e)
+            android.util.Log.e("ItemCompraRepository", "Stack trace: ${e.stackTraceToString()}")
+            android.util.Log.e("ItemCompraRepository", "=== UPDATE FALHOU ===")
+            throw e // Propagar exceção para tratamento superior
         }
     }
 

@@ -28,6 +28,9 @@ interface HistoryDao {
     @Query("DELETE FROM shopping_list_history WHERE id = :historyId")
     suspend fun deleteHistoryById(historyId: Long)
 
+    @Query("SELECT COUNT(*) FROM shopping_list_history")
+    suspend fun getAllHistoryCount(): Int
+
     @Transaction
     suspend fun insertHistoryWithItems(
         history: ShoppingListHistory,

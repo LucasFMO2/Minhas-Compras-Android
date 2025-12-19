@@ -97,16 +97,48 @@ class ListaComprasViewModel(
     }
 
     fun inserirItem(nome: String, quantidade: Int = 1, preco: Double? = null, categoria: String = "Outros") {
+        android.util.Log.d("ListaComprasViewModel", "=== INSERIR ITEM INICIADO ===")
+        android.util.Log.d("ListaComprasViewModel", "Parâmetros: nome=$nome, quantidade=$quantidade, preco=$preco, categoria=$categoria")
+        
         if (nome.isNotBlank()) {
             viewModelScope.launch {
-                repository.insert(ItemCompra(nome = nome.trim(), quantidade = quantidade, preco = preco, categoria = categoria))
+                try {
+                    android.util.Log.d("ListaComprasViewModel", "Criando objeto ItemCompra")
+                    val item = ItemCompra(nome = nome.trim(), quantidade = quantidade, preco = preco, categoria = categoria)
+                    android.util.Log.d("ListaComprasViewModel", "Item criado: $item")
+                    
+                    android.util.Log.d("ListaComprasViewModel", "Iniciando inserção no repositório")
+                    val id = repository.insert(item)
+                    android.util.Log.d("ListaComprasViewModel", "Item inserido com sucesso, ID: $id")
+                    android.util.Log.d("ListaComprasViewModel", "=== INSERIR ITEM CONCLUÍDO COM SUCESSO ===")
+                } catch (e: Exception) {
+                    android.util.Log.e("ListaComprasViewModel", "ERRO AO INSERIR ITEM: ${e.message}", e)
+                    android.util.Log.e("ListaComprasViewModel", "Stack trace: ${e.stackTraceToString()}")
+                    android.util.Log.e("ListaComprasViewModel", "=== INSERIR ITEM FALHOU ===")
+                    _uiMessages.emit(UiMessage.Error("Erro ao adicionar item: ${e.message}"))
+                }
             }
+        } else {
+            android.util.Log.w("ListaComprasViewModel", "Nome do item está em branco, ignorando inserção")
         }
     }
 
     fun atualizarItem(item: ItemCompra) {
+        android.util.Log.d("ListaComprasViewModel", "=== ATUALIZAR ITEM INICIADO ===")
+        android.util.Log.d("ListaComprasViewModel", "Item a ser atualizado: $item")
+        
         viewModelScope.launch {
-            repository.update(item)
+            try {
+                android.util.Log.d("ListaComprasViewModel", "Iniciando atualização no repositório")
+                repository.update(item)
+                android.util.Log.d("ListaComprasViewModel", "Item atualizado com sucesso")
+                android.util.Log.d("ListaComprasViewModel", "=== ATUALIZAR ITEM CONCLUÍDO COM SUCESSO ===")
+            } catch (e: Exception) {
+                android.util.Log.e("ListaComprasViewModel", "ERRO AO ATUALIZAR ITEM: ${e.message}", e)
+                android.util.Log.e("ListaComprasViewModel", "Stack trace: ${e.stackTraceToString()}")
+                android.util.Log.e("ListaComprasViewModel", "=== ATUALIZAR ITEM FALHOU ===")
+                _uiMessages.emit(UiMessage.Error("Erro ao atualizar item: ${e.message}"))
+            }
         }
     }
 

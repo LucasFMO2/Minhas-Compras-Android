@@ -79,7 +79,18 @@ fun ListaComprasScreen(
             .filter { !it.comprado }
             .sumOf { (it.preco ?: 0.0) * it.quantidade }
     }
-    val formatador = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
+    // Total geral (inclui comprados + pendentes)
+    val totalGeral = remember(allItens) {
+        allItens.sumOf { (it.preco ?: 0.0) * it.quantidade }
+    }
+
+    // Usar a mesma configuração de moeda exibida no app (pt-BR, 2 casas decimais)
+    val formatador = remember {
+        NumberFormat.getCurrencyInstance(Locale("pt", "BR")).apply {
+            minimumFractionDigits = 2
+            maximumFractionDigits = 2
+        }
+    }
     
     val sortOrder by viewModel.sortOrder.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -610,7 +621,7 @@ fun ListaComprasScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
         bottomBar = {
-            if (allItens.isNotEmpty() && totalAPagar > 0) {
+            if (allItens.isNotEmpty() && (totalAPagar > 0 || totalGeral > 0)) {
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -624,25 +635,97 @@ fun ListaComprasScreen(
                             color = MaterialTheme.colorScheme.primary,
                             thickness = 2.dp
                         )
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "Total a Pagar:",
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                text = formatador.format(totalAPagar),
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
+                        val temPendentes = itensComprados < totalItens
+                        val mostrarAPagar = totalAPagar > 0
+                        val mostrarTotal = totalGeral > 0 && itensComprados > 0
+                        val mostrarAmbos = mostrarTotal && mostrarAPagar && temPendentes
+
+                        if (mostrarAmbos) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(
+                                    modifier = Modifier.weight(1f),
+                                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                                ) {
+                                    Text(
+                                        text = "Total",
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontSize = ResponsiveUtils.getLabelFontSize()
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Text(
+                                        text = formatador.format(totalGeral),
+                                        style = MaterialTheme.typography.bodySmall.copy(
+                                            fontSize = ResponsiveUtils.getLabelFontSize()
+                                        ),
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+
+                                VerticalDivider(
+                                    modifier = Modifier
+                                        .height(28.dp)
+                                        .padding(horizontal = 12.dp),
+                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
+                                )
+
+                                Column(
+                                    modifier = Modifier.weight(1f),
+                                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                                ) {
+                                    Text(
+                                        text = "A pagar",
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontSize = ResponsiveUtils.getLabelFontSize()
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Text(
+                                        text = formatador.format(totalAPagar),
+                                        style = MaterialTheme.typography.bodySmall.copy(
+                                            fontSize = ResponsiveUtils.getLabelFontSize()
+                                        ),
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
+                        } else {
+                            // Mantém um único indicador quando "Total" e "A pagar" seriam redundantes
+                            val (label, valor) = when {
+                                mostrarAPagar -> "A pagar" to totalAPagar
+                                else -> "Total" to totalGeral
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "$label:",
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        fontSize = ResponsiveUtils.getLabelFontSize()
+                                    ),
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    text = formatador.format(valor),
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        fontSize = ResponsiveUtils.getLabelFontSize()
+                                    ),
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
                         }
                     }
                 }

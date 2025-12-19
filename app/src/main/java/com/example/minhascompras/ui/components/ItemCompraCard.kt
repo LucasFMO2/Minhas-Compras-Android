@@ -14,6 +14,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.minhascompras.data.ItemCompra
+import com.example.minhascompras.ui.utils.ResponsiveUtils
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -73,7 +74,9 @@ fun ItemCompraCard(
                 // Nome do item
                 Text(
                     text = item.nome,
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontSize = ResponsiveUtils.getBodyFontSize()
+                    ),
                     fontWeight = if (item.comprado) FontWeight.Normal else FontWeight.Medium,
                     textDecoration = if (item.comprado) {
                         TextDecoration.LineThrough
@@ -98,7 +101,9 @@ fun ItemCompraCard(
                         if (item.quantidade > 1) {
                             Text(
                                 text = "${item.quantidade}x",
-                                style = MaterialTheme.typography.bodySmall,
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontSize = ResponsiveUtils.getLabelFontSize()
+                                ),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                             )
                         }
@@ -106,8 +111,10 @@ fun ItemCompraCard(
                         if (item.preco != null && item.preco > 0) {
                             Text(
                                 text = formatador.format(item.preco * item.quantidade),
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.Medium,
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontSize = ResponsiveUtils.getLabelFontSize()
+                                ),
+                                fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.primary
                             )
                         }

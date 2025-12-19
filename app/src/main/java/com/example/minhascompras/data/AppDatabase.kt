@@ -14,7 +14,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         ShoppingListHistory::class,
         HistoryItem::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -112,6 +112,25 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Migração para v2.18.0 - Adicionar colunas de otimização
+                database.execSQL(
+                    "ALTER TABLE itens_compra ADD COLUMN last_updated INTEGER DEFAULT 0"
+                )
+                
+                // Adicionar índice para performance
+                database.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_itens_compra_last_updated ON itens_compra(last_updated)"
+                )
+                
+                // Atualizar registros existentes
+                database.execSQL(
+                    "UPDATE itens_compra SET last_updated = strftime('%s','now') WHERE last_updated = 0"
+                )
+            }
+        }
+
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = try {
@@ -120,7 +139,7 @@ abstract class AppDatabase : RoomDatabase() {
                         AppDatabase::class.java,
                         "compras_database"
                     )
-                    .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                    .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                     .fallbackToDestructiveMigration() // Fallback seguro em caso de erro de migração
                     .build()
                 } catch (e: Exception) {

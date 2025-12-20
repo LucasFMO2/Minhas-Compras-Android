@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.History
@@ -625,6 +626,7 @@ fun ListaComprasScreen(
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .height(64.dp)
                         .navigationBarsPadding(),
                     color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
                     shadowElevation = 12.dp
@@ -651,13 +653,24 @@ fun ListaComprasScreen(
                                     modifier = Modifier.weight(1f),
                                     verticalArrangement = Arrangement.spacedBy(2.dp)
                                 ) {
-                                    Text(
-                                        text = "Total",
-                                        style = MaterialTheme.typography.labelSmall.copy(
-                                            fontSize = ResponsiveUtils.getLabelFontSize()
-                                        ),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.CreditCard,
+                                            contentDescription = "Ícone de total",
+                                            modifier = Modifier.size(16.dp),
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Text(
+                                            text = "Total",
+                                            style = MaterialTheme.typography.labelSmall.copy(
+                                                fontSize = ResponsiveUtils.getLabelFontSize()
+                                            ),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
                                     Text(
                                         text = formatador.format(totalGeral),
                                         style = MaterialTheme.typography.bodySmall.copy(
@@ -679,13 +692,24 @@ fun ListaComprasScreen(
                                     modifier = Modifier.weight(1f),
                                     verticalArrangement = Arrangement.spacedBy(2.dp)
                                 ) {
-                                    Text(
-                                        text = "A pagar",
-                                        style = MaterialTheme.typography.labelSmall.copy(
-                                            fontSize = ResponsiveUtils.getLabelFontSize()
-                                        ),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.CreditCard,
+                                            contentDescription = "Ícone de a pagar",
+                                            modifier = Modifier.size(16.dp),
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Text(
+                                            text = "A pagar",
+                                            style = MaterialTheme.typography.labelSmall.copy(
+                                                fontSize = ResponsiveUtils.getLabelFontSize()
+                                            ),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
                                     Text(
                                         text = formatador.format(totalAPagar),
                                         style = MaterialTheme.typography.bodySmall.copy(
@@ -709,14 +733,25 @@ fun ListaComprasScreen(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(
-                                    text = "$label:",
-                                    style = MaterialTheme.typography.bodySmall.copy(
-                                        fontSize = ResponsiveUtils.getLabelFontSize()
-                                    ),
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.CreditCard,
+                                        contentDescription = "Ícone de $label",
+                                        modifier = Modifier.size(16.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Text(
+                                        text = "$label:",
+                                        style = MaterialTheme.typography.bodySmall.copy(
+                                            fontSize = ResponsiveUtils.getLabelFontSize()
+                                        ),
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                                 Text(
                                     text = formatador.format(valor),
                                     style = MaterialTheme.typography.bodySmall.copy(

@@ -253,7 +253,7 @@ fun SettingsScreen(
                             imageVector = Icons.Default.Settings,
                             contentDescription = null,
                             modifier = Modifier.size(
-                                if (ResponsiveUtils.isSmallScreen()) 20.dp else 24.dp
+                                if (ResponsiveUtils.isSmallScreen()) 18.dp else 20.dp
                             )
                         )
                         Text(
@@ -269,7 +269,8 @@ fun SettingsScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Voltar"
+                            contentDescription = "Voltar",
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 },

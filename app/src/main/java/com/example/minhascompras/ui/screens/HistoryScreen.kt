@@ -34,7 +34,7 @@ fun HistoryScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { 
+                title = {
                     Text(
                         "Histórico de Compras",
                         style = MaterialTheme.typography.titleLarge.copy(
@@ -46,7 +46,8 @@ fun HistoryScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Voltar"
+                            contentDescription = "Voltar",
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 },

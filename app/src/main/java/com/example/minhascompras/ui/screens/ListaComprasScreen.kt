@@ -378,7 +378,7 @@ fun ListaComprasScreen(
                                     imageVector = Icons.Default.ShoppingCart,
                                     contentDescription = "Ícone de carrinho de compras",
                                     modifier = Modifier.size(
-                                        if (ResponsiveUtils.isSmallScreen()) 20.dp else 24.dp
+                                        if (ResponsiveUtils.isSmallScreen()) 18.dp else 20.dp
                                     )
                                 )
                                 Text(
@@ -438,7 +438,7 @@ fun ListaComprasScreen(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 8.dp, vertical = 8.dp),
+                                .padding(horizontal = 8.dp, vertical = 4.dp),
                             horizontalArrangement = Arrangement.SpaceEvenly,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -455,7 +455,7 @@ fun ListaComprasScreen(
                                         MaterialTheme.colorScheme.error 
                                     else 
                                         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                                    modifier = Modifier.size(24.dp)
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                             
@@ -476,7 +476,7 @@ fun ListaComprasScreen(
                                         MaterialTheme.colorScheme.onSurface 
                                     else 
                                         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                                    modifier = Modifier.size(24.dp)
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                             
@@ -492,7 +492,7 @@ fun ListaComprasScreen(
                                             MaterialTheme.colorScheme.primary 
                                         else 
                                             MaterialTheme.colorScheme.onSurface,
-                                        modifier = Modifier.size(24.dp)
+                                        modifier = Modifier.size(20.dp)
                                     )
                                 }
                                 
@@ -584,7 +584,7 @@ fun ListaComprasScreen(
                                     imageVector = Icons.Default.History,
                                     contentDescription = "Histórico",
                                     tint = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.size(24.dp)
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                             
@@ -600,7 +600,7 @@ fun ListaComprasScreen(
                                         MaterialTheme.colorScheme.primary 
                                     else 
                                         MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.size(24.dp)
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                         }
@@ -626,7 +626,7 @@ fun ListaComprasScreen(
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(64.dp)
+                        .height(48.dp)
                         .navigationBarsPadding(),
                     color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
                     shadowElevation = 12.dp
@@ -646,7 +646,7 @@ fun ListaComprasScreen(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                                    .padding(horizontal = 16.dp, vertical = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Column(
@@ -729,7 +729,7 @@ fun ListaComprasScreen(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                                    .padding(horizontal = 16.dp, vertical = 8.dp),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {

@@ -13,8 +13,8 @@ android {
         applicationId = "com.example.minhascompras"
         minSdk = 24
         targetSdk = 34
-        versionCode = 69
-        versionName = "2.17.3"
+        versionCode = 68
+        versionName = "2.17.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -49,7 +49,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.15"
+        kotlinCompilerExtensionVersion = "1.5.14"
     }
 }
 
@@ -62,8 +62,8 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    // Material Icons Extended - versão compatível com Compose BOM 2024.05.00
-    implementation("androidx.compose.material:material-icons-extended:1.5.4")
+    // Material Icons Extended - versão compatível com Compose BOM 2023.10.01
+    implementation("androidx.compose.material:material-icons-extended:1.6.7")
     
     // Room
     implementation(libs.androidx.room.runtime)

@@ -26,7 +26,7 @@ if ($LASTEXITCODE -eq 0) {
         Copy-Item $apkPath -Destination ".\" -Force
         
         # Renomeia o APK para incluir a versão
-        $version = "2.17.2"  # Versão atual do app
+        $version = "2.17.3"  # Versão atual do app
         $newApkName = "app-release-v$version.apk"
         Rename-Item "app-release.apk" $newApkName -Force
         

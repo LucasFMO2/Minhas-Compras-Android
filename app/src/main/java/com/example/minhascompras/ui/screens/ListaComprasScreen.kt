@@ -626,7 +626,7 @@ fun ListaComprasScreen(
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(48.dp)
+                        .wrapContentHeight()
                         .navigationBarsPadding(),
                     color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
                     shadowElevation = 12.dp
@@ -637,123 +637,55 @@ fun ListaComprasScreen(
                             color = MaterialTheme.colorScheme.primary,
                             thickness = 2.dp
                         )
-                        val temPendentes = itensComprados < totalItens
-                        val mostrarAPagar = totalAPagar > 0
-                        val mostrarTotal = totalGeral > 0 && itensComprados > 0
-                        val mostrarAmbos = mostrarTotal && mostrarAPagar && temPendentes
-
-                        if (mostrarAmbos) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Total com ícone ShoppingCart (sem texto)
                             Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                                modifier = Modifier.weight(1f),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Column(
-                                    modifier = Modifier.weight(1f),
-                                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.CreditCard,
-                                            contentDescription = "Ícone de total",
-                                            modifier = Modifier.size(16.dp),
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                        Text(
-                                            text = "Total",
-                                            style = MaterialTheme.typography.labelSmall.copy(
-                                                fontSize = ResponsiveUtils.getLabelFontSize()
-                                            ),
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                    Text(
-                                        text = formatador.format(totalGeral),
-                                        style = MaterialTheme.typography.bodySmall.copy(
-                                            fontSize = ResponsiveUtils.getLabelFontSize()
-                                        ),
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                }
-
-                                VerticalDivider(
-                                    modifier = Modifier
-                                        .height(28.dp)
-                                        .padding(horizontal = 12.dp),
-                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
+                                Icon(
+                                    imageVector = Icons.Default.ShoppingCart,
+                                    contentDescription = "Total",
+                                    modifier = Modifier.size(20.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
-
-                                Column(
-                                    modifier = Modifier.weight(1f),
-                                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.CreditCard,
-                                            contentDescription = "Ícone de a pagar",
-                                            modifier = Modifier.size(16.dp),
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                        Text(
-                                            text = "A pagar",
-                                            style = MaterialTheme.typography.labelSmall.copy(
-                                                fontSize = ResponsiveUtils.getLabelFontSize()
-                                            ),
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                    Text(
-                                        text = formatador.format(totalAPagar),
-                                        style = MaterialTheme.typography.bodySmall.copy(
-                                            fontSize = ResponsiveUtils.getLabelFontSize()
-                                        ),
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                }
-                            }
-                        } else {
-                            // Mantém um único indicador quando "Total" e "A pagar" seriam redundantes
-                            val (label, valor) = when {
-                                mostrarAPagar -> "A pagar" to totalAPagar
-                                else -> "Total" to totalGeral
-                            }
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.CreditCard,
-                                        contentDescription = "Ícone de $label",
-                                        modifier = Modifier.size(16.dp),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    Text(
-                                        text = "$label:",
-                                        style = MaterialTheme.typography.bodySmall.copy(
-                                            fontSize = ResponsiveUtils.getLabelFontSize()
-                                        ),
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
                                 Text(
-                                    text = formatador.format(valor),
+                                    text = formatador.format(totalGeral),
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        fontSize = ResponsiveUtils.getLabelFontSize()
+                                    ),
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+
+                            VerticalDivider(
+                                modifier = Modifier
+                                    .height(28.dp)
+                                    .padding(horizontal = 12.dp),
+                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
+                            )
+
+                            // A Pagar com ícone CreditCard (sem texto)
+                            Row(
+                                modifier = Modifier.weight(1f),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.CreditCard,
+                                    contentDescription = "A pagar",
+                                    modifier = Modifier.size(20.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    text = formatador.format(totalAPagar),
                                     style = MaterialTheme.typography.bodySmall.copy(
                                         fontSize = ResponsiveUtils.getLabelFontSize()
                                     ),

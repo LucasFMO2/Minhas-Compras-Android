@@ -69,19 +69,28 @@ class HistoryViewModel(
         viewModelScope.launch {
             // ID negativo: lista arquivada
             val listId = -historyId
-            
+
             // Verificar se há histórico real (ShoppingListHistory) para esta lista
             // Quando archiveCurrentList é chamado, cria um ShoppingListHistory com os itens
             val realHistoryList = repository.getHistoryLists(listId).first()
             val realHistory = realHistoryList.firstOrNull { it.listId == listId }
-            
-            val activeListId = shoppingListPreferencesManager.activeListId.first()
-            
-            if (realHistory != null && activeListId != null) {
-                // Há histórico real com itens salvos: usar repository.reuseHistoryList que copia os itens
-                repository.reuseHistoryList(realHistory.id, activeListId)
-                // Selecionar a lista como ativa (já desarquivada pelo repository)
+
+            if (realHistory != null) {
+                // Há histórico com itens: copiar itens de volta para a lista arquivada
+                repository.reuseHistoryList(realHistory.id, listId)
+
+                // Desarquivar a lista arquivada
+                shoppingListRepository?.let { repo ->
+                    val list = repo.getListByIdSync(listId)
+                    if (list != null && list.isArchived) {
+                        repo.updateList(list.copy(isArchived = false))
+                    }
+                }
+
+                // Selecionar a lista arquivada como ativa
                 shoppingListPreferencesManager.setActiveListId(listId)
+
+                // NÃO deletar o histórico - manter para reutilização futura
             } else {
                 // Não há histórico: apenas desarquivar e selecionar a lista
                 // (não há itens para copiar - lista foi arquivada sem itens ou histórico foi deletado)

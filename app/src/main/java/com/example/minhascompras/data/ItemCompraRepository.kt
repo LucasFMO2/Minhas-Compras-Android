@@ -391,9 +391,9 @@ class ItemCompraRepository(
                     }
                 }
             }
-            
-            // Deletar o histórico após reutilizar, fazendo a lista desaparecer do histórico
-            historyDao.deleteHistoryById(historyId)
+
+            // NÃO deletar o histórico após reutilizar - manter para reutilização futura
+            // historyDao.deleteHistoryById(historyId)
         }
     }
 

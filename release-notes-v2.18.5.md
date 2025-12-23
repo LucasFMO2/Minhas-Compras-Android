@@ -25,8 +25,8 @@ Esta versão corrige um problema crítico onde ao reutilizar uma lista arquivada
 
 ### 📋 Detalhes Técnicos
 
-- **Version Code**: 82
-- **Version Name**: 2.18.5
+- **Version Code**: 83
+- **Version Name**: 2.18.6
 - **Target SDK**: 34
 - **Min SDK**: 24
 

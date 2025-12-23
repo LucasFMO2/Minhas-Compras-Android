@@ -8,7 +8,8 @@ import kotlinx.coroutines.flow.map
 
 class ItemCompraRepository(
     private val itemCompraDao: ItemCompraDao,
-    private val historyDao: HistoryDao
+    private val historyDao: HistoryDao,
+    private val shoppingListDao: ShoppingListDao? = null
 ) {
     private val syncService = SupabaseSyncService(itemCompraDao, historyDao)
     // AuthService inicializado de forma lazy para evitar crashes na inicialização
@@ -25,6 +26,14 @@ class ItemCompraRepository(
 
     suspend fun getAllItensList(): List<ItemCompra> {
         return itemCompraDao.getAllItens().first()
+    }
+
+    fun getAllItensByList(listId: Long): Flow<List<ItemCompra>> {
+        return itemCompraDao.getItensByList(listId)
+    }
+
+    suspend fun getAllItensListByList(listId: Long): List<ItemCompra> {
+        return itemCompraDao.getItensByList(listId).first()
     }
 
     fun getFilteredItens(
@@ -54,6 +63,41 @@ class ItemCompraRepository(
                     itemCompraDao.getItensByStatus(comprado = true)
                 } else {
                     itemCompraDao.searchItensByStatus(normalizedQuery, comprado = true)
+                }
+            }
+        }
+        
+        return baseFlow.map { items -> applySortOrder(items, sortOrder) }
+    }
+
+    fun getFilteredItensByList(
+        listId: Long,
+        searchQuery: String, 
+        filterStatus: FilterStatus,
+        sortOrder: SortOrder
+    ): Flow<List<ItemCompra>> {
+        val normalizedQuery = searchQuery.trim()
+        
+        val baseFlow = when (filterStatus) {
+            FilterStatus.ALL -> {
+                if (normalizedQuery.isEmpty()) {
+                    itemCompraDao.getItensByList(listId)
+                } else {
+                    itemCompraDao.searchItensByList(listId, normalizedQuery)
+                }
+            }
+            FilterStatus.PENDING -> {
+                if (normalizedQuery.isEmpty()) {
+                    itemCompraDao.getItensByListAndStatus(listId, comprado = false)
+                } else {
+                    itemCompraDao.searchItensByListAndStatus(listId, normalizedQuery, comprado = false)
+                }
+            }
+            FilterStatus.PURCHASED -> {
+                if (normalizedQuery.isEmpty()) {
+                    itemCompraDao.getItensByListAndStatus(listId, comprado = true)
+                } else {
+                    itemCompraDao.searchItensByListAndStatus(listId, normalizedQuery, comprado = true)
                 }
             }
         }
@@ -141,10 +185,44 @@ class ItemCompraRepository(
         }
     }
 
+    suspend fun deleteCompradosByList(listId: Long) {
+        // Obter itens comprados da lista antes de deletar para sincronizar
+        val comprados = itemCompraDao.getItensByList(listId).first().filter { it.comprado }
+        itemCompraDao.deleteCompradosByList(listId)
+        // Sincronizar deleções com Supabase
+        if (syncService.isAvailable() && authService.isAuthenticated()) {
+            val userId = authService.getCurrentUserId()
+            comprados.forEach { item ->
+                if (item.id > 0) {
+                    syncService.deleteItemFromSupabase(item.id, userId).onFailure {
+                        // Log do erro, mas não falha a operação local
+                    }
+                }
+            }
+        }
+    }
+
     suspend fun deleteAll() {
         // Obter todos os itens antes de deletar para sincronizar
         val todosItens = itemCompraDao.getAllItens().first()
         itemCompraDao.deleteAll()
+        // Sincronizar deleções com Supabase
+        if (syncService.isAvailable() && authService.isAuthenticated()) {
+            val userId = authService.getCurrentUserId()
+            todosItens.forEach { item ->
+                if (item.id > 0) {
+                    syncService.deleteItemFromSupabase(item.id, userId).onFailure {
+                        // Log do erro, mas não falha a operação local
+                    }
+                }
+            }
+        }
+    }
+
+    suspend fun deleteAllByList(listId: Long) {
+        // Obter todos os itens da lista antes de deletar para sincronizar
+        val todosItens = itemCompraDao.getItensByList(listId).first()
+        itemCompraDao.deleteAllByList(listId)
         // Sincronizar deleções com Supabase
         if (syncService.isAvailable() && authService.isAuthenticated()) {
             val userId = authService.getCurrentUserId()
@@ -163,12 +241,43 @@ class ItemCompraRepository(
     }
 
     // Funções de histórico
-    suspend fun archiveCurrentList(items: List<ItemCompra>) {
-        if (items.isEmpty()) return
+    suspend fun archiveCurrentList(listId: Long, listName: String) {
+        // #region agent log
+        com.example.minhascompras.utils.DebugLogger.log(
+            location = "ItemCompraRepository.kt:archiveCurrentList",
+            message = "function called",
+            data = mapOf("listId" to listId, "listName" to listName),
+            hypothesisId = "F"
+        )
+        // #endregion
+        
+        val items = itemCompraDao.getItensByList(listId).first()
+        
+        // #region agent log
+        com.example.minhascompras.utils.DebugLogger.log(
+            location = "ItemCompraRepository.kt:archiveCurrentList",
+            message = "items retrieved",
+            data = mapOf("itemCount" to items.size),
+            hypothesisId = "F"
+        )
+        // #endregion
+        
+        if (items.isEmpty()) {
+            // #region agent log
+            com.example.minhascompras.utils.DebugLogger.log(
+                location = "ItemCompraRepository.kt:archiveCurrentList",
+                message = "no items to archive, returning",
+                data = emptyMap(),
+                hypothesisId = "F"
+            )
+            // #endregion
+            return
+        }
         
         val history = ShoppingListHistory(
             completionDate = System.currentTimeMillis(),
-            listName = "Lista de Compras"
+            listName = listName,
+            listId = listId // Associar histórico à lista específica
         )
         
         val historyItems = items.map { item ->
@@ -181,7 +290,25 @@ class ItemCompraRepository(
             )
         }
         
+        // #region agent log
+        com.example.minhascompras.utils.DebugLogger.log(
+            location = "ItemCompraRepository.kt:archiveCurrentList",
+            message = "inserting history with items",
+            data = mapOf("historyItemsCount" to historyItems.size),
+            hypothesisId = "F"
+        )
+        // #endregion
+        
         historyDao.insertHistoryWithItems(history, historyItems)
+        
+        // #region agent log
+        com.example.minhascompras.utils.DebugLogger.log(
+            location = "ItemCompraRepository.kt:archiveCurrentList",
+            message = "history inserted, deleting items",
+            data = mapOf("listId" to listId),
+            hypothesisId = "F"
+        )
+        // #endregion
         
         // Sincronizar histórico com Supabase se disponível
         if (syncService.isAvailable() && authService.isAuthenticated()) {
@@ -192,11 +319,42 @@ class ItemCompraRepository(
         }
         
         // Limpar a lista atual
-        itemCompraDao.deleteAll()
+        itemCompraDao.deleteAllByList(listId)
+        
+        // Marcar a lista como arquivada
+        shoppingListDao?.let { dao ->
+            val list = dao.getListByIdSync(listId)
+            if (list != null) {
+                val archivedList = list.copy(isArchived = true)
+                dao.update(archivedList)
+            }
+        }
+        
+        // #region agent log
+        com.example.minhascompras.utils.DebugLogger.log(
+            location = "ItemCompraRepository.kt:archiveCurrentList",
+            message = "archive completed",
+            data = mapOf("listId" to listId),
+            hypothesisId = "F"
+        )
+        // #endregion
     }
 
     fun getHistoryLists(): Flow<List<ShoppingListHistory>> {
         return historyDao.getAllHistoryLists()
+    }
+
+    /**
+     * Obtém histórico de listas, opcionalmente filtrado por listId.
+     * Se listId for null, retorna histórico de todas as listas.
+     * Se listId for fornecido, retorna apenas histórico daquela lista específica.
+     */
+    fun getHistoryLists(listId: Long?): Flow<List<ShoppingListHistory>> {
+        return if (listId == null) {
+            historyDao.getAllHistoryLists()
+        } else {
+            historyDao.getHistoryListsByListId(listId)
+        }
     }
 
     fun getHistoryListWithItems(historyId: Long): Flow<ShoppingListHistoryWithItems?> {
@@ -207,7 +365,7 @@ class ItemCompraRepository(
         historyDao.deleteHistoryById(historyId)
     }
 
-    suspend fun reuseHistoryList(historyId: Long) {
+    suspend fun reuseHistoryList(historyId: Long, listId: Long) {
         val historyWithItems = historyDao.getHistoryListWithItems(historyId).first()
         if (historyWithItems != null) {
             val items = historyWithItems.items.map { historyItem ->
@@ -217,10 +375,25 @@ class ItemCompraRepository(
                     preco = historyItem.preco,
                     categoria = historyItem.categoria,
                     comprado = false, // Resetar para não comprado
-                    dataCriacao = System.currentTimeMillis()
+                    dataCriacao = System.currentTimeMillis(),
+                    listId = listId
                 )
             }
             itemCompraDao.insertAll(items)
+            
+            // Desarquivar a lista original se o histórico tiver listId associado
+            historyWithItems.history.listId?.let { originalListId ->
+                shoppingListDao?.let { dao ->
+                    val originalList = dao.getListByIdSync(originalListId)
+                    if (originalList != null && originalList.isArchived) {
+                        val unarchivedList = originalList.copy(isArchived = false)
+                        dao.update(unarchivedList)
+                    }
+                }
+            }
+            
+            // Deletar o histórico após reutilizar, fazendo a lista desaparecer do histórico
+            historyDao.deleteHistoryById(historyId)
         }
     }
 

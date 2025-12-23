@@ -16,6 +16,18 @@ interface HistoryDao {
     @Query("SELECT * FROM shopping_list_history ORDER BY completionDate DESC")
     fun getAllHistoryListsWithItems(): Flow<List<ShoppingListHistoryWithItems>>
 
+    // Queries filtradas por listId
+    @Query("SELECT * FROM shopping_list_history WHERE listId = :listId ORDER BY completionDate DESC")
+    fun getHistoryListsByListId(listId: Long): Flow<List<ShoppingListHistory>>
+
+    @Transaction
+    @Query("SELECT * FROM shopping_list_history WHERE listId = :listId ORDER BY completionDate DESC")
+    fun getAllHistoryListsWithItemsByListId(listId: Long): Flow<List<ShoppingListHistoryWithItems>>
+
+    @Transaction
+    @Query("SELECT * FROM shopping_list_history WHERE id = :historyId AND listId = :listId")
+    fun getHistoryListWithItemsByListId(historyId: Long, listId: Long): Flow<ShoppingListHistoryWithItems?>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertHistory(history: ShoppingListHistory): Long
 

@@ -30,6 +30,44 @@ interface ItemCompraDao {
     """)
     fun getItensByStatus(comprado: Boolean): Flow<List<ItemCompra>>
 
+    @Query("""
+        SELECT * FROM itens_compra 
+        WHERE listId = :listId
+        ORDER BY comprado ASC, dataCriacao DESC
+    """)
+    fun getItensByList(listId: Long): Flow<List<ItemCompra>>
+
+    @Query("""
+        SELECT * FROM itens_compra 
+        WHERE listId = :listId
+        AND LOWER(nome) LIKE '%' || LOWER(:searchQuery) || '%'
+        ORDER BY comprado ASC, dataCriacao DESC
+    """)
+    fun searchItensByList(listId: Long, searchQuery: String): Flow<List<ItemCompra>>
+
+    @Query("""
+        SELECT * FROM itens_compra 
+        WHERE listId = :listId
+        AND LOWER(nome) LIKE '%' || LOWER(:searchQuery) || '%'
+        AND comprado = :comprado
+        ORDER BY comprado ASC, dataCriacao DESC
+    """)
+    fun searchItensByListAndStatus(listId: Long, searchQuery: String, comprado: Boolean): Flow<List<ItemCompra>>
+
+    @Query("""
+        SELECT * FROM itens_compra 
+        WHERE listId = :listId
+        AND comprado = :comprado
+        ORDER BY comprado ASC, dataCriacao DESC
+    """)
+    fun getItensByListAndStatus(listId: Long, comprado: Boolean): Flow<List<ItemCompra>>
+
+    @Query("DELETE FROM itens_compra WHERE comprado = 1 AND listId = :listId")
+    suspend fun deleteCompradosByList(listId: Long)
+
+    @Query("DELETE FROM itens_compra WHERE listId = :listId")
+    suspend fun deleteAllByList(listId: Long)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(item: ItemCompra): Long
 

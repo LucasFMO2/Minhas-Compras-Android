@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 class UpdateManager(private val context: Context) {
     companion object {
-        private const val GITHUB_API_URL = "https://api.github.com/repos/Lucasfmo1/Minhas-Compras-Android/releases/latest"
+        private const val GITHUB_API_URL = "https://api.github.com/repos/LucasFMO2/Minhas-Compras-Android/releases/latest"
         private const val DOWNLOAD_DIR = "updates"
         private const val MAX_RETRIES = 3
         private const val INITIAL_RETRY_DELAY_MS = 1000L // Delay inicial de 1 segundo

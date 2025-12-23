@@ -2,11 +2,14 @@ package com.example.minhascompras.ui.screens
 
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
@@ -14,6 +17,7 @@ import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Archive
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CreditCard
@@ -27,9 +31,11 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.*
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -44,8 +50,11 @@ import com.example.minhascompras.ui.components.ItemCompraCard
 import com.example.minhascompras.ui.components.StatisticCard
 import com.example.minhascompras.ui.utils.ResponsiveUtils
 import com.example.minhascompras.ui.viewmodel.ListaComprasViewModel
+import com.example.minhascompras.ui.viewmodel.ShoppingListViewModel
 import com.example.minhascompras.ui.viewmodel.UpdateViewModel
 import com.example.minhascompras.ui.viewmodel.UpdateState
+import com.example.minhascompras.data.ShoppingList
+import com.example.minhascompras.utils.DebugLogger
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
@@ -55,6 +64,7 @@ import java.util.Locale
 @Composable
 fun ListaComprasScreen(
     viewModel: ListaComprasViewModel,
+    shoppingListViewModel: ShoppingListViewModel? = null,
     updateViewModel: UpdateViewModel? = null,
     onNavigateToSettings: () -> Unit = {},
     onNavigateToHistory: () -> Unit = {},
@@ -104,6 +114,21 @@ fun ListaComprasScreen(
     var showSortSubMenu by remember { mutableStateOf(false) }
     var showSortDropdown by remember { mutableStateOf(false) }
     
+    // Observar listas e lista ativa
+    val allLists by shoppingListViewModel?.allLists?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
+    val activeList by shoppingListViewModel?.activeList?.collectAsState() ?: remember { mutableStateOf<ShoppingList?>(null) }
+    var showCreateListDialog by remember { mutableStateOf(false) }
+    var showRenameListDialog by remember { mutableStateOf(false) }
+    var showDeleteListDialog by remember { mutableStateOf(false) }
+    var listToRename by remember { mutableStateOf<ShoppingList?>(null) }
+    var listToDelete by remember { mutableStateOf<ShoppingList?>(null) }
+    var expandedMenuId by remember { mutableStateOf<Long?>(null) }
+    
+    // Calcular contagem de itens por lista usando allItens
+    val itemCountByListId = remember(allItens) {
+        allItens.groupBy { it.listId }.mapValues { it.value.size }
+    }
+    
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -135,6 +160,24 @@ fun ListaComprasScreen(
                 message = uiMessage.message,
                 actionLabel = actionLabel,
                 withDismissAction = uiMessage is ListaComprasViewModel.UiMessage.Error,
+                duration = duration
+            )
+        }
+    }
+
+    // Observar mensagens do ShoppingListViewModel
+    LaunchedEffect(Unit) {
+        shoppingListViewModel?.uiMessages?.collectLatest { uiMessage ->
+            val duration = when (uiMessage) {
+                is ShoppingListViewModel.UiMessage.Success -> SnackbarDuration.Short
+                is ShoppingListViewModel.UiMessage.Info -> SnackbarDuration.Short
+                is ShoppingListViewModel.UiMessage.Error -> SnackbarDuration.Long
+            }
+            val actionLabel = if (uiMessage is ShoppingListViewModel.UiMessage.Error) "OK" else null
+            snackbarHostState.showSnackbar(
+                message = uiMessage.message,
+                actionLabel = actionLabel,
+                withDismissAction = uiMessage is ShoppingListViewModel.UiMessage.Error,
                 duration = duration
             )
         }
@@ -218,6 +261,178 @@ fun ListaComprasScreen(
                     )
                     
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                    
+                    // Listas de Compras
+                    if (shoppingListViewModel != null) {
+                        Text(
+                            text = "Listas de Compras",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 300.dp)
+                        ) {
+                            items(allLists, key = { it.id }) { list ->
+                                val isActive = activeList?.id == list.id
+                                val itemCount = itemCountByListId[list.id] ?: 0
+                                
+                                // #region agent log
+                                DebugLogger.log(
+                                    location = "ListaComprasScreen.kt:drawer",
+                                    message = "rendering list item",
+                                    data = mapOf(
+                                        "listId" to list.id,
+                                        "listName" to list.nome,
+                                        "isDefault" to list.isDefault,
+                                        "isActive" to isActive
+                                    ),
+                                    hypothesisId = "E"
+                                )
+                                // #endregion
+                                
+                                NavigationDrawerItem(
+                                    icon = {
+                                        if (isActive) {
+                                            Icon(
+                                                imageVector = Icons.Default.Check,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary
+                                            )
+                                        } else {
+                                            Box(
+                                                modifier = Modifier.size(24.dp),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                // Espaço vazio para alinhamento
+                                            }
+                                        }
+                                    },
+                                    label = {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.weight(1f),
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    text = list.nome,
+                                                    fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
+                                                    color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                                    modifier = Modifier.weight(1f),
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                                Text(
+                                                    text = "($itemCount)",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                            // Menu de opções (apenas se não for lista padrão)
+                                            if (!list.isDefault) {
+                                                // #region agent log
+                                                DebugLogger.log(
+                                                    location = "ListaComprasScreen.kt:drawer",
+                                                    message = "showing menu button for non-default list",
+                                                    data = mapOf("listId" to list.id, "isDefault" to list.isDefault),
+                                                    hypothesisId = "E"
+                                                )
+                                                // #endregion
+                                                
+                                                Box {
+                                                    IconButton(
+                                                        onClick = { expandedMenuId = list.id },
+                                                        modifier = Modifier.size(40.dp)
+                                                    ) {
+                                                        Icon(
+                                                            imageVector = Icons.Default.MoreVert,
+                                                            contentDescription = "Opções da lista",
+                                                            modifier = Modifier.size(20.dp)
+                                                        )
+                                                    }
+                                                    DropdownMenu(
+                                                        expanded = expandedMenuId == list.id,
+                                                        onDismissRequest = { expandedMenuId = null }
+                                                    ) {
+                                                        DropdownMenuItem(
+                                                            text = { Text("Renomear") },
+                                                            onClick = {
+                                                                listToRename = list
+                                                                showRenameListDialog = true
+                                                                expandedMenuId = null
+                                                                scope.launch { drawerState.close() }
+                                                            },
+                                                            leadingIcon = {
+                                                                Icon(
+                                                                    imageVector = Icons.Default.Edit,
+                                                                    contentDescription = null
+                                                                )
+                                                            }
+                                                        )
+                                                        DropdownMenuItem(
+                                                            text = { 
+                                                                Text(
+                                                                    "Deletar",
+                                                                    color = MaterialTheme.colorScheme.error
+                                                                ) 
+                                                            },
+                                                            onClick = {
+                                                                listToDelete = list
+                                                                showDeleteListDialog = true
+                                                                expandedMenuId = null
+                                                                scope.launch { drawerState.close() }
+                                                            },
+                                                            leadingIcon = {
+                                                                Icon(
+                                                                    imageVector = Icons.Default.Delete,
+                                                                    contentDescription = null,
+                                                                    tint = MaterialTheme.colorScheme.error
+                                                                )
+                                                            }
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    selected = isActive,
+                                    onClick = {
+                                        shoppingListViewModel.setActiveList(list.id)
+                                        scope.launch { drawerState.close() }
+                                    },
+                                    modifier = Modifier.padding(vertical = 4.dp)
+                                )
+                            }
+                            
+                            item {
+                                Button(
+                                    onClick = { showCreateListDialog = true },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Add,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Criar Nova Lista")
+                                }
+                            }
+                        }
+                        
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                    }
                     
                     // Ordenar (com submenu)
                     NavigationDrawerItem(
@@ -372,7 +587,14 @@ fun ListaComprasScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(
                                     if (ResponsiveUtils.isSmallScreen()) 6.dp else 8.dp
-                                )
+                                ),
+                                modifier = Modifier
+                                    .clickable(
+                                        indication = null, // Usar indicação padrão do Material
+                                        interactionSource = remember { MutableInteractionSource() }
+                                    ) {
+                                        scope.launch { drawerState.open() }
+                                    }
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.ShoppingCart,
@@ -382,7 +604,7 @@ fun ListaComprasScreen(
                                     )
                                 )
                                 Text(
-                                    itemSelecionado?.nome ?: "Minhas Compras",
+                                    activeList?.nome ?: itemSelecionado?.nome ?: "Minhas Compras",
                                     style = MaterialTheme.typography.titleLarge.copy(
                                         fontSize = ResponsiveUtils.getTitleFontSize()
                                     ),
@@ -390,6 +612,17 @@ fun ListaComprasScreen(
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
+                                // Indicador visual de que é clicável
+                                if (shoppingListViewModel != null && allLists.size > 1) {
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowDropDown,
+                                        contentDescription = "Selecionar lista",
+                                        modifier = Modifier.size(
+                                            if (ResponsiveUtils.isSmallScreen()) 16.dp else 18.dp
+                                        ),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                         },
                         actions = {
@@ -608,9 +841,26 @@ fun ListaComprasScreen(
                 }
             },
         floatingActionButton = {
+            // Verificar se há lista ativa
+            val hasActiveList = activeList != null || itemSelecionado != null
+            
             FloatingActionButton(
-                onClick = { showDialog = true },
-                containerColor = MaterialTheme.colorScheme.primary
+                onClick = { 
+                    if (hasActiveList) {
+                        showDialog = true
+                    } else {
+                        // Mostrar mensagem quando não há lista
+                        scope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = "Crie ou selecione uma lista antes de adicionar itens",
+                                duration = SnackbarDuration.Short
+                            )
+                        }
+                    }
+                },
+                containerColor = MaterialTheme.colorScheme.primary,
+                // Desabilitar visualmente quando não há lista
+                modifier = Modifier.alpha(if (hasActiveList) 1f else 0.6f)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
@@ -705,12 +955,135 @@ fun ListaComprasScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Verificar se a lista completa está vazia ou se apenas o filtro não retornou resultados
+            // Verificar primeiro se há lista ativa
+            val hasActiveList = activeList != null || itemSelecionado != null
             val listaCompletaVazia = allItens.isEmpty()
             val filtroSemResultados = !listaCompletaVazia && itens.isEmpty()
             
-            if (listaCompletaVazia) {
-                // Lista completamente vazia - mostrar tela de estado vazio padrão
+            if (!hasActiveList) {
+                // SEM LISTA ATIVA - mostrar estado específico
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(ResponsiveUtils.getMediumSpacing()),
+                        modifier = Modifier.padding(ResponsiveUtils.getHorizontalPadding())
+                    ) {
+                        // Ícone com fundo circular destacado
+                        val iconContainerSize = if (ResponsiveUtils.isSmallScreen()) 120.dp else 160.dp
+                        val iconSize = if (ResponsiveUtils.isSmallScreen()) 60.dp else 80.dp
+                        
+                        Box(
+                            modifier = Modifier
+                                .size(iconContainerSize)
+                                .clip(CircleShape)
+                                .background(
+                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ShoppingCart,
+                                contentDescription = "Ícone de lista vazia",
+                                modifier = Modifier.size(iconSize),
+                                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                            )
+                        }
+                        
+                        // Mensagens
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(ResponsiveUtils.getSmallSpacing())
+                        ) {
+                            Text(
+                                text = "Nenhuma lista criada!",
+                                style = MaterialTheme.typography.headlineMedium.copy(
+                                    fontSize = ResponsiveUtils.getTitleFontSize() * 1.2f
+                                ),
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = "Crie sua primeira lista de compras para começar a adicionar itens",
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontSize = ResponsiveUtils.getBodyFontSize()
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(horizontal = ResponsiveUtils.getHorizontalPadding())
+                            )
+                        }
+                        
+                        // Botão de ação destacado
+                        FilledTonalButton(
+                            onClick = { 
+                                // #region agent log
+                                DebugLogger.log(
+                                    location = "ListaComprasScreen.kt:1022",
+                                    message = "Button clicked - creating list dialog",
+                                    data = mapOf(
+                                        "shoppingListViewModelNull" to (shoppingListViewModel == null),
+                                        "hasActiveList" to (activeList != null),
+                                        "showCreateListDialogBefore" to false
+                                    ),
+                                    hypothesisId = "A"
+                                )
+                                // #endregion
+                                try {
+                                    showCreateListDialog = true
+                                    // #region agent log
+                                    DebugLogger.log(
+                                        location = "ListaComprasScreen.kt:1035",
+                                        message = "Dialog state set to true",
+                                        data = mapOf("showCreateListDialogAfter" to true),
+                                        hypothesisId = "A"
+                                    )
+                                    // #endregion
+                                } catch (e: Exception) {
+                                    // #region agent log
+                                    DebugLogger.log(
+                                        location = "ListaComprasScreen.kt:1042",
+                                        message = "Exception in onClick",
+                                        data = mapOf(
+                                            "error" to (e.message ?: "unknown"),
+                                            "exceptionType" to e.javaClass.simpleName
+                                        ),
+                                        hypothesisId = "E"
+                                    )
+                                    // #endregion
+                                    throw e
+                                }
+                            },
+                            modifier = Modifier
+                                .padding(top = ResponsiveUtils.getSpacing())
+                                .height(ResponsiveUtils.getButtonHeight()),
+                            colors = ButtonDefaults.filledTonalButtonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            ),
+                            contentPadding = ResponsiveUtils.getButtonPadding()
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = null,
+                                modifier = Modifier.size(ResponsiveUtils.getIconSize())
+                            )
+                            Spacer(modifier = Modifier.width(ResponsiveUtils.getSmallSpacing()))
+                            Text(
+                                "Criar Primeira Lista",
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    fontSize = ResponsiveUtils.getBodyFontSize()
+                                ),
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+                }
+            } else if (listaCompletaVazia) {
+                // TEM LISTA MAS ESTÁ VAZIA - mostrar estado vazio padrão
                 EstadoVazioScreen(
                     onAddClick = { showDialog = true },
                     modifier = Modifier.fillMaxSize()
@@ -1029,6 +1402,205 @@ fun ListaComprasScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showArchiveDialog = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    // Dialog para criar nova lista
+    if (showCreateListDialog && shoppingListViewModel != null) {
+        // #region agent log
+        DebugLogger.log(
+            location = "ListaComprasScreen.kt:1377",
+            message = "Dialog rendering - condition met",
+            data = mapOf(
+                "showCreateListDialog" to showCreateListDialog,
+                "shoppingListViewModelNotNull" to (shoppingListViewModel != null)
+            ),
+            hypothesisId = "B"
+        )
+        // #endregion
+        var listName by remember { mutableStateOf("") }
+        
+        AlertDialog(
+            onDismissRequest = { 
+                showCreateListDialog = false
+                listName = ""
+            },
+            title = { Text("Criar Nova Lista") },
+            text = {
+                OutlinedTextField(
+                    value = listName,
+                    onValueChange = { listName = it },
+                    label = { Text("Nome da lista") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        // #region agent log
+                        DebugLogger.log(
+                            location = "ListaComprasScreen.kt:1397",
+                            message = "Create button clicked",
+                            data = mapOf(
+                                "listName" to listName,
+                                "listNameIsBlank" to listName.isBlank(),
+                                "shoppingListViewModelNotNull" to (shoppingListViewModel != null)
+                            ),
+                            hypothesisId = "C"
+                        )
+                        // #endregion
+                        if (listName.isNotBlank()) {
+                            try {
+                                // #region agent log
+                                DebugLogger.log(
+                                    location = "ListaComprasScreen.kt:1408",
+                                    message = "Calling createList",
+                                    data = mapOf("listName" to listName.trim()),
+                                    hypothesisId = "C"
+                                )
+                                // #endregion
+                                shoppingListViewModel.createList(listName.trim())
+                                // #region agent log
+                                DebugLogger.log(
+                                    location = "ListaComprasScreen.kt:1415",
+                                    message = "createList called successfully",
+                                    data = emptyMap(),
+                                    hypothesisId = "C"
+                                )
+                                // #endregion
+                                showCreateListDialog = false
+                                listName = ""
+                            } catch (e: Exception) {
+                                // #region agent log
+                                DebugLogger.log(
+                                    location = "ListaComprasScreen.kt:1423",
+                                    message = "Exception in createList",
+                                    data = mapOf(
+                                        "error" to (e.message ?: "unknown"),
+                                        "exceptionType" to e.javaClass.simpleName,
+                                        "stackTrace" to e.stackTraceToString()
+                                    ),
+                                    hypothesisId = "C"
+                                )
+                                // #endregion
+                                throw e
+                            }
+                        }
+                    },
+                    enabled = listName.isNotBlank()
+                ) {
+                    Text("Criar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { 
+                    showCreateListDialog = false
+                    listName = ""
+                }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    // Dialog para renomear lista
+    if (showRenameListDialog && shoppingListViewModel != null && listToRename != null) {
+        var newListName by remember(listToRename) { mutableStateOf(listToRename!!.nome) }
+        val isNameChanged = newListName.trim() != listToRename!!.nome.trim()
+        
+        AlertDialog(
+            onDismissRequest = { 
+                showRenameListDialog = false
+                listToRename = null
+            },
+            title = { Text("Renomear Lista") },
+            text = {
+                OutlinedTextField(
+                    value = newListName,
+                    onValueChange = { newListName = it },
+                    label = { Text("Nome da lista") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (newListName.isNotBlank() && isNameChanged) {
+                            shoppingListViewModel.renameList(listToRename!!.id, newListName.trim())
+                            showRenameListDialog = false
+                            listToRename = null
+                        }
+                    },
+                    enabled = newListName.isNotBlank() && isNameChanged
+                ) {
+                    Text("Renomear")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { 
+                    showRenameListDialog = false
+                    listToRename = null
+                }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    // Dialog para deletar lista
+    if (showDeleteListDialog && shoppingListViewModel != null && listToDelete != null) {
+        val itemCount = itemCountByListId[listToDelete!!.id] ?: 0
+        
+        AlertDialog(
+            onDismissRequest = { 
+                showDeleteListDialog = false
+                listToDelete = null
+            },
+            title = { Text("Deletar Lista") },
+            text = {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("Tem certeza que deseja deletar a lista \"${listToDelete!!.nome}\"?")
+                    if (itemCount > 0) {
+                        Text(
+                            "Esta lista contém $itemCount item${if (itemCount > 1) "s" else ""} que serão deletados permanentemente.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                    Text(
+                        "Esta ação não pode ser desfeita.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        shoppingListViewModel.deleteList(listToDelete!!.id)
+                        showDeleteListDialog = false
+                        listToDelete = null
+                    }
+                ) {
+                    Text(
+                        "Deletar",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { 
+                    showDeleteListDialog = false
+                    listToDelete = null
+                }) {
                     Text("Cancelar")
                 }
             }

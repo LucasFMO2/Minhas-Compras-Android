@@ -11,13 +11,11 @@ import com.example.minhascompras.data.ShoppingListPreferencesManager
 import com.example.minhascompras.data.ShoppingListRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class HistoryViewModel(
@@ -25,116 +23,75 @@ class HistoryViewModel(
     private val shoppingListPreferencesManager: ShoppingListPreferencesManager,
     private val shoppingListRepository: ShoppingListRepository? = null
 ) : ViewModel() {
-    // Filtro por lista: null = todas as listas, Long = lista específica
-    private val _filterListId = MutableStateFlow<Long?>(null)
-    val filterListId: StateFlow<Long?> = _filterListId.asStateFlow()
-
-    // Nome da lista filtrada (para exibir na UI)
-    val filteredListName: StateFlow<String?> = combine(_filterListId) { filterIds ->
-        filterIds.first()
-    }.flatMapLatest { listId ->
-        if (listId == null || shoppingListRepository == null) {
-            MutableStateFlow<String?>(null).asStateFlow()
-        } else {
-            shoppingListRepository.getListById(listId)
-                .map { it?.nome }
-        }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = null
-    )
-
-    // Todas as listas disponíveis (para filtro)
-    val allLists: StateFlow<List<ShoppingList>> = 
+    // Histórico: APENAS listas arquivadas, sem filtros
+    val historyLists: StateFlow<List<ShoppingListHistory>> = 
         if (shoppingListRepository != null) {
-            shoppingListRepository.allLists
+            shoppingListRepository.getArchivedLists()
+                .map { archivedLists ->
+                    // Converter todas as listas arquivadas em ShoppingListHistory
+                    archivedLists.map { archivedList ->
+                        ShoppingListHistory(
+                            id = -archivedList.id, // ID negativo para diferenciar
+                            listId = archivedList.id,
+                            listName = archivedList.nome,
+                            completionDate = archivedList.dataCriacao
+                        )
+                    }.sortedByDescending { it.completionDate }
+                }
                 .stateIn(
                     scope = viewModelScope,
                     started = SharingStarted.WhileSubscribed(5000),
                     initialValue = emptyList()
                 )
         } else {
-            MutableStateFlow(emptyList<ShoppingList>()).asStateFlow()
+            MutableStateFlow(emptyList<ShoppingListHistory>()).asStateFlow()
         }
 
-    // Inicializar com lista ativa por padrão
-    init {
-        viewModelScope.launch {
-            val activeListId = shoppingListPreferencesManager.activeListId.first()
-            _filterListId.value = activeListId
-        }
-    }
-
-    // Histórico reativo ao filtro
-    val historyLists: StateFlow<List<ShoppingListHistory>> = combine(_filterListId) { filterIds ->
-        filterIds.first()
-    }.flatMapLatest { listId ->
-        repository.getHistoryLists(listId)
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
-    )
-
-    /**
-     * Filtra histórico por lista específica ou mostra todas as listas
-     * @param listId ID da lista para filtrar, ou null para mostrar todas
-     */
-    fun filterByList(listId: Long?) {
-        _filterListId.value = listId
-    }
-
-    /**
-     * Filtra histórico pela lista ativa
-     */
-    fun filterByActiveList() {
-        viewModelScope.launch {
-            val activeListId = shoppingListPreferencesManager.activeListId.first()
-            _filterListId.value = activeListId
-        }
-    }
-
-    /**
-     * Obtém o nome da lista pelo ID (retorna Flow para uso reativo)
-     */
-    fun getListName(listId: Long?): StateFlow<String?> {
-        return if (listId == null || shoppingListRepository == null) {
-            MutableStateFlow<String?>(null).asStateFlow()
-        } else {
-            shoppingListRepository.getListById(listId)
-                .map { it?.nome }
-                .stateIn(
-                    scope = viewModelScope,
-                    started = SharingStarted.WhileSubscribed(5000),
-                    initialValue = null
-                )
-        }
-    }
-
-    fun getHistoryListWithItems(historyId: Long): StateFlow<ShoppingListHistoryWithItems?> {
-        return repository.getHistoryListWithItems(historyId)
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = null
-            )
+    fun getHistoryListWithItems(@Suppress("UNUSED_PARAMETER") historyId: Long): StateFlow<ShoppingListHistoryWithItems?> {
+        // Listas arquivadas não têm itens salvos no histórico
+        return MutableStateFlow<ShoppingListHistoryWithItems?>(null).asStateFlow()
     }
 
     fun deleteHistory(historyId: Long) {
         viewModelScope.launch {
-            repository.deleteHistory(historyId)
+            // Sempre desarquivar a lista (ID sempre negativo)
+            val listId = -historyId
+            shoppingListRepository?.let { repo ->
+                val list = repo.getListByIdSync(listId)
+                if (list != null && list.isArchived) {
+                    repo.updateList(list.copy(isArchived = false))
+                }
+            }
         }
     }
 
     fun reuseHistoryList(historyId: Long) {
         viewModelScope.launch {
+            // ID negativo: lista arquivada
+            val listId = -historyId
+            
+            // Verificar se há histórico real (ShoppingListHistory) para esta lista
+            // Quando archiveCurrentList é chamado, cria um ShoppingListHistory com os itens
+            val realHistoryList = repository.getHistoryLists(listId).first()
+            val realHistory = realHistoryList.firstOrNull { it.listId == listId }
+            
             val activeListId = shoppingListPreferencesManager.activeListId.first()
-            if (activeListId != null) {
-                repository.reuseHistoryList(historyId, activeListId)
+            
+            if (realHistory != null && activeListId != null) {
+                // Há histórico real com itens salvos: usar repository.reuseHistoryList que copia os itens
+                repository.reuseHistoryList(realHistory.id, activeListId)
+                // Selecionar a lista como ativa (já desarquivada pelo repository)
+                shoppingListPreferencesManager.setActiveListId(listId)
             } else {
-                // Opcional: mostrar mensagem para usuário criar uma lista primeiro
-                // Por enquanto, apenas não faz nada se não houver lista ativa
+                // Não há histórico: apenas desarquivar e selecionar a lista
+                // (não há itens para copiar - lista foi arquivada sem itens ou histórico foi deletado)
+                shoppingListRepository?.let { repo ->
+                    val list = repo.getListByIdSync(listId)
+                    if (list != null && list.isArchived) {
+                        repo.updateList(list.copy(isArchived = false))
+                        shoppingListPreferencesManager.setActiveListId(listId)
+                    }
+                }
             }
         }
     }

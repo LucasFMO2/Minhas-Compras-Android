@@ -4,8 +4,19 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 
 ## 📥 Download
 
-### 🆕 Versão 2.18.7 (Mais Recente)
+### 🆕 Versão 2.18.8 (Mais Recente)
 
+**[⬇️ Baixar APK v2.18.8](https://github.com/LucasFMO2/Minhas-Compras-Android/releases/download/v2.18.8/app-release-v2.18.8.apk)**
+
+🚀 **Nova Funcionalidade:**
+- 🔔 **Firebase Cloud Messaging (FCM)** - Notificações push em tempo real
+- 📱 **Recebimento de Notificações** - Funciona mesmo com app em segundo plano ou fechado
+- 🔐 **Permissão Automática** - Solicitação automática de permissão (Android 13+)
+- ✨ **Integração Completa** - Token FCM, canal de notificação e PendingIntent configurados
+
+### 📦 Versões Recentes
+
+**Versão 2.18.7:**
 **[⬇️ Baixar APK v2.18.7](https://github.com/LucasFMO2/Minhas-Compras-Android/releases/download/v2.18.7/app-release-v2.18.7.apk)**
 
 🐛 **Correção Crítica:**
@@ -13,8 +24,6 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 - 🗑️ **Remoção Completa** - Remove lista, histórico e itens associados via CASCADE
 - 🚫 **Sem Regressão** - Lista excluída não reaparece nas listas ativas
 - 🧹 **Limpeza Total** - Histórico e dados relacionados são completamente removidos
-
-### 📦 Versões Recentes
 
 **Versão 2.18.6:**
 **[⬇️ Baixar APK v2.18.6](https://github.com/LucasFMO2/Minhas-Compras-Android/releases/download/v2.18.6/app-release-v2.18.6.apk)**

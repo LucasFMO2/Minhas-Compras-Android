@@ -1,7 +1,9 @@
 package com.example.minhascompras.data
 
+import android.content.Context
 import com.example.minhascompras.data.supabase.AuthService
 import com.example.minhascompras.data.supabase.SupabaseSyncService
+import com.example.minhascompras.notifications.NotificationHelper
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -154,6 +156,32 @@ class ItemCompraRepository(
             syncService.syncItemToSupabase(item, userId).onFailure {
                 // Log do erro, mas não falha a operação local
             }
+        }
+    }
+    
+    /**
+     * Verifica se todos os itens de uma lista foram comprados e envia notificação se necessário.
+     * 
+     * @param context Contexto da aplicação (para acessar NotificationPreferencesManager)
+     * @param listId ID da lista a verificar (null para lista padrão)
+     */
+    suspend fun checkAndNotifyCompletion(context: Context, listId: Long?) {
+        if (listId == null) return
+        
+        try {
+            val allItems = itemCompraDao.getItensByList(listId).first()
+            if (allItems.isNotEmpty() && allItems.all { it.comprado }) {
+                // Todos os itens foram comprados - verificar se notificação está habilitada
+                val notificationPrefsManager = NotificationPreferencesManager(context)
+                val isEnabled = notificationPrefsManager.isCompletionNotificationEnabled().first()
+                
+                if (isEnabled) {
+                    NotificationHelper.showCompletionNotification(context)
+                }
+            }
+        } catch (e: Exception) {
+            // Ignorar erros silenciosamente
+            android.util.Log.e("ItemCompraRepository", "Erro ao verificar conclusão", e)
         }
     }
 

@@ -5,6 +5,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
 import android.util.Log
+import com.example.minhascompras.notifications.NotificationHelper
 import java.lang.Thread.UncaughtExceptionHandler
 
 class MinhasComprasApplication : Application() {
@@ -30,6 +31,9 @@ class MinhasComprasApplication : Application() {
         
         // Criar canal de notificação para Android 8.0+
         createNotificationChannel()
+        
+        // Criar canais de notificação inteligentes
+        NotificationHelper.createNotificationChannels(this)
         
         Log.d("MinhasComprasApp", "Application inicializada com sucesso")
     }

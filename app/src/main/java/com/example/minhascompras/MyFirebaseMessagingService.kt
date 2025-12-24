@@ -6,8 +6,12 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.minhascompras.MinhasComprasApplication.Companion.CHANNEL_ID
+import com.example.minhascompras.data.FCMTokenManager
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Serviço de mensageria do Firebase Cloud Messaging (FCM).
@@ -44,8 +48,16 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         super.onNewToken(token)
         Log.d(TAG, "Novo token FCM recebido: $token")
         
+        // Salvar token localmente usando FCMTokenManager
+        val tokenManager = FCMTokenManager(applicationContext)
+        CoroutineScope(Dispatchers.IO).launch {
+            tokenManager.saveToken(token)
+            Log.d(TAG, "Token FCM salvo localmente com sucesso")
+        }
+        
         // TODO: Em uma implementação futura, este token deve ser enviado para o backend
         // para permitir o envio de notificações push para este dispositivo específico.
+        // Exemplo: enviarTokenParaBackend(token)
     }
 
     /**

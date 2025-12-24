@@ -1281,8 +1281,118 @@
         "details": "Sistema de notificações usando NotificationManager. Canal de notificações configurado (Android 8.0+). Lembrete diário configurável (horário personalizado). Notificação quando todos os itens forem marcados como comprados. Lembrete de itens pendentes há X dias (configurável, padrão 7). Tela de configurações de notificações em SettingsScreen. Toggle para habilitar/desabilitar cada tipo de notificação. WorkManager para agendar notificações recorrentes. Notificação com ação rápida 'Abrir App'. (Opcional) Notificação baseada em geofencing (localização).",
         "priority": "medium",
         "dependencies": [],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Configurar Canais de Notificação e Permissões Base",
+            "description": "Configurar o NotificationManager para criar e registrar canais de notificação para diferentes tipos de alertas. Lidar com as permissões de notificação no Android 13+ para garantir que o aplicativo possa exibir alertas.",
+            "dependencies": [],
+            "details": "Criar um NotificationChannel padrão para as notificações do aplicativo, definindo sua prioridade, som e vibração. Implementar a lógica para solicitar permissões de notificação ao usuário em tempo de execução para dispositivos com Android 13 (API 33) ou superior. Assegurar que a criação dos canais de notificação ocorra apenas uma vez durante a inicialização do aplicativo.",
+            "status": "done",
+            "testStrategy": "Verificar se os canais de notificação são criados corretamente. Testar a solicitação e o gerenciamento de permissões de notificação em dispositivos com Android 13+ e em versões anteriores.",
+            "updatedAt": "2025-12-24T21:59:57.501Z",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implementar Serviço de Agendamento Recorrente com WorkManager",
+            "description": "Desenvolver e integrar o WorkManager para gerenciar o agendamento e a execução eficiente de tarefas de notificação recorrentes em segundo plano, como lembretes diários e verificações de itens pendentes.",
+            "dependencies": [
+              1
+            ],
+            "details": "Criar uma classe Worker abstrata ou genérica que possa ser estendida para diferentes tipos de notificações agendadas. Configurar as Constraints apropriadas para a execução do trabalho (por exemplo, requer rede, bateria não baixa). Implementar o agendamento de PeriodicWorkRequest com a flexibilidade necessária para diferentes intervalos de repetição e horários de início.",
+            "status": "done",
+            "testStrategy": "Testar o agendamento de tarefas recorrentes com WorkManager. Verificar se as Constraints são aplicadas corretamente. Simular cenários de execução em segundo plano.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-24T21:59:57.600Z"
+          },
+          {
+            "id": 3,
+            "title": "Desenvolver Notificação de Lembrete Diário com Horário Personalizado",
+            "description": "Implementar a lógica para enviar uma notificação diária em um horário específico definido pelo usuário, lembrando-o de suas compras pendentes.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "O Worker responsável por esta notificação deve consultar as preferências do usuário para determinar o horário configurado. No momento certo, ele deve construir e exibir uma notificação com um título e corpo informativos. O conteúdo da notificação pode ser personalizável ou incluir um resumo da lista de compras.",
+            "status": "done",
+            "testStrategy": "Testar o disparo da notificação em diferentes horários configurados. Verificar o conteúdo da notificação e sua correta exibição. Garantir que a notificação seja exibida apenas uma vez por dia no horário definido.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-24T21:59:57.702Z"
+          },
+          {
+            "id": 4,
+            "title": "Implementar Notificação para Conclusão de Lista de Compras",
+            "description": "Criar uma notificação que é acionada automaticamente quando todos os itens de uma lista de compras são marcados como comprados, celebrando a conclusão ou sugerindo uma nova lista.",
+            "dependencies": [
+              1
+            ],
+            "details": "Monitorar o estado dos itens de uma lista de compras. Quando a condição de 'todos os itens marcados como comprados' for detectada, exibir uma notificação parabenizando o usuário ou fornecendo uma sugestão útil (por exemplo, 'Que tal começar uma nova lista?'). Esta notificação será acionada por evento, não por agendamento recorrente.",
+            "status": "done",
+            "testStrategy": "Testar o disparo da notificação ao marcar o último item de uma lista. Verificar se a notificação é exibida uma única vez por evento de conclusão. Assegurar que a notificação não seja disparada prematuramente ou incorretamente.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-24T22:08:31.971Z"
+          },
+          {
+            "id": 5,
+            "title": "Desenvolver Notificação de Lembrete para Itens Pendentes Antigos",
+            "description": "Implementar um sistema de notificação que alerta o usuário sobre itens que estão há X dias pendentes em uma lista de compras. O valor de X deve ser configurável, com um padrão de 7 dias.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "O Worker agendado (PeriodicWorkRequest) deve consultar o banco de dados do aplicativo para identificar itens que não foram comprados e que estão pendentes há mais de X dias (configurado pelo usuário). Se tais itens forem encontrados, uma notificação deve ser construída e exibida, listando ou resumindo os itens em questão. O valor de X deve ser lido das configurações do usuário.",
+            "status": "done",
+            "testStrategy": "Testar o Worker para identificar corretamente itens pendentes há X dias. Verificar o disparo e o conteúdo da notificação sob diferentes configurações de X. Simular a passagem do tempo para garantir a detecção precisa.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-24T21:59:57.953Z"
+          },
+          {
+            "id": 6,
+            "title": "Criar Seção de Configurações de Notificações na SettingsScreen",
+            "description": "Desenvolver a interface de usuário dentro da SettingsScreen para permitir que o usuário configure e personalize os diferentes tipos de notificação disponíveis no aplicativo.",
+            "dependencies": [],
+            "details": "Adicionar elementos de UI (como toggles, seletores de tempo e campos numéricos) à SettingsScreen para cada tipo de notificação: lembrete diário (com seletor de horário), notificação de conclusão de lista (com toggle) e notificação de itens pendentes (com toggle e campo numérico para dias).",
+            "status": "done",
+            "testStrategy": "Verificar se todos os controles de configuração de notificação são exibidos corretamente na SettingsScreen. Testar a interação do usuário com cada controle (toggles, seletores de tempo, campos numéricos) e a persistência visual das seleções.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-24T22:08:32.013Z"
+          },
+          {
+            "id": 7,
+            "title": "Integrar Preferências do Usuário com Lógica de Agendamento/Cancelamento de Notificações",
+            "description": "Conectar os controles da tela de configurações à lógica de agendamento e cancelamento de tarefas do WorkManager, e ao estado geral das notificações, garantindo que as escolhas do usuário sejam respeitadas.",
+            "dependencies": [
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "details": "Salvar as preferências do usuário (por exemplo, se uma notificação está habilitada, horário do lembrete diário, número de dias para itens pendentes) usando DataStore ou SharedPreferences. Quando uma preferência é alterada, cancelar e/ou reagendar os WorkRequest correspondentes no WorkManager para refletir a nova configuração. A lógica de exibição das notificações deve sempre consultar essas preferências antes de disparar um alerta.",
+            "status": "done",
+            "testStrategy": "Testar a persistência das configurações de notificação. Verificar se a alteração de um toggle habilita/desabilita ou reagenda corretamente os Workers associados. Testar cenários de ligar/desligar e modificar horários/dias para garantir a correta interação com o WorkManager.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-24T22:08:32.050Z"
+          },
+          {
+            "id": 8,
+            "title": "Adicionar Ação Rápida 'Abrir App' a Todas as Notificações",
+            "description": "Modificar todas as notificações implementadas para incluir uma ação rápida que permite ao usuário abrir o aplicativo diretamente a partir da notificação.",
+            "dependencies": [
+              3,
+              4,
+              5
+            ],
+            "details": "Para cada tipo de notificação (lembrete diário, conclusão de lista, itens pendentes antigos), configurar um PendingIntent que inicie a MainActivity do aplicativo quando a notificação for clicada. Assegurar que a ação 'Abrir App' seja responsiva e leve o usuário à tela principal do aplicativo.",
+            "status": "done",
+            "testStrategy": "Testar a funcionalidade de 'Abrir App' em cada tipo de notificação. Verificar se o clique na notificação abre o aplicativo corretamente e na tela esperada. Testar a experiência do usuário com esta ação rápida.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-24T21:59:58.129Z"
+          }
+        ],
+        "updatedAt": "2025-12-24T22:08:32.050Z"
       },
       {
         "id": "15",
@@ -1591,9 +1701,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-12-24T19:19:03.203Z",
+      "lastModified": "2025-12-24T22:08:32.057Z",
       "taskCount": 17,
-      "completedCount": 11,
+      "completedCount": 12,
       "tags": [
         "master"
       ]

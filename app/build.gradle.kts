@@ -10,12 +10,12 @@ android {
     namespace = "com.example.minhascompras"
     compileSdk = 34
 
-    defaultConfig {
-        applicationId = "com.example.minhascompras"
-        minSdk = 24
-        targetSdk = 34
-        versionCode = 85
-        versionName = "2.18.8"
+        defaultConfig {
+            applicationId = "com.example.minhascompras"
+            minSdk = 24
+            targetSdk = 34
+            versionCode = 86
+            versionName = "2.19.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -97,6 +97,9 @@ dependencies {
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging.ktx)
+    
+    // WorkManager
+    implementation(libs.androidx.work.runtime.ktx)
     
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

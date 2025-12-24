@@ -3,6 +3,7 @@ package com.example.minhascompras.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import android.app.Application
 import com.example.minhascompras.data.FilterStatus
 import com.example.minhascompras.data.ItemCompra
 import com.example.minhascompras.data.ItemCompraRepository
@@ -28,7 +29,8 @@ class ListaComprasViewModel(
     private val repository: ItemCompraRepository,
     private val userPreferencesManager: UserPreferencesManager,
     private val shoppingListPreferencesManager: ShoppingListPreferencesManager,
-    private val shoppingListRepository: com.example.minhascompras.data.ShoppingListRepository? = null
+    private val shoppingListRepository: com.example.minhascompras.data.ShoppingListRepository? = null,
+    private val application: Application? = null
 ) : ViewModel() {
     // StateFlows para busca e filtro
     private val _searchQuery = MutableStateFlow("")
@@ -207,6 +209,12 @@ class ListaComprasViewModel(
     fun toggleComprado(item: ItemCompra) {
         viewModelScope.launch {
             repository.update(item.copy(comprado = !item.comprado))
+            
+            // Verificar se todos os itens foram comprados e enviar notificação se necessário
+            application?.let { app ->
+                val listId = activeListId.value
+                repository.checkAndNotifyCompletion(app, listId)
+            }
         }
     }
 
@@ -435,12 +443,13 @@ class ListaComprasViewModelFactory(
     private val repository: ItemCompraRepository,
     private val userPreferencesManager: UserPreferencesManager,
     private val shoppingListPreferencesManager: ShoppingListPreferencesManager,
-    private val shoppingListRepository: com.example.minhascompras.data.ShoppingListRepository? = null
+    private val shoppingListRepository: com.example.minhascompras.data.ShoppingListRepository? = null,
+    private val application: Application? = null
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ListaComprasViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return ListaComprasViewModel(repository, userPreferencesManager, shoppingListPreferencesManager, shoppingListRepository) as T
+            return ListaComprasViewModel(repository, userPreferencesManager, shoppingListPreferencesManager, shoppingListRepository, application) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

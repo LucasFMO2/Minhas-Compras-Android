@@ -34,6 +34,8 @@ import com.example.minhascompras.data.UpdatePreferencesManager
 import com.example.minhascompras.data.ThemeMode
 import com.example.minhascompras.data.ThemePreferencesManager
 import com.example.minhascompras.data.UserPreferencesManager
+import com.example.minhascompras.data.NotificationPreferencesManager
+import com.example.minhascompras.notifications.NotificationScheduler
 import com.example.minhascompras.ui.screens.HistoryScreen
 import com.example.minhascompras.ui.screens.ListaComprasScreen
 import com.example.minhascompras.ui.screens.SettingsScreen
@@ -53,6 +55,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 
 sealed class Screen(val route: String) {
     object ListaCompras : Screen("lista_compras")
@@ -120,7 +123,7 @@ class MainActivity : ComponentActivity() {
             throw RuntimeException("Erro crítico: não foi possível inicializar preferências de listas", e)
         }
         
-        val viewModelFactory = ListaComprasViewModelFactory(repository, userPreferencesManager, shoppingListPreferencesManager, shoppingListRepository)
+        val viewModelFactory = ListaComprasViewModelFactory(repository, userPreferencesManager, shoppingListPreferencesManager, shoppingListRepository, application)
         val shoppingListViewModelFactory = ShoppingListViewModelFactory(shoppingListRepository, shoppingListPreferencesManager)
         val historyViewModelFactory = HistoryViewModelFactory(repository, shoppingListPreferencesManager, shoppingListRepository)
         val updateViewModelFactory = UpdateViewModelFactory(applicationContext)
@@ -132,6 +135,27 @@ class MainActivity : ComponentActivity() {
                 updatePreferencesManager.updateLastAppUse()
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Erro ao atualizar timestamp de uso", e)
+            }
+        }
+        
+        // Inicializar workers de notificação
+        lifecycleScope.launch {
+            try {
+                val notificationPrefsManager = NotificationPreferencesManager(applicationContext)
+                
+                // Agendar lembrete diário se habilitado
+                val dailyReminderEnabled = notificationPrefsManager.isDailyReminderEnabled().first()
+                if (dailyReminderEnabled) {
+                    val hour = notificationPrefsManager.getDailyReminderHour().first()
+                    val minute = notificationPrefsManager.getDailyReminderMinute().first()
+                    NotificationScheduler.scheduleDailyReminder(applicationContext, hour, minute, true)
+                }
+                
+                // Agendar verificação de itens pendentes se habilitado
+                val pendingItemsEnabled = notificationPrefsManager.isPendingItemsNotificationEnabled().first()
+                NotificationScheduler.schedulePendingItemsCheck(applicationContext, pendingItemsEnabled)
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Erro ao inicializar workers de notificação", e)
             }
         }
         

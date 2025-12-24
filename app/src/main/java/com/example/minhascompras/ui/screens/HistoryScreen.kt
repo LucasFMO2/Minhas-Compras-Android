@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.example.minhascompras.data.ShoppingListHistory
 import com.example.minhascompras.ui.utils.ResponsiveUtils
 import com.example.minhascompras.ui.viewmodel.HistoryViewModel
+import com.example.minhascompras.utils.DebugLogger
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -28,66 +29,47 @@ fun HistoryScreen(
     onReuseList: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // #region agent log
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        DebugLogger.log(
+            location = "HistoryScreen.kt:HistoryScreen",
+            message = "HistoryScreen composable entered",
+            data = emptyMap(),
+            hypothesisId = "D"
+        )
+    }
+    // #endregion
+    
     val historyLists by viewModel.historyLists.collectAsState()
-    val filterListId by viewModel.filterListId.collectAsState()
-    val filteredListName by viewModel.filteredListName.collectAsState()
-    val allLists by viewModel.allLists.collectAsState()
+    val isReusing by viewModel.isReusing.collectAsState()
+    
+    // #region agent log
+    androidx.compose.runtime.LaunchedEffect(historyLists.size) {
+        DebugLogger.log(
+            location = "HistoryScreen.kt:HistoryScreen",
+            message = "historyLists state updated",
+            data = mapOf(
+                "historyListsCount" to historyLists.size,
+                "historyListIds" to historyLists.map { it.id },
+                "historyListNames" to historyLists.map { it.listName }
+            ),
+            hypothesisId = "D"
+        )
+    }
+    // #endregion
+    
     val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale("pt", "BR"))
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Column {
-                        Text(
-                            "Histórico de Compras",
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontSize = ResponsiveUtils.getTitleFontSize()
-                            )
+                    Text(
+                        "Histórico de Compras",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontSize = ResponsiveUtils.getTitleFontSize()
                         )
-                        // Filtros de lista
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 4.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            // Filtro "Lista Ativa"
-                            FilterChip(
-                                selected = filterListId != null,
-                                onClick = {
-                                    if (filterListId == null) {
-                                        // Se estava mostrando todas, filtrar por lista ativa
-                                        viewModel.filterByActiveList()
-                                    } else {
-                                        // Se já estava filtrando, mostrar todas
-                                        viewModel.filterByList(null)
-                                    }
-                                },
-                                label = {
-                                    Text(
-                                        filteredListName ?: "Lista Ativa",
-                                        style = MaterialTheme.typography.labelSmall
-                                    )
-                                },
-                                modifier = Modifier.height(28.dp)
-                            )
-                            // Filtro "Todas as Listas"
-                            FilterChip(
-                                selected = filterListId == null,
-                                onClick = {
-                                    viewModel.filterByList(null)
-                                },
-                                label = {
-                                    Text(
-                                        "Todas",
-                                        style = MaterialTheme.typography.labelSmall
-                                    )
-                                },
-                                modifier = Modifier.height(28.dp)
-                            )
-                        }
-                    }
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
@@ -118,12 +100,12 @@ fun HistoryScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text(
-                        "Nenhum histórico encontrado",
+                        "Nenhuma lista arquivada",
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        "Listas completas serão arquivadas automaticamente aqui",
+                        "Listas arquivadas aparecerão aqui",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -144,11 +126,14 @@ fun HistoryScreen(
                     HistoryItemCard(
                         history = history,
                         dateFormat = dateFormat,
-                        showListName = filterListId == null, // Mostrar nome da lista apenas quando mostrando todas
+                        showListName = true, // Sempre mostrar nome da lista
+                        isReusing = isReusing,
                         onDelete = { viewModel.deleteHistory(history.id) },
                         onReuse = { 
-                            viewModel.reuseHistoryList(history.id)
-                            onReuseList(history.id)
+                            // Navegar apenas após a operação completar (via callback)
+                            viewModel.reuseHistoryList(history.id) {
+                                onReuseList(history.id)
+                            }
                         }
                     )
                 }
@@ -161,7 +146,8 @@ fun HistoryScreen(
 fun HistoryItemCard(
     history: ShoppingListHistory,
     dateFormat: SimpleDateFormat,
-    showListName: Boolean = false,
+    @Suppress("UNUSED_PARAMETER") showListName: Boolean = false,
+    isReusing: Boolean = false,
     onDelete: () -> Unit,
     onReuse: () -> Unit,
     modifier: Modifier = Modifier
@@ -186,32 +172,16 @@ fun HistoryItemCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    // Mostrar nome da lista original apenas se mostrar todas as listas
-                    // e se o histórico tiver listId diferente (lista que não está sendo filtrada)
-                    if (showListName && history.listId != null) {
-                        // O listName já contém o nome da lista arquivada
-                        Text(
-                            text = history.listName,
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontSize = ResponsiveUtils.getBodyFontSize()
-                            ),
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 2,
-                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                        )
-                    } else {
-                        Text(
-                            text = history.listName,
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontSize = ResponsiveUtils.getBodyFontSize()
-                            ),
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 2,
-                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                        )
-                    }
+                    Text(
+                        text = history.listName,
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontSize = ResponsiveUtils.getBodyFontSize()
+                        ),
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 2,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                    )
                     Spacer(modifier = Modifier.height(ResponsiveUtils.getSmallSpacing()))
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -249,25 +219,38 @@ fun HistoryItemCard(
             ) {
                 FilledTonalButton(
                     onClick = onReuse,
+                    enabled = !isReusing,
                     colors = ButtonDefaults.filledTonalButtonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                        disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
                     ),
                     modifier = Modifier.height(ResponsiveUtils.getButtonHeight()),
                     contentPadding = ResponsiveUtils.getButtonPadding()
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = "Reutilizar lista",
-                        modifier = Modifier.size(
-                            if (ResponsiveUtils.isSmallScreen()) 16.dp else 18.dp
+                    if (isReusing) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(
+                                if (ResponsiveUtils.isSmallScreen()) 14.dp else 16.dp
+                            ),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
                         )
-                    )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Reutilizar lista",
+                            modifier = Modifier.size(
+                                if (ResponsiveUtils.isSmallScreen()) 16.dp else 18.dp
+                            )
+                        )
+                    }
                     Spacer(modifier = Modifier.width(
                         if (ResponsiveUtils.isSmallScreen()) 6.dp else 8.dp
                     ))
                     Text(
-                        "Reutilizar",
+                        if (isReusing) "Carregando..." else "Reutilizar",
                         style = MaterialTheme.typography.labelLarge.copy(
                             fontSize = ResponsiveUtils.getBodyFontSize()
                         ),

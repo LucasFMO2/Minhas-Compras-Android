@@ -4,11 +4,23 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 
 ## 📥 Download
 
-### 🆕 Versão 2.18.8 (Mais Recente)
+### 🆕 Versão 2.19.0 (Mais Recente)
 
+**[⬇️ Baixar APK v2.19.0](https://github.com/LucasFMO2/Minhas-Compras-Android/releases/download/v2.19.0/app-release-v2.19.0.apk)**
+
+🎉 **Nova Funcionalidade Principal:**
+- 🔔 **Sistema de Notificações Inteligentes** - Lembretes diários, conclusão de lista e itens pendentes
+- ⏰ **Lembrete Diário Configurável** - Escolha o horário que prefere receber lembretes
+- 🎯 **Notificação de Conclusão** - Celebre quando completar sua lista de compras
+- 📅 **Itens Pendentes** - Alertas sobre itens esquecidos há vários dias
+- ⚙️ **Configurações Completas** - Controle total sobre cada tipo de notificação
+
+### 📦 Versões Recentes
+
+**Versão 2.18.8:**
 **[⬇️ Baixar APK v2.18.8](https://github.com/LucasFMO2/Minhas-Compras-Android/releases/download/v2.18.8/app-release-v2.18.8.apk)**
 
-🚀 **Nova Funcionalidade:**
+🚀 **Funcionalidade:**
 - 🔔 **Firebase Cloud Messaging (FCM)** - Notificações push em tempo real
 - 📱 **Recebimento de Notificações** - Funciona mesmo com app em segundo plano ou fechado
 - 🔐 **Permissão Automática** - Solicitação automática de permissão (Android 13+)

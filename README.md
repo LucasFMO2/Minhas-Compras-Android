@@ -4,28 +4,35 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 
 ## 📥 Download
 
-### 🆕 Versão 2.11.1 (Mais Recente)
+### 🆕 Versão 2.18.7 (Mais Recente)
 
-**[⬇️ Baixar APK v2.11.1](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/download/v2.11.1/app-release-v2.11.1.apk)**
+**[⬇️ Baixar APK v2.18.7](https://github.com/LucasFMO2/Minhas-Compras-Android/releases/download/v2.18.7/app-release-v2.18.7.apk)**
 
-✨ **Interface Minimalista e Limpa:**
-- 🧹 **Interface completamente limpa** - Removidas estatísticas, foco total na lista de itens
-- 📱 **Cards simplificados** - Design minimalista, menos elevação visual, informações discretas
-- 🎯 **Elementos mais discretos** - Filtros e busca aparecem apenas quando necessário
-- ⚡ **Performance otimizada** - Menos animações, mais fluidez e responsividade
-- 🎨 **Design inspirado nos melhores apps** - Interface limpa e funcional como os apps de referência
+🐛 **Correção Crítica:**
+- ✅ **Exclusão de Listas Arquivadas Corrigida** - Listas arquivadas agora são completamente deletadas ao clicar em "Excluir"
+- 🗑️ **Remoção Completa** - Remove lista, histórico e itens associados via CASCADE
+- 🚫 **Sem Regressão** - Lista excluída não reaparece nas listas ativas
+- 🧹 **Limpeza Total** - Histórico e dados relacionados são completamente removidos
 
-### 📦 Versões Anteriores
+### 📦 Versões Recentes
 
-**Versão 2.11.0:**
-**[⬇️ Baixar APK v2.11.0](https://github.com/Lucasfmo1/Minhas-Compras-Android/releases/download/v2.11.0/app-release-v2.11.0.apk)**
+**Versão 2.18.6:**
+**[⬇️ Baixar APK v2.18.6](https://github.com/LucasFMO2/Minhas-Compras-Android/releases/download/v2.18.6/app-release-v2.18.6.apk)**
 
-✨ **Redesign Completo da Interface:**
-- 🎨 **Sistema de design modernizado** - Paleta de cores renovada, tipografia aprimorada, espaçamento consistente
-- 📱 **Responsividade aprimorada** - Breakpoints precisos, componentes adaptativos, layout otimizado
-- 🎯 **Componentes redesenhados** - ItemCompraCard, StatisticCard, dialogs e estados vazios completamente modernizados
-- 🖥️ **Telas modernizadas** - ListaComprasScreen, HistoryScreen e SettingsScreen com melhor hierarquia visual
-- ✨ **Animações e micro-interações** - Transições suaves, feedback visual melhorado, animações de entrada
+🐛 **Correção de Múltiplos Cliques:**
+- ✅ **Botão Reutilizar Corrigido** - Proteção contra múltiplos cliques no botão "Reutilizar"
+- 🔒 **Thread-Safety** - Mutex garante que apenas uma operação ocorra por vez
+- ⏳ **Feedback Visual** - Indicador de carregamento durante processamento
+- 🚫 **Sem Duplicação** - Previne inserção múltipla de itens
+- ✨ **Experiência Consistente** - Lista é ativada corretamente com um único clique
+
+**Versão 2.18.5:**
+**[⬇️ Baixar APK v2.18.5](https://github.com/LucasFMO2/Minhas-Compras-Android/releases/download/v2.18.5/app-release-v2.18.5.apk)**
+
+🐛 **Correção de Reutilização:**
+- ✅ **Reutilização de Listas Arquivadas** - Itens são copiados corretamente ao reutilizar lista
+- 📋 **Histórico Preservado** - Lista permanece no histórico após reutilização
+- 🔄 **Funcionalidade Restaurada** - Reutilização funciona corretamente sem perder dados
 
 ### 📦 Versões Anteriores
 
@@ -248,7 +255,7 @@ Um aplicativo Android moderno e intuitivo para gerenciar sua lista de compras, d
 
 1. Clone o repositório:
 ```bash
-git clone https://github.com/Lucasfmo1/Minhas-Compras-Android.git
+git clone https://github.com/LucasFMO2/Minhas-Compras-Android.git
 ```
 
 2. Abra o projeto no Android Studio

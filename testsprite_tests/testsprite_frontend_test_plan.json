@@ -1,0 +1,638 @@
+[
+  {
+    "id": "TC001",
+    "title": "Add Item with Valid Data",
+    "description": "Verify that a user can successfully add a new shopping item with valid name, category, quantity, and price.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open the add item dialog"
+      },
+      {
+        "type": "action",
+        "description": "Input valid item name"
+      },
+      {
+        "type": "action",
+        "description": "Select a mandatory category from the predefined list"
+      },
+      {
+        "type": "action",
+        "description": "Input valid quantity and price"
+      },
+      {
+        "type": "action",
+        "description": "Save the new item"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm the item appears on the list with correct details and category badge"
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "Add Item Missing Category",
+    "description": "Verify that adding a new item without selecting a category is prevented and appropriate validation feedback is shown.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open the add item dialog"
+      },
+      {
+        "type": "action",
+        "description": "Input valid item name but do not select category"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to save the new item"
+      },
+      {
+        "type": "assertion",
+        "description": "Validation error is displayed indicating category selection is mandatory"
+      },
+      {
+        "type": "assertion",
+        "description": "Item is not added to the shopping list"
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Edit Existing Item Details",
+    "description": "Ensure that a user can edit the details of an existing shopping item, including name, category, quantity, and price.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select an existing item from the shopping list"
+      },
+      {
+        "type": "action",
+        "description": "Open edit item dialog"
+      },
+      {
+        "type": "action",
+        "description": "Modify item name, change category, quantity, and price"
+      },
+      {
+        "type": "action",
+        "description": "Save changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Updated item details are correctly reflected on the list with updated category badge"
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Delete Single Item with Undo",
+    "description": "Verify that swiping left on an item deletes it and the user can undo the deletion using a snackbar action.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Swipe left on an item in the shopping list"
+      },
+      {
+        "type": "assertion",
+        "description": "Item is removed from the list immediately"
+      },
+      {
+        "type": "assertion",
+        "description": "An undo snackbar appears allowing restoration of the item"
+      },
+      {
+        "type": "action",
+        "description": "Click on undo action in snackbar"
+      },
+      {
+        "type": "assertion",
+        "description": "Item is restored back to the original position in the list"
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Swipe Right to Mark as Bought",
+    "description": "Ensure that swiping right on an item marks it as bought, updates its status visually, and triggers necessary state changes.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Swipe right on a pending item in the shopping list"
+      },
+      {
+        "type": "assertion",
+        "description": "Item status changes to bought"
+      },
+      {
+        "type": "assertion",
+        "description": "Visual indicator for bought status is shown on the item card"
+      },
+      {
+        "type": "assertion",
+        "description": "Item moves or remains sorted appropriately according to current list sorting preferences"
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Real-time Search with Debounce and Status Filters",
+    "description": "Validate the search functionality filters items dynamically as user types with debounce, combining correctly with All, Pending, and Bought status filters, maintaining performance with over 100 items.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open shopping list with more than 100 items"
+      },
+      {
+        "type": "action",
+        "description": "Enter partial item name in search input"
+      },
+      {
+        "type": "assertion",
+        "description": "Items filtered in real-time matching the search term ignoring case with debounce to avoid excessive recompositions"
+      },
+      {
+        "type": "action",
+        "description": "Apply 'Pending' status filter"
+      },
+      {
+        "type": "assertion",
+        "description": "List shows only pending items matching the search term"
+      },
+      {
+        "type": "action",
+        "description": "Apply 'Bought' status filter"
+      },
+      {
+        "type": "assertion",
+        "description": "List shows only bought items matching the search term"
+      },
+      {
+        "type": "action",
+        "description": "Clear search input"
+      },
+      {
+        "type": "assertion",
+        "description": "List resets to current status filter showing all matching items"
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Sorting Preferences Persistence",
+    "description": "Verify that sorting items by name, date, or price works seamlessly with applied filters and user preferences are saved and restored on app restart.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open shopping list screen"
+      },
+      {
+        "type": "action",
+        "description": "Apply sorting by name ascending"
+      },
+      {
+        "type": "assertion",
+        "description": "List items are sorted alphabetically by name"
+      },
+      {
+        "type": "action",
+        "description": "Switch sorting to price descending"
+      },
+      {
+        "type": "assertion",
+        "description": "Items are sorted by price in descending order considering current filters"
+      },
+      {
+        "type": "action",
+        "description": "Close and restart the app"
+      },
+      {
+        "type": "assertion",
+        "description": "Last sorting preference (price descending) is preserved and applied automatically"
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Dark and Light Mode Toggle Persistence",
+    "description": "Ensure that the user can toggle between dark and light mode via settings or top bar, with immediate smooth transition and preference saved for future app launches.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open settings screen or use top bar toggle"
+      },
+      {
+        "type": "action",
+        "description": "Switch theme from light mode to dark mode"
+      },
+      {
+        "type": "assertion",
+        "description": "UI switches smoothly to dark theme with all elements and text colors adhering to Material Design 3 and WCAG AA contrast"
+      },
+      {
+        "type": "action",
+        "description": "Close and reopen the app"
+      },
+      {
+        "type": "assertion",
+        "description": "Dark mode preference is persisted and applied on launch"
+      },
+      {
+        "type": "action",
+        "description": "Toggle back to light mode and verify persistence again"
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Backup Export Produces Valid JSON",
+    "description": "Test backing up shopping data exports a valid JSON file that can be saved and shared without corruption.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to backup functionality"
+      },
+      {
+        "type": "action",
+        "description": "Export shopping data as JSON"
+      },
+      {
+        "type": "assertion",
+        "description": "A valid JSON file is generated containing current shopping list, categories, and history data"
+      },
+      {
+        "type": "action",
+        "description": "Share the JSON file to an external app"
+      },
+      {
+        "type": "assertion",
+        "description": "File is shared successfully and not corrupted"
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Backup Import with Validation and Error Handling",
+    "description": "Verify that importing a backup JSON file validates data integrity, shows confirmation dialog for valid files, and displays error dialog if file is invalid or corrupted.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to import backup functionality"
+      },
+      {
+        "type": "action",
+        "description": "Select a valid backup JSON file"
+      },
+      {
+        "type": "assertion",
+        "description": "Validation passes and confirmation dialog appears before importing"
+      },
+      {
+        "type": "action",
+        "description": "Confirm to proceed with import"
+      },
+      {
+        "type": "assertion",
+        "description": "Shopping data is restored correctly and updated in the app"
+      },
+      {
+        "type": "action",
+        "description": "Attempt importing an invalid or corrupted JSON file"
+      },
+      {
+        "type": "assertion",
+        "description": "Error dialog displays indicating invalid backup file and import is aborted"
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "Automatic Save to Purchase History When All Items Bought",
+    "description": "Check that when all items in the shopping list are marked as bought, the current list is automatically saved to history for future reuse.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Mark all items in shopping list as bought, either individually or via swipe gestures"
+      },
+      {
+        "type": "assertion",
+        "description": "Current shopping list is automatically saved in purchase history"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to purchase history screen"
+      },
+      {
+        "type": "assertion",
+        "description": "Saved historic list appears correctly with all items marked as bought"
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Reuse History Creates Independent List Copy",
+    "description": "Verify that reusing a historic shopping list creates a new independent shopping list copy without linking back to the original history entry.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open purchase history screen"
+      },
+      {
+        "type": "action",
+        "description": "Select a historic list and choose to reuse it"
+      },
+      {
+        "type": "assertion",
+        "description": "A new shopping list is created with identical items but independent from the historic record"
+      },
+      {
+        "type": "action",
+        "description": "Modify or delete items in the new list"
+      },
+      {
+        "type": "assertion",
+        "description": "Changes do not affect the historic list"
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Delete History Entry",
+    "description": "Ensure the user can delete historic shopping lists individually with confirmation and the list is removed accordingly.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open purchase history screen"
+      },
+      {
+        "type": "action",
+        "description": "Select delete action on a historic list"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirmation dialog is shown before deletion"
+      },
+      {
+        "type": "action",
+        "description": "Confirm deletion"
+      },
+      {
+        "type": "assertion",
+        "description": "Selected historic shopping list is deleted and removed from the history screen"
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "Add/Edit Item Dialog Autocomplete and Validation",
+    "description": "Verify that add and edit dialogs provide relevant autocomplete suggestions for item names and show validation errors for invalid inputs such as empty names or invalid quantity.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open add item dialog"
+      },
+      {
+        "type": "action",
+        "description": "Start typing an item name and observe autocomplete suggestions"
+      },
+      {
+        "type": "assertion",
+        "description": "Autocomplete suggestions relevant to input appear"
+      },
+      {
+        "type": "action",
+        "description": "Leave item name empty and attempt to save"
+      },
+      {
+        "type": "assertion",
+        "description": "Validation error message is shown for mandatory item name"
+      },
+      {
+        "type": "action",
+        "description": "Enter invalid quantity and attempt to save"
+      },
+      {
+        "type": "assertion",
+        "description": "Validation feedback indicates invalid quantity input"
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "Accessibility Compliance Checks",
+    "description": "Ensure that all UI components have proper content descriptions, labels, support TalkBack correctly, and meet WCAG AA contrast requirements in both dark and light modes.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Enable TalkBack on the device and navigate through the app screens (shopping list, add/edit dialogs, history, settings)"
+      },
+      {
+        "type": "assertion",
+        "description": "All interactive UI elements have correct content descriptions and labels announced properly"
+      },
+      {
+        "type": "assertion",
+        "description": "Contrast ratio of text and controls meet WCAG AA standards in both themes"
+      },
+      {
+        "type": "action",
+        "description": "Toggle between dark and light mode"
+      },
+      {
+        "type": "assertion",
+        "description": "Accessibility properties remain consistent and effective"
+      }
+    ]
+  },
+  {
+    "id": "TC016",
+    "title": "Performance Under Load with 100+ Items",
+    "description": "Validate that app operations such as searching, filtering, sorting, scrolling, and adding items remain smooth and responsive with 100 or more items.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Pre-populate shopping list with at least 100 items"
+      },
+      {
+        "type": "action",
+        "description": "Perform search with filtering"
+      },
+      {
+        "type": "assertion",
+        "description": "Filtering and search complete within 100 milliseconds"
+      },
+      {
+        "type": "action",
+        "description": "Sort items by price and name"
+      },
+      {
+        "type": "assertion",
+        "description": "Sort operations complete swiftly without UI freezes"
+      },
+      {
+        "type": "action",
+        "description": "Scroll rapidly through the list"
+      },
+      {
+        "type": "assertion",
+        "description": "List scrolls smoothly without jitter"
+      },
+      {
+        "type": "action",
+        "description": "Add new items rapidly"
+      },
+      {
+        "type": "assertion",
+        "description": "Items are added promptly and visible in lists without delay"
+      }
+    ]
+  },
+  {
+    "id": "TC017",
+    "title": "Undo Deletion Does Not Interfere with Scrolling",
+    "description": "Ensure swipe left gesture to delete and snackbar undo action do not interfere with vertical scrolling of the list.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Perform vertical scroll on shopping list"
+      },
+      {
+        "type": "assertion",
+        "description": "Scroll is smooth and unaffected by swipe gestures"
+      },
+      {
+        "type": "action",
+        "description": "Swipe left on an item to delete"
+      },
+      {
+        "type": "assertion",
+        "description": "Item is deleted and undo snackbar appears"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to scroll list vertically while snackbar is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Scrolling continues smoothly without blocked gestures"
+      }
+    ]
+  },
+  {
+    "id": "TC018",
+    "title": "Data Integrity with Category Migration",
+    "description": "Validate that existing shopping data migrates correctly to new categorization system without data loss or inconsistency after app upgrade.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Install older app version with existing shopping data"
+      },
+      {
+        "type": "action",
+        "description": "Upgrade/install new app version with mandatory categories"
+      },
+      {
+        "type": "assertion",
+        "description": "All existing items have assigned categories, defaulted if necessary"
+      },
+      {
+        "type": "assertion",
+        "description": "No item data (name, quantity, price, status) is lost or corrupted"
+      },
+      {
+        "type": "assertion",
+        "description": "Category badges display correctly for all items"
+      }
+    ]
+  },
+  {
+    "id": "TC019",
+    "title": "Backup Import Using External App Intent",
+    "description": "Test that importing backup files via external app intents parses and integrates data correctly into the application with validation.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "From an external app, share a valid backup JSON file with Minhas Compras app"
+      },
+      {
+        "type": "assertion",
+        "description": "Minhas Compras receives the file and prompts user for import confirmation"
+      },
+      {
+        "type": "action",
+        "description": "Confirm import"
+      },
+      {
+        "type": "assertion",
+        "description": "Data is imported correctly and app UI updates accordingly"
+      },
+      {
+        "type": "action",
+        "description": "Repeat similarly with an invalid or corrupted file"
+      },
+      {
+        "type": "assertion",
+        "description": "Error dialog is shown, import is canceled, and app state remains unchanged"
+      }
+    ]
+  },
+  {
+    "id": "TC020",
+    "title": "Launch Performance Test",
+    "description": "Confirm that the app launch time is under 2 seconds from cold start on target devices.",
+    "category": "performance",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Terminate the app completely"
+      },
+      {
+        "type": "action",
+        "description": "Open the app from launcher"
+      },
+      {
+        "type": "assertion",
+        "description": "App main screen with shopping list is fully rendered within 2 seconds"
+      }
+    ]
+  }
+]

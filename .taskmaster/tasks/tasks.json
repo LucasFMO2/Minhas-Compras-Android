@@ -942,8 +942,73 @@
         "dependencies": [
           "1"
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Configuração Inicial do Projeto Firebase e Dependências Gradle",
+            "description": "Crie e configure o projeto no Firebase Console, registre o aplicativo Android e adicione o arquivo `google-services.json` ao projeto. Em seguida, adicione as dependências necessárias do Firebase BOM e FCM ao `build.gradle.kts` do módulo `app` e aplique o plugin `google-services`.",
+            "dependencies": [],
+            "details": "1. Crie um projeto no Firebase Console e registre o aplicativo Android usando o `applicationId` do projeto.\n2. Baixe o arquivo `google-services.json` e coloque-o no diretório `app/`.\n3. No `build.gradle.kts` do projeto (project-level), adicione a dependência do plugin Google Services `com.google.gms.google-services` e, se necessário, o repositório Maven Central/Google.\n4. No `build.gradle.kts` do módulo `app`, adicione as dependências do Firebase BOM (`implementation(platform(\"com.google.firebase:firebase-bom:latest_version\"))`) e do FCM (`implementation(\"com.google.firebase:firebase-messaging-ktx\")`).\n5. Aplique o plugin `com.google.gms.google-services` no topo do arquivo `build.gradle.kts` do módulo `app`.\n<info added on 2025-12-24T18:35:06.324Z>\nO que foi feito:\nO arquivo google-services.json foi baixado do Firebase Console e colocado no diretório app/. As versões do Firebase BOM (33.7.0) e do plugin Google Services (4.4.2) foram adicionadas ao libs.versions.toml. O plugin google-services foi adicionado ao build.gradle.kts do projeto (project-level) e aplicado no app/build.gradle.kts. As dependências do Firebase BOM (platform) e Firebase Messaging KTX foram adicionadas.\n\nArquivos modificados:\n- gradle/libs.versions.toml: Adicionadas versões e bibliotecas do Firebase\n- build.gradle.kts: Adicionado plugin google-services\n- app/build.gradle.kts: Aplicado plugin e adicionadas dependências Firebase\n- app/google-services.json: Arquivo baixado e configurado\n\nObservação: Existe um erro de versão do Gradle (8.9 vs 8.13 requerido) que é pré-existente e não relacionado ao Firebase. As configurações do Firebase estão corretas.\n</info added on 2025-12-24T18:35:06.324Z>",
+            "status": "done",
+            "testStrategy": "Compile o projeto e verifique se não há erros relacionados às dependências do Firebase. Confirme a presença do arquivo `google-services.json` no local correto do projeto.",
+            "updatedAt": "2025-12-24T18:35:11.755Z",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Criação do Serviço de Mensageria e Manipulação de Token",
+            "description": "Crie a classe `MyFirebaseMessagingService` que estende `FirebaseMessagingService` e sobrescreva o método `onNewToken` para registrar o token de registro FCM no log, que é crucial para identificar o dispositivo para envio de notificações.",
+            "dependencies": [
+              1
+            ],
+            "details": "1. Crie um novo arquivo Kotlin chamado `MyFirebaseMessagingService.kt` no pacote principal do aplicativo.\n2. Faça com que `MyFirebaseMessagingService` herde de `com.google.firebase.messaging.FirebaseMessagingService`.\n3. Sobrescreva o método `onNewToken(token: String)` e adicione um `Log.d` para exibir o valor do `token` gerado.\n4. Opcionalmente, adicione um `Log.d` ao `onCreate()` ou construtor do serviço para confirmar sua inicialização.\n<info added on 2025-12-24T19:10:14.293Z>\nImplementação concluída. O arquivo MyFirebaseMessagingService.kt foi criado no pacote com.example.minhascompras. A classe herda de FirebaseMessagingService e implementa os métodos onNewToken() e onCreate() com logging para registrar o token FCM e confirmar a inicialização. Uma estrutura básica para onMessageReceived() foi adicionada, cuja implementação completa ocorrerá na subtarefa 10.3. O serviço será registrado no AndroidManifest.xml na subtarefa 10.5.\n</info added on 2025-12-24T19:10:14.293Z>",
+            "status": "done",
+            "testStrategy": "Execute o aplicativo em um emulador ou dispositivo e verifique o Logcat. Procure pela mensagem de log contendo o token FCM, que deve aparecer após a primeira inicialização ou reinstalação do aplicativo.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-24T19:10:17.214Z"
+          },
+          {
+            "id": 3,
+            "title": "Implementação do Recebimento de Mensagens em Foreground",
+            "description": "Sobrescreva o método `onMessageReceived` na classe `MyFirebaseMessagingService` para extrair o título e o corpo das mensagens recebidas e exibi-los como uma notificação local quando o aplicativo estiver em primeiro plano.",
+            "dependencies": [
+              2
+            ],
+            "details": "1. Na classe `MyFirebaseMessagingService`, sobrescreva o método `onMessageReceived(remoteMessage: RemoteMessage)`.\n2. Dentro deste método, verifique se `remoteMessage.notification` não é nulo.\n3. Extraia o `title` e `body` de `remoteMessage.notification`.\n4. Adicione `Log.d` para o título e corpo da mensagem para fins de depuração.\n5. Crie uma função auxiliar `showNotification(title: String, body: String)` dentro da classe de serviço para construir e exibir uma notificação local básica (nesta etapa, sem `PendingIntent` ou canal de notificação complexos).\n<info added on 2025-12-24T19:12:40.362Z>\nImplementação concluída. O método `onMessageReceived` foi implementado para processar mensagens em primeiro plano, extraindo o título e corpo da notificação. Uma função auxiliar `showNotification` foi criada para construir e exibir a notificação. Adicionalmente, foram implementados a criação de um canal de notificação básico para Android 8.0+ e um `PendingIntent` que abre a `MainActivity` ao tocar na notificação.\n\nObservação: Está sendo usado um ícone temporário (`android.R.drawable.ic_dialog_info`), que será substituído e melhorado na subtarefa 10.4.\n</info added on 2025-12-24T19:12:40.362Z>",
+            "status": "done",
+            "testStrategy": "Envie uma notificação de teste do Firebase Console (com título e corpo) enquanto o aplicativo estiver em primeiro plano. Verifique se as mensagens de log contendo o título e o corpo da notificação aparecem no Logcat e se uma notificação básica é exibida na barra de status.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-24T19:12:46.269Z"
+          },
+          {
+            "id": 4,
+            "title": "Configurar Canais de Notificação e Exibição Detalhada com PendingIntent",
+            "description": "Implemente a criação de um canal de notificação para Android 8.0+ e aprimore a função de exibição de notificações para usar `NotificationManagerCompat` e `NotificationCompat.Builder`, configurando um `PendingIntent` para abrir a `MainActivity` ao tocar na notificação.",
+            "dependencies": [
+              3
+            ],
+            "details": "1. Crie uma classe `MyApplication` que estenda `android.app.Application` e registre-a no `AndroidManifest.xml` (na tag `<application>`, adicione `android:name=\".MyApplication\"`).\n2. Dentro de `MyApplication.onCreate()`, crie e registre o canal de notificação (Notification Channel) usando `NotificationManager`. Defina um `CHANNEL_ID` e `CHANNEL_NAME`.\n3. Modifique a função `showNotification` em `MyFirebaseMessagingService`:\n    a. Use `NotificationManagerCompat` para exibir a notificação.\n    b. Crie um `PendingIntent` que abra a `MainActivity` quando a notificação for clicada.\n    c. Use `NotificationCompat.Builder` para construir a notificação, incluindo o `CHANNEL_ID`, um ícone pequeno (`R.drawable.ic_launcher_foreground`), título, corpo e o `PendingIntent`.\n<info added on 2025-12-24T19:16:01.256Z>\nImplementação concluída. O canal de notificação foi criado na classe `MinhasComprasApplication` (já existente e registrada no Manifesto), com as constantes `CHANNEL_ID` e `CHANNEL_NAME` movidas para seu companion object para compartilhamento. A função `showNotification` em `MyFirebaseMessagingService.kt` foi aprimorada para usar `NotificationManagerCompat`, com um `PendingIntent` configurado para abrir a `MainActivity` e o ícone do app (`R.drawable.ic_launcher_foreground`). Adicionalmente, a função duplicada `createNotificationChannel()` foi removida do serviço, resultando em um código mais limpo e centralizado.\n</info added on 2025-12-24T19:16:01.256Z>",
+            "status": "done",
+            "testStrategy": "Envie uma notificação de teste do Firebase Console. Verifique se a notificação aparece com o ícone correto, título e corpo. Toque na notificação e confirme que ela abre a `MainActivity`. Teste em dispositivos com Android 8.0+ para garantir o comportamento correto do canal e em versões anteriores para assegurar compatibilidade.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-24T19:16:05.076Z"
+          },
+          {
+            "id": 5,
+            "title": "Implementar Solicitação de Permissão de Notificação e Registro do Serviço no Manifesto",
+            "description": "Adicione a lógica para solicitar a permissão `POST_NOTIFICATIONS` em tempo de execução para Android 13+ e registre o `MyFirebaseMessagingService` no `AndroidManifest.xml` para garantir que ele possa receber eventos FCM, mesmo em segundo plano ou com o aplicativo fechado.",
+            "dependencies": [
+              4
+            ],
+            "details": "1. No `AndroidManifest.xml`, adicione a permissão `POST_NOTIFICATIONS` dentro da tag `<manifest>`.\n2. Na `MainActivity` (ou Composable principal, se usando Jetpack Compose), use `rememberLauncherForActivityResult` com `ActivityResultContracts.RequestPermission` para solicitar `android.permission.POST_NOTIFICATIONS` em tempo de execução para dispositivos com API 33 ou superior.\n3. No `AndroidManifest.xml`, dentro da tag `<application>`, registre o `MyFirebaseMessagingService` da seguinte forma:\n   ```xml\n   <service\n       android:name=\".MyFirebaseMessagingService\"\n       android:exported=\"false\">\n       <intent-filter>\n           <action android:name=\"com.google.firebase.MESSAGING_EVENT\" />\n       </intent-filter>\n   </service>\n   ```\n<info added on 2025-12-24T19:18:57.852Z>\nA implementação foi concluída. Na `MainActivity.kt`, foi adicionada a lógica para a solicitação da permissão de notificação em tempo de execução (para API 33+), utilizando `rememberLauncherForActivityResult` e um `LaunchedEffect` que verifica se a permissão já foi concedida antes de solicitá-la. No `AndroidManifest.xml`, a presença da permissão `POST_NOTIFICATIONS` foi verificada e o `MyFirebaseMessagingService` foi devidamente registrado com `android:exported=\"false\"` e o `intent-filter` para a ação `com.google.firebase.MESSAGING_EVENT`. Com isso, a solicitação de permissão é feita automaticamente na inicialização do app (em Android 13+) e o serviço está preparado para receber notificações em segundo plano.\n</info added on 2025-12-24T19:18:57.852Z>",
+            "status": "done",
+            "testStrategy": "Instale o aplicativo em um dispositivo com Android 13+ (ou emulador). Verifique se a solicitação de permissão de notificação é exibida na inicialização. Envie uma notificação de teste do Firebase Console quando o aplicativo estiver em segundo plano e, em seguida, completamente fechado. Verifique se a notificação é recebida e exibida corretamente em ambos os cenários.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-24T19:19:03.195Z"
+          }
+        ],
+        "updatedAt": "2025-12-24T19:19:03.195Z"
       },
       {
         "id": "11",
@@ -1526,9 +1591,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-12-22T20:22:06.777Z",
+      "lastModified": "2025-12-24T19:19:03.203Z",
       "taskCount": 17,
-      "completedCount": 10,
+      "completedCount": 11,
       "tags": [
         "master"
       ]

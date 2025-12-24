@@ -1,0 +1,576 @@
+================================================================================
+PRODUCT REQUIREMENTS DOCUMENT (PRD)
+Minhas Compras - MVP v3.0
+================================================================================
+
+DOCUMENTO: PRD v1.0
+DATA: Novembro 2024
+VERSÃO DO PRODUTO: 3.0 MVP
+PRAZO: 3 semanas (15 dias úteis)
+STATUS: Em Planejamento
+
+================================================================================
+1. VISÃO GERAL DO PRODUTO
+================================================================================
+
+PRODUTO: Minhas Compras
+TIPO: Aplicativo Android para Gerenciamento de Lista de Compras
+PLATAFORMA: Android 7.0+ (API 24+)
+TECNOLOGIA: Kotlin, Jetpack Compose, Room Database
+
+DESCRIÇÃO:
+Minhas Compras é um aplicativo Android moderno e intuitivo para gerenciar
+listas de compras pessoais. O MVP v3.0 adiciona funcionalidades essenciais
+de busca, filtros, categorias, modo escuro, gestos e backup, transformando
+o app em uma solução completa e profissional.
+
+OBJETIVO DO MVP:
+Desenvolver e lançar a versão 3.0 com funcionalidades essenciais que
+aumentem significativamente o valor do produto, mantendo alta qualidade
+e experiência do usuário.
+
+================================================================================
+2. OBJETIVOS DE NEGÓCIO
+================================================================================
+
+OBJETIVOS PRIMÁRIOS:
+- Adicionar funcionalidades essenciais solicitadas pelos usuários
+- Melhorar a organização e usabilidade do aplicativo
+- Preparar o produto para publicação na Play Store
+- Estabelecer base sólida para futuras expansões
+
+OBJETIVOS SECUNDÁRIOS:
+- Manter alta qualidade de código
+- Garantir performance otimizada
+- Assegurar acessibilidade básica
+- Documentar adequadamente o produto
+
+================================================================================
+3. PÚBLICO-ALVO
+================================================================================
+
+USUÁRIOS PRIMÁRIOS:
+- Pessoas que fazem compras regularmente
+- Usuários que precisam organizar listas de compras
+- Pessoas que querem controlar gastos e orçamento
+- Usuários de smartphones Android
+
+PERFIL DO USUÁRIO:
+- Idade: 18-65 anos
+- Experiência técnica: Básica a intermediária
+- Necessidade: Organização e controle de compras
+- Dispositivo: Android 7.0 ou superior
+
+================================================================================
+4. STATUS ATUAL DO PRODUTO (v2.3)
+================================================================================
+
+FUNCIONALIDADES JÁ IMPLEMENTADAS:
+✓ Adicionar itens com nome, quantidade e preço
+✓ Editar itens existentes
+✓ Deletar itens individuais
+✓ Marcar itens como comprado/pendente
+✓ Deletar todos os itens comprados
+✓ Persistência local com Room Database
+✓ Estatísticas básicas (total, pendentes, comprados)
+✓ Estatísticas de preços (total geral, pendentes, comprados)
+✓ Barra de progresso visual
+✓ Interface Material Design 3
+✓ Animações suaves
+✓ Estado vazio com call-to-action
+
+ARQUITETURA ATUAL:
+✓ MVVM com ViewModel
+✓ Room Database com DAO
+✓ Repository Pattern
+✓ Kotlin Coroutines
+✓ Jetpack Compose
+✓ StateFlow para reatividade
+
+================================================================================
+5. REQUISITOS FUNCIONAIS - MVP v3.0
+================================================================================
+
+-------------------------------------------------------------------------------
+5.1 SEMANA 1: FUNCIONALIDADES ESSENCIAIS
+-------------------------------------------------------------------------------
+
+RF-001: BUSCA E FILTROS
+Prioridade: ALTA
+Complexidade: MÉDIA
+Estimativa: 2-3 dias (16 horas)
+
+Descrição:
+Implementar sistema de busca e filtros para facilitar a localização de
+itens na lista de compras.
+
+Requisitos Funcionais:
+- RF-001.1: Campo de busca deve estar visível na tela principal
+- RF-001.2: Busca deve funcionar em tempo real enquanto o usuário digita
+- RF-001.3: Busca deve filtrar itens por nome (case-insensitive)
+- RF-001.4: Sistema deve oferecer três filtros: Todos, Pendentes, Comprados
+- RF-001.5: Filtro ativo deve ter indicador visual claro
+- RF-001.6: Deve haver botão para limpar busca e filtros
+- RF-001.7: Busca e filtros devem funcionar em conjunto
+- RF-001.8: Performance deve ser mantida mesmo com muitos itens (debounce 300ms)
+
+Critérios de Aceitação:
+- CA-001.1: Busca funciona enquanto o usuário digita
+- CA-001.2: Filtros atualizam a lista instantaneamente
+- CA-001.3: Busca e filtros funcionam em conjunto corretamente
+- CA-001.4: Performance mantida com 100+ itens na lista
+- CA-001.5: Interface é intuitiva e acessível
+
+User Stories:
+- Como usuário, eu quero buscar itens por nome para encontrá-los rapidamente
+- Como usuário, eu quero filtrar por status para ver apenas pendentes ou comprados
+- Como usuário, eu quero combinar busca e filtros para refinar minha busca
+
+-------------------------------------------------------------------------------
+
+RF-002: ORDENAÇÃO DE ITENS
+Prioridade: MÉDIA
+Complexidade: BAIXA
+Estimativa: 1-2 dias (8 horas)
+
+Descrição:
+Implementar sistema de ordenação para organizar itens da lista de diferentes
+formas.
+
+Requisitos Funcionais:
+- RF-002.1: Deve haver menu de ordenação (dropdown ou bottom sheet)
+- RF-002.2: Deve oferecer ordenação por Nome (A-Z)
+- RF-002.3: Deve oferecer ordenação por Data (mais recente primeiro)
+- RF-002.4: Deve oferecer ordenação por Preço (menor para maior)
+- RF-002.5: Ordenação atual deve ter indicador visual
+- RF-002.6: Preferência de ordenação deve ser persistida
+- RF-002.7: Ordenação deve funcionar com todos os filtros
+
+Critérios de Aceitação:
+- CA-002.1: Ordenação funciona corretamente em todos os filtros
+- CA-002.2: Performance mantida com muitos itens
+- CA-002.3: UI é intuitiva e acessível
+- CA-002.4: Preferência é mantida após fechar o app
+
+User Stories:
+- Como usuário, eu quero ordenar itens por nome para facilitar a localização
+- Como usuário, eu quero ordenar por preço para ver itens mais caros primeiro
+- Como usuário, eu quero que minha preferência de ordenação seja lembrada
+
+-------------------------------------------------------------------------------
+
+RF-003: CATEGORIAS BÁSICAS
+Prioridade: ALTA
+Complexidade: MÉDIA-ALTA
+Estimativa: 3-4 dias (24 horas)
+
+Descrição:
+Adicionar sistema de categorias para organizar itens da lista de compras.
+
+Requisitos Funcionais:
+- RF-003.1: Modelo ItemCompra deve ter campo "categoria"
+- RF-003.2: Deve haver migração do Room Database (versão 2 → 3)
+- RF-003.3: Deve haver lista pré-definida de categorias:
+  * Frutas e Verduras
+  * Laticínios
+  * Carnes e Aves
+  * Padaria
+  * Limpeza
+  * Higiene
+  * Bebidas
+  * Grãos e Cereais
+  * Outros
+- RF-003.4: Categoria deve ser selecionável no dialog de adicionar/editar
+- RF-003.5: Categoria deve ser obrigatória ao adicionar item
+- RF-003.6: Categoria deve ser exibida no card do item (badge/chip)
+- RF-003.7: Dados existentes devem ser migrados (categoria padrão "Outros")
+- RF-003.8: Visual deve ser consistente com Material Design 3
+- RF-003.9: (Opcional) Filtro por categoria se sobrar tempo
+
+Critérios de Aceitação:
+- CA-003.1: Categoria é obrigatória ao adicionar item
+- CA-003.2: Migração não perde dados existentes
+- CA-003.3: Visual é consistente com Material Design 3
+- CA-003.4: Categorias são exibidas corretamente nos cards
+
+User Stories:
+- Como usuário, eu quero categorizar meus itens para organizar melhor minha lista
+- Como usuário, eu quero ver a categoria de cada item na lista
+- Como usuário, eu quero que meus dados existentes sejam preservados na atualização
+
+-------------------------------------------------------------------------------
+5.2 SEMANA 2: MELHORIAS DE UX E FUNCIONALIDADES
+-------------------------------------------------------------------------------
+
+RF-004: MODO ESCURO/CLARO
+Prioridade: MÉDIA
+Complexidade: BAIXA
+Estimativa: 1-2 dias (12 horas)
+
+Descrição:
+Implementar suporte a tema claro e escuro para melhorar a experiência do
+usuário em diferentes condições de iluminação.
+
+Requisitos Funcionais:
+- RF-004.1: Deve haver toggle de tema no TopBar ou menu de configurações
+- RF-004.2: Deve suportar tema claro
+- RF-004.3: Deve suportar tema escuro
+- RF-004.4: Preferência do tema deve ser persistida
+- RF-004.5: Transição entre temas deve ser suave
+- RF-004.6: (Opcional) Seguir preferência do sistema
+
+Critérios de Aceitação:
+- CA-004.1: Todos os componentes respeitam o tema selecionado
+- CA-004.2: Cores têm contraste adequado para acessibilidade
+- CA-004.3: Preferência persiste após fechar o app
+- CA-004.4: Transição é suave e sem flickering
+
+User Stories:
+- Como usuário, eu quero usar modo escuro para reduzir cansaço visual
+- Como usuário, eu quero que minha preferência de tema seja lembrada
+- Como usuário, eu quero alternar entre temas facilmente
+
+-------------------------------------------------------------------------------
+
+RF-005: GESTOS E AÇÕES RÁPIDAS
+Prioridade: MÉDIA
+Complexidade: MÉDIA
+Estimativa: 2-3 dias (16 horas)
+
+Descrição:
+Implementar gestos de swipe para ações rápidas nos itens da lista.
+
+Requisitos Funcionais:
+- RF-005.1: Swipe para direita deve marcar item como comprado
+- RF-005.2: Swipe para esquerda deve deletar item
+- RF-005.3: Deve haver feedback visual durante o swipe
+- RF-005.4: Após deletar, deve aparecer Snackbar com ação "Desfazer"
+- RF-005.5: Desfazer deve restaurar item deletado
+- RF-005.6: (Opcional) Long press para menu de ações rápidas
+
+Critérios de Aceitação:
+- CA-005.1: Gestos funcionam de forma intuitiva
+- CA-005.2: Feedback visual é claro e imediato
+- CA-005.3: Desfazer funciona corretamente
+- CA-005.4: Gestos não interferem com scroll da lista
+
+User Stories:
+- Como usuário, eu quero marcar itens como comprados com um gesto rápido
+- Como usuário, eu quero deletar itens com um gesto simples
+- Como usuário, eu quero poder desfazer uma exclusão acidental
+
+-------------------------------------------------------------------------------
+
+RF-006: MELHORIAS NO DIALOG
+Prioridade: BAIXA
+Complexidade: BAIXA
+Estimativa: 1 dia (8 horas)
+
+Descrição:
+Melhorar o dialog de adicionar/editar itens com autocompletar e sugestões.
+
+Requisitos Funcionais:
+- RF-006.1: Campo de nome deve ter autocompletar baseado em itens anteriores
+- RF-006.2: Deve mostrar sugestões de itens frequentes
+- RF-006.3: Validação de campos deve ser melhorada
+- RF-006.4: Deve haver feedback visual de erros
+
+Critérios de Aceitação:
+- CA-006.1: Autocompletar acelera a entrada de dados
+- CA-006.2: Sugestões são relevantes e úteis
+- CA-006.3: Validação previne erros do usuário
+- CA-006.4: Feedback de erros é claro
+
+User Stories:
+- Como usuário, eu quero que o app sugira nomes de itens que já adicionei
+- Como usuário, eu quero ver itens que adiciono frequentemente
+- Como usuário, eu quero ser avisado se cometer um erro ao preencher campos
+
+-------------------------------------------------------------------------------
+5.3 SEMANA 3: BACKUP E POLIMENTO
+-------------------------------------------------------------------------------
+
+RF-007: BACKUP E RESTAURAÇÃO
+Prioridade: ALTA
+Complexidade: MÉDIA-ALTA
+Estimativa: 3-4 dias (24 horas)
+
+Descrição:
+Implementar sistema de backup e restauração de dados para segurança e
+portabilidade.
+
+Requisitos Funcionais:
+- RF-007.1: Deve haver menu de configurações/sobre
+- RF-007.2: Deve haver opção "Exportar dados" que gera arquivo JSON
+- RF-007.3: Deve haver opção "Importar dados" que lê arquivo JSON
+- RF-007.4: Deve ser possível compartilhar lista via texto/WhatsApp
+- RF-007.5: Deve haver dialog de confirmação para importação
+- RF-007.6: Deve validar arquivo JSON antes de importar
+- RF-007.7: Importação não deve corromper dados existentes
+
+Critérios de Aceitação:
+- CA-007.1: Exportação gera arquivo JSON válido e completo
+- CA-007.2: Importação valida e trata erros adequadamente
+- CA-007.3: Compartilhamento funciona em apps externos
+- CA-007.4: Backup não corrompe dados existentes
+- CA-007.5: Usuário é avisado antes de sobrescrever dados
+
+User Stories:
+- Como usuário, eu quero fazer backup dos meus dados para não perdê-los
+- Como usuário, eu quero restaurar meus dados em outro dispositivo
+- Como usuário, eu quero compartilhar minha lista com outras pessoas
+
+-------------------------------------------------------------------------------
+
+RF-008: HISTÓRICO DE COMPRAS
+Prioridade: MÉDIA
+Complexidade: MÉDIA
+Estimativa: 2-3 dias (16 horas)
+
+Descrição:
+Implementar sistema de histórico para salvar e reutilizar listas de compras
+anteriores.
+
+Requisitos Funcionais:
+- RF-008.1: Lista deve ser salva automaticamente quando todos os itens forem comprados
+- RF-008.2: Deve haver tela de histórico com listas anteriores
+- RF-008.3: Deve ser possível visualizar lista histórica
+- RF-008.4: Deve ser possível reutilizar lista histórica (criar nova lista baseada nela)
+- RF-008.5: Deve ser possível deletar histórico
+- RF-008.6: Reutilização deve criar nova lista independente
+
+Critérios de Aceitação:
+- CA-008.1: Histórico salva automaticamente quando lista é completada
+- CA-008.2: Reutilização cria nova lista independente
+- CA-008.3: Performance mantida com muitos históricos
+- CA-008.4: Interface é intuitiva e fácil de usar
+
+User Stories:
+- Como usuário, eu quero que minhas listas completadas sejam salvas automaticamente
+- Como usuário, eu quero reutilizar listas anteriores para economizar tempo
+- Como usuário, eu quero ver meu histórico de compras anteriores
+
+-------------------------------------------------------------------------------
+
+RF-009: TESTES E CORREÇÕES
+Prioridade: ALTA
+Complexidade: VARIÁVEL
+Estimativa: 2-3 dias (16 horas)
+
+Descrição:
+Implementar testes básicos e corrigir bugs encontrados durante o desenvolvimento.
+
+Requisitos Funcionais:
+- RF-009.1: Deve haver testes unitários básicos (ViewModel)
+- RF-009.2: Deve haver testes de UI básicos (Compose Testing)
+- RF-009.3: Bugs encontrados devem ser corrigidos
+- RF-009.4: Performance deve ser otimizada
+- RF-009.5: Acessibilidade deve ser revisada
+- RF-009.6: Código deve ser revisado
+
+Critérios de Aceitação:
+- CA-009.1: Cobertura mínima de testes (30-40%)
+- CA-009.2: App funciona sem crashes críticos
+- CA-009.3: Performance é aceitável (< 100ms para operações)
+- CA-009.4: Acessibilidade básica está implementada
+
+User Stories:
+- Como desenvolvedor, eu quero testes para garantir qualidade do código
+- Como usuário, eu quero um app estável sem crashes
+- Como usuário, eu quero um app rápido e responsivo
+
+================================================================================
+6. REQUISITOS NÃO-FUNCIONAIS
+================================================================================
+
+RNF-001: PERFORMANCE
+- Operações de busca devem responder em < 100ms
+- Lista deve scrollar suavemente com 100+ itens
+- App deve iniciar em < 2 segundos
+- Uso de memória deve ser otimizado
+
+RNF-002: USABILIDADE
+- Interface deve ser intuitiva e fácil de usar
+- Ações comuns devem ser acessíveis em 1-2 toques
+- Feedback visual deve ser claro e imediato
+- Navegação deve ser lógica e consistente
+
+RNF-003: ACESSIBILIDADE
+- Content descriptions em todos os ícones
+- Labels adequados para campos
+- Suporte a TalkBack
+- Contraste de cores adequado (WCAG AA)
+
+RNF-004: CONFIABILIDADE
+- App não deve crashar
+- Dados não devem ser perdidos
+- Migrações de banco devem ser seguras
+- Backup/restauração deve ser confiável
+
+RNF-005: COMPATIBILIDADE
+- Android 7.0+ (API 24+)
+- Diferentes tamanhos de tela
+- Orientação portrait e landscape
+- Diferentes densidades de tela
+
+RNF-006: MANUTENIBILIDADE
+- Código bem estruturado e documentado
+- Arquitetura clara e escalável
+- Testes para facilitar refatoração
+- Padrões de código consistentes
+
+================================================================================
+7. CONSIDERAÇÕES TÉCNICAS
+================================================================================
+
+TEC-001: MIGRAÇÕES DO ROOM
+- Criar migração adequada para adicionar categoria (versão 2 → 3)
+- Não usar fallbackToDestructiveMigration() em produção
+- Testar migração com dados existentes
+- Garantir que dados não sejam perdidos
+
+TEC-002: PERFORMANCE
+- Usar índices no Room para busca otimizada
+- LazyColumn com keys adequadas para recomposição eficiente
+- Debounce na busca (300ms) para reduzir queries
+- Cache de resultados quando apropriado
+
+TEC-003: ARQUITETURA
+- Manter padrão MVVM
+- Repository Pattern para acesso a dados
+- StateFlow para reatividade
+- Separação clara de responsabilidades
+
+TEC-004: TESTES
+- Testes unitários para ViewModel
+- Testes de UI para componentes principais
+- Testes de integração para fluxos críticos
+- Cobertura mínima de 30-40%
+
+================================================================================
+8. CRONOGRAMA
+================================================================================
+
+SEMANA 1 (Dias 1-5):
+- Dia 1-2: RF-001 (Busca e Filtros) - 16h
+- Dia 3: RF-002 (Ordenação) - 8h
+- Dia 4-5: RF-003 (Categorias) - 24h
+
+SEMANA 2 (Dias 6-10):
+- Dia 6: RF-004 (Modo Escuro/Claro) - 12h
+- Dia 7-8: RF-005 (Gestos) - 16h
+- Dia 9: RF-006 (Melhorias Dialog) - 8h
+- Dia 10: Buffer/testes - 4h
+
+SEMANA 3 (Dias 11-15):
+- Dia 11-13: RF-007 (Backup/Restauração) - 24h
+- Dia 14: RF-008 (Histórico) - 16h
+- Dia 15: RF-009 (Testes finais e polimento) - 16h
+
+TOTAL ESTIMADO: 140 horas
+
+================================================================================
+9. RISCOS E DEPENDÊNCIAS
+================================================================================
+
+RISCO-001: Migração do Room pode ser complexa
+Probabilidade: MÉDIA
+Impacto: ALTO
+Mitigação: Testar migração isoladamente primeiro, criar backup antes
+
+RISCO-002: Gestos podem não funcionar bem em todos os dispositivos
+Probabilidade: BAIXA
+Impacto: MÉDIO
+Mitigação: Usar biblioteca testada, testar em múltiplos dispositivos
+
+RISCO-003: Prazo apertado pode comprometer qualidade
+Probabilidade: ALTA
+Impacto: ALTO
+Mitigação: Priorizar features críticas, manter buffer de tempo
+
+DEPENDÊNCIA-001: Room Database versão atual
+DEPENDÊNCIA-002: Jetpack Compose estável
+DEPENDÊNCIA-003: Material Design 3
+
+================================================================================
+10. CRITÉRIOS DE SUCESSO DO MVP
+================================================================================
+
+FUNCIONALIDADES OBRIGATÓRIAS:
+✓ Busca e filtros funcionando
+✓ Categorias implementadas
+✓ Modo escuro/claro
+✓ Backup/restauração básico
+✓ Gestos básicos (swipe)
+
+QUALIDADE:
+✓ Sem crashes críticos
+✓ Performance aceitável (< 100ms para operações)
+✓ UI responsiva e intuitiva
+✓ Acessibilidade básica
+
+DOCUMENTAÇÃO:
+✓ README atualizado
+✓ CHANGELOG atualizado
+✓ Comentários no código crítico
+
+ENTREGÁVEIS:
+✓ APK de Release (v3.0)
+✓ Código-fonte no GitHub
+✓ Release Notes detalhadas
+✓ Documentação atualizada
+✓ Testes básicos implementados
+
+================================================================================
+11. RECURSOS FORA DO ESCOPO (PÓS-MVP)
+================================================================================
+
+FUTURO-001: Múltiplas Listas
+- Criar e gerenciar múltiplas listas
+- Navegação entre listas
+- Renomear/deletar listas
+
+FUTURO-002: Widget
+- Widget na tela inicial
+- Adicionar itens rapidamente
+- Ver progresso sem abrir app
+
+FUTURO-003: Notificações
+- Lembrete para ir às compras
+- Notificação quando lista estiver pronta
+
+FUTURO-004: Estatísticas Avançadas
+- Gráficos de gastos
+- Histórico de compras por período
+- Itens mais comprados
+
+FUTURO-005: Compartilhamento Colaborativo
+- Compartilhar lista com outras pessoas
+- Edição colaborativa em tempo real
+- Sincronização via Firebase
+
+FUTURO-006: Scanner de Código de Barras
+- Adicionar item escaneando código
+- Buscar preços online
+
+================================================================================
+12. APROVAÇÕES E REVISÕES
+================================================================================
+
+APROVADO POR:
+[ ] Product Owner
+[ ] Tech Lead
+[ ] Designer
+[ ] QA Lead
+
+DATA DE APROVAÇÃO: ___________
+
+REVISÕES:
+- Revisão 1: ___________
+- Revisão 2: ___________
+- Revisão Final: ___________
+
+================================================================================
+FIM DO DOCUMENTO
+================================================================================
+

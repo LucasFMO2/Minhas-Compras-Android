@@ -1,0 +1,52 @@
+[
+  {
+    "id": "TC001",
+    "title": "searchapiendpoint",
+    "description": "Test the real-time search API endpoint to ensure it supports case-insensitive filtering by item name combined with status filters (All, Pending, Bought). Verify debounce functionality and performance with over 100 items."
+  },
+  {
+    "id": "TC002",
+    "title": "sortingapiendpoint",
+    "description": "Test the sorting API endpoint to verify sorting of shopping list items by name, date, or price. Ensure sorting works seamlessly with current filters and persists user preferences across sessions."
+  },
+  {
+    "id": "TC003",
+    "title": "categoryapiendpoint",
+    "description": "Test the category API endpoint to ensure mandatory category selection on item addition, correct display of category badges on item cards, and proper migration of existing data without loss."
+  },
+  {
+    "id": "TC004",
+    "title": "darkmodeapiendpoint",
+    "description": "Test the dark mode toggle API endpoint to verify consistent application of dark and light themes with smooth transitions and persistence of user preference."
+  },
+  {
+    "id": "TC005",
+    "title": "swipegestureapiendpoint",
+    "description": "Test the swipe gesture API endpoint to ensure swipe right marks items as bought, swipe left deletes items with undo option via snackbar, and gestures do not interfere with scrolling."
+  },
+  {
+    "id": "TC006",
+    "title": "backuprestoreapiendpoint",
+    "description": "Test the backup and restore API endpoints to verify export of valid JSON files, import with validation and error handling, and sharing functionality with external apps without data corruption."
+  },
+  {
+    "id": "TC007",
+    "title": "purchasehistoryapiendpoint",
+    "description": "Test the purchase history API endpoint to ensure automatic saving of completed lists, ability to view history, reuse past lists creating independent copies, and deletion of unwanted histories with good performance."
+  },
+  {
+    "id": "TC008",
+    "title": "autocompleteapiendpoint",
+    "description": "Test the add/edit item dialog API endpoint to verify autocomplete suggestions for item names, effective validation feedback, and clear error messages for invalid inputs."
+  },
+  {
+    "id": "TC009",
+    "title": "performanceapiendpoint",
+    "description": "Test the overall app performance API endpoints to ensure all operations execute swiftly (under 100ms where applicable), smooth scrolling, and app launch within 2 seconds."
+  },
+  {
+    "id": "TC010",
+    "title": "accessibilityapiendpoint",
+    "description": "Test the accessibility API endpoints to verify compliance with WCAG AA contrast standards, proper labeling of UI elements, content descriptions, and TalkBack support for visually impaired users."
+  }
+]

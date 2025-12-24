@@ -1,0 +1,236 @@
+{
+  "meta": {
+    "project": "Minhas Compras",
+    "date": "2025-12-22",
+    "prepared_by": "Software Development Manager"
+  },
+  "product_overview": "Minhas Compras is a modern, intuitive Android application designed for personal shopping list management. Using technologies such as Kotlin, Jetpack Compose, and Room Database, it provides robust features including real-time search, filtering, categorization, dark mode, gesture controls, and cloud backup and synchronization, all wrapped in a Material Design 3 interface.",
+  "core_goals": [
+    "Implement essential features including search, filtering, item categorization, dark/light mode, and gesture actions to enhance user experience.",
+    "Ensure data integrity and reliability with local persistence using Room Database and cloud synchronization with Supabase.",
+    "Deliver a performant, accessible, and responsive user interface adhering to Material Design 3 principles.",
+    "Support secure backup and restoration of shopping data through export/import functionality.",
+    "Establish a foundation for future expansions such as multi-list support, advanced statistics, and collaborative shopping.",
+    "Maintain high code quality with MVVM architecture, including unit and UI tests to ensure app stability."
+  ],
+  "key_features": [
+    "Real-time search with case-insensitive filtering by item name coupled with status filters (All, Pending, Bought).",
+    "Sortable shopping list items by name, date, or price with persistent user preferences.",
+    "Comprehensive categorization system with mandatory category selection on item addition and visual badges on item cards.",
+    "Dark mode and light mode toggle with smooth transitions and saved user preferences.",
+    "Swipe gestures for quick actions: swipe right to mark as bought, swipe left to delete with undo via snackbar.",
+    "Backup and restoration system allowing export/import of shopping data as JSON files and sharing via external apps.",
+    "Purchase history management with automatic saving of completed lists and ability to reuse or delete historic lists.",
+    "Enhanced add/edit dialog with autocomplete and suggestions for item names, and improved validation feedback.",
+    "Robust performance optimizations including debounce on search input, efficient recomposition with LazyColumn, and indexed database queries.",
+    "Accessibility features such as content descriptions, proper labels, TalkBack support, and WCAG AA contrast compliance."
+  ],
+  "user_flow_summary": [
+    "User launches app and sees their shopping list with options to search, filter, and sort items.",
+    "User adds a new item, selecting a category from a predefined list before saving.",
+    "User performs a swipe right gesture on an item to mark it as bought or swipe left to delete it, with an option to undo deletion.",
+    "User toggles between dark and light mode in settings or top bar; preference is saved and applied throughout the app.",
+    "User backs up their data by exporting a JSON file and can restore it by importing another, with validation and confirmation dialogs.",
+    "When all items are marked bought, the list is automatically saved to history; user can view history, select past lists to reuse, and delete unwanted histories.",
+    "Search input filters items dynamically, combined with status filters, while sorting preference persistently orders items.",
+    "User interacts with dialogs enhanced with autocomplete and validation for efficient and error-free data entry."
+  ],
+  "validation_criteria": [
+    "Search supports real-time filtering with debounce and combines correctly with status filters, maintaining performance with 100+ items.",
+    "Sorting works seamlessly with current filters and persists user preference across sessions.",
+    "Category system enforces mandatory selection, displays badges on item cards, and migrates existing data without loss.",
+    "Dark/light mode toggle applies theme consistently with smooth transitions and persists preference.",
+    "Swipe gestures provide intuitive feedback, support undo deletion, and do not interfere with scrolling.",
+    "Backup exports valid JSON files, import validates and handles errors, and sharing works with external apps without corrupting data.",
+    "Purchase history saves completed lists automatically; reuse creates independent copies and history operations perform well with many entries.",
+    "Dialogs offer relevant autocomplete suggestions, effective validation, and clear error feedback.",
+    "App performs all operations swiftly (<100ms where applicable), maintains smooth scrolling, and launches quickly (<2 seconds).",
+    "Accessibility standards are met with adequate contrast, properly labeled elements, and TalkBack support.",
+    "Code quality benchmarks with minimum 30-40% test coverage, no critical crashes, and stable performance throughout."
+  ],
+  "code_summary": {
+    "project_name": "Minhas Compras",
+    "project_type": "Android Application",
+    "version": "2.18.7",
+    "version_code": 84,
+    "tech_stack": {
+      "language": "Kotlin",
+      "platform": "Android",
+      "min_sdk": 24,
+      "target_sdk": 34,
+      "compile_sdk": 34,
+      "ui_framework": "Jetpack Compose",
+      "architecture": "MVVM",
+      "database": "Room Database",
+      "async": "Kotlin Coroutines",
+      "state_management": "StateFlow",
+      "navigation": "Navigation Compose",
+      "design_system": "Material Design 3",
+      "backend_sync": "Supabase",
+      "cloud_messaging": "Firebase Cloud Messaging",
+      "local_storage": "DataStore Preferences"
+    },
+    "dependencies": {
+      "core": [
+        "androidx.core:core-ktx:1.13.1",
+        "androidx.lifecycle:lifecycle-runtime-ktx:2.8.3",
+        "androidx.activity:activity-compose:1.9.1"
+      ],
+      "compose": [
+        "androidx.compose.ui:ui",
+        "androidx.compose.material3:material3",
+        "androidx.compose.material:material-icons-extended:1.6.7"
+      ],
+      "database": [
+        "androidx.room:room-runtime:2.6.1",
+        "androidx.room:room-ktx:2.6.1"
+      ],
+      "viewmodel": [
+        "androidx.lifecycle:lifecycle-viewmodel-compose:2.8.3"
+      ],
+      "navigation": [
+        "androidx.navigation:navigation-compose:2.7.7"
+      ],
+      "coroutines": [
+        "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1"
+      ],
+      "serialization": [
+        "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3"
+      ],
+      "datastore": [
+        "androidx.datastore:datastore-preferences:1.1.1"
+      ],
+      "supabase": [
+        "io.github.jan-tennert.supabase:postgrest-kt:2.5.0",
+        "io.github.jan-tennert.supabase:realtime-kt:2.5.0",
+        "io.github.jan-tennert.supabase:storage-kt:2.5.0",
+        "io.github.jan-tennert.supabase:gotrue-kt:2.5.0",
+        "io.github.jan-tennert.supabase:functions-kt:2.5.0"
+      ],
+      "networking": [
+        "com.squareup.okhttp3:okhttp:4.12.0"
+      ],
+      "firebase": [
+        "com.google.firebase:firebase-messaging-ktx"
+      ]
+    },
+    "features": {
+      "core_features": [
+        "Adicionar itens com nome, quantidade e preço",
+        "Editar itens existentes",
+        "Deletar itens individuais",
+        "Marcar itens como comprado/pendente",
+        "Deletar todos os itens comprados",
+        "Persistência local com Room Database",
+        "Estatísticas básicas (total, pendentes, comprados)",
+        "Estatísticas de preços (total geral, pendentes, comprados)",
+        "Barra de progresso visual",
+        "Interface Material Design 3",
+        "Animações suaves",
+        "Estado vazio com call-to-action"
+      ],
+      "advanced_features": [
+        "Sistema de busca e filtros",
+        "Ordenação de itens (nome, data, preço)",
+        "Categorias de itens",
+        "Modo escuro/claro",
+        "Gestos de swipe para ações rápidas",
+        "Backup e restauração de dados",
+        "Histórico de compras",
+        "Sincronização com Supabase",
+        "Autenticação de usuários",
+        "Notificações de atualização"
+      ]
+    },
+    "architecture": {
+      "pattern": "MVVM",
+      "components": {
+        "data_layer": {
+          "entities": [
+            "ItemCompra",
+            "ShoppingList",
+            "ShoppingListHistory",
+            "HistoryItem",
+            "ItemCategory"
+          ],
+          "daos": [
+            "ItemCompraDao",
+            "ShoppingListDao",
+            "HistoryDao"
+          ],
+          "repositories": [
+            "ItemCompraRepository",
+            "ShoppingListRepository"
+          ],
+          "database": "AppDatabase"
+        },
+        "ui_layer": {
+          "screens": [
+            "ListaComprasScreen",
+            "HistoryScreen",
+            "SettingsScreen"
+          ],
+          "components": [
+            "ItemCompraCard",
+            "AdicionarItemDialog",
+            "EstadoVazioScreen",
+            "StatisticCard"
+          ],
+          "viewmodels": [
+            "ListaComprasViewModel",
+            "HistoryViewModel",
+            "ShoppingListViewModel",
+            "AuthViewModel",
+            "ThemeViewModel",
+            "UpdateViewModel"
+          ],
+          "theme": [
+            "Theme",
+            "Color",
+            "Type"
+          ]
+        },
+        "utils": [
+          "DebugLogger",
+          "Logger",
+          "NetworkUtils",
+          "ResponsiveUtils"
+        ]
+      }
+    },
+    "testing": {
+      "unit_tests": [
+        "ListaComprasViewModelTest",
+        "ExampleUnitTest"
+      ],
+      "instrumented_tests": [
+        "ExampleInstrumentedTest"
+      ],
+      "test_dependencies": [
+        "junit:junit:4.13.2",
+        "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1",
+        "io.mockk:mockk:1.13.11",
+        "androidx.test.ext:junit:1.2.1",
+        "androidx.test.espresso:espresso-core:3.6.1",
+        "androidx.compose.ui:ui-test-junit4"
+      ]
+    },
+    "project_structure": {
+      "main_package": "com.example.minhascompras",
+      "main_activity": "MainActivity.kt",
+      "application_class": "MinhasComprasApplication.kt",
+      "source_directories": {
+        "data": "app/src/main/java/com/example/minhascompras/data",
+        "ui": "app/src/main/java/com/example/minhascompras/ui",
+        "utils": "app/src/main/java/com/example/minhascompras/utils"
+      }
+    },
+    "build_tools": {
+      "gradle_version": "8.13.0",
+      "kotlin_version": "1.9.24",
+      "ksp_version": "1.9.24-1.0.20",
+      "build_system": "Gradle with Kotlin DSL"
+    },
+    "description": "Aplicativo Android moderno para gerenciamento de listas de compras pessoais. Desenvolvido com Kotlin, Jetpack Compose e Room Database, seguindo arquitetura MVVM e Material Design 3. Inclui funcionalidades de busca, filtros, categorias, modo escuro, gestos, backup e sincronização com Supabase."
+  }
+}

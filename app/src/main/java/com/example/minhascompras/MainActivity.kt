@@ -1,9 +1,14 @@
 package com.example.minhascompras
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -169,6 +174,32 @@ class MainActivity : ComponentActivity() {
                             hypothesisId = "D"
                         )
                         // #endregion
+                        
+                        // Solicitar permissão de notificação para Android 13+ (API 33+)
+                        val context = LocalContext.current
+                        val notificationPermissionLauncher = rememberLauncherForActivityResult(
+                            contract = ActivityResultContracts.RequestPermission()
+                        ) { isGranted ->
+                            if (isGranted) {
+                                android.util.Log.d("MainActivity", "Permissão de notificação concedida")
+                            } else {
+                                android.util.Log.d("MainActivity", "Permissão de notificação negada")
+                            }
+                        }
+                        
+                        // Solicitar permissão automaticamente se necessário (Android 13+)
+                        LaunchedEffect(Unit) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                when {
+                                    context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED -> {
+                                        android.util.Log.d("MainActivity", "Permissão de notificação já concedida")
+                                    }
+                                    else -> {
+                                        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                    }
+                                }
+                            }
+                        }
                         
                         // Verificar atualizações automaticamente ao abrir o app
                         LaunchedEffect(Unit) {

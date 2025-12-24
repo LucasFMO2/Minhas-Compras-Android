@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -13,8 +14,8 @@ android {
         applicationId = "com.example.minhascompras"
         minSdk = 24
         targetSdk = 34
-        versionCode = 84
-        versionName = "2.18.7"
+        versionCode = 85
+        versionName = "2.18.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -92,6 +93,10 @@ dependencies {
     implementation(libs.supabase.auth)
     implementation(libs.supabase.functions)
     implementation(libs.okhttp)
+    
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging.ktx)
     
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

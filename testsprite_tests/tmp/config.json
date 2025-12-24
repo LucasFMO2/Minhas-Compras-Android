@@ -1,0 +1,18 @@
+{
+  "status": "commited",
+  "type": "backend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:8080",
+  "backendAuthType": "basic token",
+  "backendUsername": "teste",
+  "backendPassword": "teste123",
+  "executionArgs": {
+    "projectName": "Minhas-Compras-Android",
+    "projectPath": "C:\\Users\\nerdd\\Desktop\\Minhas-Compras-Android",
+    "testIds": [],
+    "additionalInstruction": "Focar nos testes da task 10 - Firebase Cloud Messaging: testar recebimento de token FCM, recebimento de mensagens, exibição de notificações, e solicitação de permissão.",
+    "envs": {
+      "API_KEY": "sk-user-CzO47KyETtaJwYldbARnbxMmETdTtZDewbIP9GVtftd96bG6yklQpUeZPPjQWJBSkHi6A2Kg3T9APwgW9D2OhTOP_9nnk2RxUtS3h35utE77iJLFubpEycw5SCjEQmGCa38"
+    }
+  }
+}

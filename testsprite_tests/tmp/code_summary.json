@@ -1,0 +1,230 @@
+{
+  "tech_stack": [
+    "Kotlin",
+    "Android",
+    "Jetpack Compose",
+    "Room Database",
+    "Firebase Cloud Messaging",
+    "Material Design 3",
+    "MVVM Architecture"
+  ],
+  "features": [
+    {
+      "name": "FCM Token Registration",
+      "description": "Recebe e registra o token FCM do dispositivo quando um novo token é gerado pelo Firebase. O token é essencial para identificar o dispositivo e permitir o envio de notificações push direcionadas.",
+      "files": [
+        "app/src/main/java/com/example/minhascompras/MyFirebaseMessagingService.kt"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "FCM Token Registration API",
+          "version": "1.0.0",
+          "description": "API para recebimento e registro de tokens FCM"
+        },
+        "paths": {
+          "/fcm/token": {
+            "post": {
+              "summary": "Recebe novo token FCM",
+              "description": "Método onNewToken é chamado automaticamente pelo Firebase quando um novo token é gerado",
+              "requestBody": {
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "token": {
+                          "type": "string",
+                          "description": "Token FCM do dispositivo"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "Token recebido e registrado com sucesso"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "FCM Message Reception",
+      "description": "Recebe e processa mensagens push do Firebase Cloud Messaging quando o aplicativo está em primeiro plano. Extrai título e corpo da mensagem e exibe como notificação local.",
+      "files": [
+        "app/src/main/java/com/example/minhascompras/MyFirebaseMessagingService.kt"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "FCM Message Reception API",
+          "version": "1.0.0",
+          "description": "API para recebimento e processamento de mensagens FCM"
+        },
+        "paths": {
+          "/fcm/message": {
+            "post": {
+              "summary": "Recebe mensagem FCM",
+              "description": "Método onMessageReceived é chamado quando uma mensagem push é recebida",
+              "requestBody": {
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "notification": {
+                          "type": "object",
+                          "properties": {
+                            "title": {
+                              "type": "string",
+                              "description": "Título da notificação"
+                            },
+                            "body": {
+                              "type": "string",
+                              "description": "Corpo da notificação"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "Mensagem recebida e notificação exibida com sucesso"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Local Notification Display",
+      "description": "Exibe notificações locais na barra de status do Android quando mensagens FCM são recebidas. Configura PendingIntent para abrir a MainActivity ao tocar na notificação.",
+      "files": [
+        "app/src/main/java/com/example/minhascompras/MyFirebaseMessagingService.kt",
+        "app/src/main/java/com/example/minhascompras/MinhasComprasApplication.kt"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Local Notification Display API",
+          "version": "1.0.0",
+          "description": "API para exibição de notificações locais"
+        },
+        "paths": {
+          "/notification/show": {
+            "post": {
+              "summary": "Exibe notificação local",
+              "description": "Cria e exibe uma notificação na barra de status",
+              "requestBody": {
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string",
+                          "description": "Título da notificação"
+                        },
+                        "body": {
+                          "type": "string",
+                          "description": "Corpo da notificação"
+                        }
+                      },
+                      "required": ["title", "body"]
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "Notificação exibida com sucesso"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Notification Permission Request",
+      "description": "Solicita permissão POST_NOTIFICATIONS em tempo de execução para dispositivos Android 13+ (API 33+). A permissão é necessária para exibir notificações push.",
+      "files": [
+        "app/src/main/java/com/example/minhascompras/MainActivity.kt",
+        "app/src/main/AndroidManifest.xml"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Notification Permission Request API",
+          "version": "1.0.0",
+          "description": "API para solicitação de permissão de notificações"
+        },
+        "paths": {
+          "/permission/notifications": {
+            "post": {
+              "summary": "Solicita permissão de notificações",
+              "description": "Solicita permissão POST_NOTIFICATIONS em tempo de execução (Android 13+)",
+              "responses": {
+                "200": {
+                  "description": "Permissão concedida",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "granted": {
+                            "type": "boolean",
+                            "description": "Indica se a permissão foi concedida"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "403": {
+                  "description": "Permissão negada pelo usuário"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Notification Channel Creation",
+      "description": "Cria canal de notificação para Android 8.0+ (API 26+) na inicialização da aplicação. O canal é necessário para exibir notificações no Android moderno.",
+      "files": [
+        "app/src/main/java/com/example/minhascompras/MinhasComprasApplication.kt"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Notification Channel Creation API",
+          "version": "1.0.0",
+          "description": "API para criação de canal de notificação"
+        },
+        "paths": {
+          "/notification/channel": {
+            "post": {
+              "summary": "Cria canal de notificação",
+              "description": "Cria canal de notificação na inicialização da aplicação",
+              "responses": {
+                "200": {
+                  "description": "Canal de notificação criado com sucesso"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

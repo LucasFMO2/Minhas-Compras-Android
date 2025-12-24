@@ -76,6 +76,19 @@ class ShoppingListRepository(
         return shoppingListDao.getItemCountForList(listId)
     }
 
+    fun getArchivedLists(): Flow<List<ShoppingList>> {
+        return shoppingListDao.getArchivedLists().also { flow ->
+            // #region agent log
+            com.example.minhascompras.utils.DebugLogger.log(
+                location = "ShoppingListRepository.kt:getArchivedLists",
+                message = "returning Flow from DAO",
+                data = emptyMap(),
+                hypothesisId = "A"
+            )
+            // #endregion
+        }
+    }
+
     /**
      * Garante que sempre exista uma lista padrão.
      * Se não existir, cria a lista "Minhas Compras" com ID 1.

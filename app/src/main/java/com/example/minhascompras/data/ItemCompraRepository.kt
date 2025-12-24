@@ -324,10 +324,54 @@ class ItemCompraRepository(
         // Marcar a lista como arquivada
         shoppingListDao?.let { dao ->
             val list = dao.getListByIdSync(listId)
+            // #region agent log
+            com.example.minhascompras.utils.DebugLogger.log(
+                location = "ItemCompraRepository.kt:archiveCurrentList",
+                message = "before marking as archived",
+                data = mapOf(
+                    "listId" to listId,
+                    "listFound" to (list != null),
+                    "currentIsArchived" to (list?.isArchived ?: false)
+                ),
+                hypothesisId = "C"
+            )
+            // #endregion
+            
             if (list != null) {
                 val archivedList = list.copy(isArchived = true)
                 dao.update(archivedList)
+                
+                // #region agent log
+                com.example.minhascompras.utils.DebugLogger.log(
+                    location = "ItemCompraRepository.kt:archiveCurrentList",
+                    message = "list marked as archived",
+                    data = mapOf(
+                        "listId" to listId,
+                        "listName" to list.nome,
+                        "isArchived" to true
+                    ),
+                    hypothesisId = "C"
+                )
+                // #endregion
+            } else {
+                // #region agent log
+                com.example.minhascompras.utils.DebugLogger.log(
+                    location = "ItemCompraRepository.kt:archiveCurrentList",
+                    message = "list not found, cannot mark as archived",
+                    data = mapOf("listId" to listId),
+                    hypothesisId = "C"
+                )
+                // #endregion
             }
+        } ?: run {
+            // #region agent log
+            com.example.minhascompras.utils.DebugLogger.log(
+                location = "ItemCompraRepository.kt:archiveCurrentList",
+                message = "shoppingListDao is null, cannot mark as archived",
+                data = mapOf("listId" to listId),
+                hypothesisId = "C"
+            )
+            // #endregion
         }
         
         // #region agent log
@@ -366,8 +410,65 @@ class ItemCompraRepository(
     }
 
     suspend fun reuseHistoryList(historyId: Long, listId: Long) {
+        // #region agent log
+        com.example.minhascompras.utils.DebugLogger.log(
+            location = "ItemCompraRepository.kt:reuseHistoryList",
+            message = "function called",
+            data = mapOf(
+                "historyId" to historyId,
+                "listId" to listId
+            ),
+            hypothesisId = "REUSE"
+        )
+        // #endregion
+        
         val historyWithItems = historyDao.getHistoryListWithItems(historyId).first()
+        
+        // #region agent log
+        com.example.minhascompras.utils.DebugLogger.log(
+            location = "ItemCompraRepository.kt:reuseHistoryList",
+            message = "historyWithItems retrieved",
+            data = mapOf(
+                "historyId" to historyId,
+                "historyWithItemsNotNull" to (historyWithItems != null),
+                "itemsCount" to (historyWithItems?.items?.size ?: 0)
+            ),
+            hypothesisId = "REUSE"
+        )
+        // #endregion
+        
         if (historyWithItems != null) {
+            // Verificar se já existem itens nesta lista antes de inserir
+            val existingItems = itemCompraDao.getItensByList(listId).first()
+            
+            // #region agent log
+            com.example.minhascompras.utils.DebugLogger.log(
+                location = "ItemCompraRepository.kt:reuseHistoryList",
+                message = "checked existing items",
+                data = mapOf(
+                    "listId" to listId,
+                    "existingItemsCount" to existingItems.size
+                ),
+                hypothesisId = "REUSE"
+            )
+            // #endregion
+            
+            // Se já existem itens, deletar antes de inserir novos (evitar duplicação)
+            if (existingItems.isNotEmpty()) {
+                // #region agent log
+                com.example.minhascompras.utils.DebugLogger.log(
+                    location = "ItemCompraRepository.kt:reuseHistoryList",
+                    message = "deleting existing items to avoid duplication",
+                    data = mapOf(
+                        "listId" to listId,
+                        "existingItemsCount" to existingItems.size
+                    ),
+                    hypothesisId = "REUSE"
+                )
+                // #endregion
+                itemCompraDao.deleteAllByList(listId)
+            }
+            
             val items = historyWithItems.items.map { historyItem ->
                 ItemCompra(
                     nome = historyItem.nome,
@@ -379,7 +480,32 @@ class ItemCompraRepository(
                     listId = listId
                 )
             }
+            
+            // #region agent log
+            com.example.minhascompras.utils.DebugLogger.log(
+                location = "ItemCompraRepository.kt:reuseHistoryList",
+                message = "inserting items",
+                data = mapOf(
+                    "listId" to listId,
+                    "itemsCount" to items.size
+                ),
+                hypothesisId = "REUSE"
+            )
+            // #endregion
+            
             itemCompraDao.insertAll(items)
+            
+            // #region agent log
+            com.example.minhascompras.utils.DebugLogger.log(
+                location = "ItemCompraRepository.kt:reuseHistoryList",
+                message = "items inserted",
+                data = mapOf(
+                    "listId" to listId,
+                    "itemsCount" to items.size
+                ),
+                hypothesisId = "REUSE"
+            )
+            // #endregion
             
             // Desarquivar a lista original se o histórico tiver listId associado
             historyWithItems.history.listId?.let { originalListId ->

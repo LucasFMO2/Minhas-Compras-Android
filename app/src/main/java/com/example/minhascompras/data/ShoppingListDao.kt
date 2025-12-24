@@ -44,5 +44,12 @@ interface ShoppingListDao {
         WHERE listId = :listId
     """)
     fun getItemCountForList(listId: Long): Flow<Int>
+
+    @Query("""
+        SELECT * FROM shopping_lists 
+        WHERE isArchived = 1
+        ORDER BY dataCriacao DESC
+    """)
+    fun getArchivedLists(): Flow<List<ShoppingList>>
 }
 

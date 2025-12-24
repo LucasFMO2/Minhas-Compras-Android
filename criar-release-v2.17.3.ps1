@@ -1,11 +1,21 @@
 # Script para criar release pública v2.17.3 com APK específico
+# Carrega variáveis de ambiente do arquivo .env automaticamente
+$scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Path
+$loadEnvPath = Join-Path $scriptPath "load-env.ps1"
+
+if (Test-Path $loadEnvPath) {
+    . $loadEnvPath
+    if (Test-Path (Join-Path $scriptPath ".env")) {
+        Load-EnvFile -EnvFile (Join-Path $scriptPath ".env") | Out-Null
+    }
+}
+
 # O token deve ser fornecido via variável de ambiente GITHUB_TOKEN ou será solicitado
 if ($env:GITHUB_TOKEN) {
     $token = $env:GITHUB_TOKEN
 } else {
     Write-Host "Token GitHub nao encontrado na variavel de ambiente GITHUB_TOKEN" -ForegroundColor Yellow
-    Write-Host "Por favor, defina: `$env:GITHUB_TOKEN = 'seu-token-aqui'" -ForegroundColor Yellow
-    Write-Host "Ou forneca o token quando solicitado" -ForegroundColor Yellow
+    Write-Host "Por favor, defina no arquivo .env ou forneca o token quando solicitado" -ForegroundColor Yellow
     $token = Read-Host "Cole seu Personal Access Token do GitHub" -AsSecureString
     $token = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
         [Runtime.InteropServices.Marshal]::SecureStringToBSTR($token)

@@ -103,12 +103,22 @@ class HistoryViewModel(
 
     fun deleteHistory(historyId: Long) {
         viewModelScope.launch {
-            // Sempre desarquivar a lista (ID sempre negativo)
+            // ID negativo: lista arquivada
             val listId = -historyId
+            
+            // 1. Deletar o histórico associado (se existir)
+            // O histórico contém os itens salvos quando a lista foi arquivada
+            val realHistoryList = repository.getHistoryLists(listId).first()
+            realHistoryList.firstOrNull { it.listId == listId }?.let { history ->
+                repository.deleteHistory(history.id)
+            }
+            
+            // 2. Deletar a lista arquivada
+            // Os itens da lista são deletados automaticamente via CASCADE
             shoppingListRepository?.let { repo ->
                 val list = repo.getListByIdSync(listId)
-                if (list != null && list.isArchived) {
-                    repo.updateList(list.copy(isArchived = false))
+                if (list != null) {
+                    repo.deleteList(listId)
                 }
             }
         }

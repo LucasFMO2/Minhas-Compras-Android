@@ -5,6 +5,8 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -59,8 +61,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 /**
- * Componente de seleção de horário com colunas roláveis para horas e minutos.
- * Similar ao TimePicker nativo do Android com visual moderno e amigável.
+ * Componente de seleção de horário estilo carrossel com scroll vertical.
+ * Design inspirado no iOS picker com snap automático e indicador visual.
  */
 @Composable
 fun ScrollableTimePicker(
@@ -70,151 +72,63 @@ fun ScrollableTimePicker(
     onMinuteSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val hourListState = rememberLazyListState(
-        initialFirstVisibleItemIndex = selectedHour.coerceIn(0, 23)
-    )
-    val minuteListState = rememberLazyListState(
-        initialFirstVisibleItemIndex = selectedMinute.coerceIn(0, 59)
-    )
-
+    val hourListState = rememberLazyListState()
+    val minuteListState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+    
     val density = LocalDensity.current
-    val itemHeightPx = with(density) { 56.dp.toPx() } // Reduzido para melhor proporção
-    val viewportHeightPx = with(density) { 200.dp.toPx() } // Altura reduzida, mais compacta
-    val viewportCenterPx = viewportHeightPx / 2
-    val itemCenterOffsetPx = itemHeightPx / 2
-
-    val scrollOffsetPx = viewportCenterPx - itemCenterOffsetPx
-
-    var isScrollingToHour by remember { mutableStateOf(false) }
-    var isScrollingToMinute by remember { mutableStateOf(false) }
-
-    // Sincronização otimizada com animações mais rápidas
-    LaunchedEffect(selectedHour) {
-        if (!isScrollingToHour && selectedHour in 0..23) {
-            isScrollingToHour = true
-            hourListState.animateScrollToItem(
-                index = selectedHour,
-                scrollOffset = scrollOffsetPx.toInt()
-            )
-            delay(150) // Animação mais rápida e responsiva
-            isScrollingToHour = false
-        }
-    }
-
-    LaunchedEffect(selectedMinute) {
-        if (!isScrollingToMinute && selectedMinute in 0..59) {
-            isScrollingToMinute = true
-            minuteListState.animateScrollToItem(
-                index = selectedMinute,
-                scrollOffset = scrollOffsetPx.toInt()
-            )
-            delay(150) // Animação mais rápida e responsiva
-            isScrollingToMinute = false
-        }
+    val itemHeightPx = with(density) { 48.dp.toPx() }
+    val viewportHeightPx = with(density) { 192.dp.toPx() }
+    val itemCenterOffset = ((viewportHeightPx - itemHeightPx) / 2).toInt()
+    
+    // Scroll inicial para o horário selecionado
+    LaunchedEffect(Unit) {
+        hourListState.scrollToItem(selectedHour.coerceIn(0, 23), -itemCenterOffset)
+        minuteListState.scrollToItem(selectedMinute.coerceIn(0, 59), -itemCenterOffset)
     }
     
-    // Detecção de scroll otimizada com resposta mais rápida
+    // Detectar item no centro após parar de rolar (horas)
     LaunchedEffect(hourListState.isScrollInProgress) {
-        if (!hourListState.isScrollInProgress && !isScrollingToHour) {
-            delay(150) // Delay reduzido para resposta mais rápida
-
-            if (hourListState.isScrollInProgress || isScrollingToHour) return@LaunchedEffect
-
-            val firstVisible = hourListState.firstVisibleItemIndex
-            val offset = hourListState.firstVisibleItemScrollOffset.toFloat()
-
-            val currentItemTop = offset
-            val currentItemCenter = currentItemTop + itemCenterOffsetPx
-            val distanceFromCenter = kotlin.math.abs(currentItemCenter - viewportCenterPx)
-
-            var closestIndex = firstVisible
-            var minDistance = distanceFromCenter
-
-            // Verificar itens adjacentes
-            if (firstVisible > 0) {
-                val prevItemTop = offset - itemHeightPx
-                val prevItemCenter = prevItemTop + itemCenterOffsetPx
-                val prevDistance = kotlin.math.abs(prevItemCenter - viewportCenterPx)
-                if (prevDistance < minDistance) {
-                    minDistance = prevDistance
-                    closestIndex = firstVisible - 1
+        snapshotFlow { 
+            hourListState.isScrollInProgress to 
+            (hourListState.firstVisibleItemIndex to hourListState.firstVisibleItemScrollOffset)
+        }.collect { (isScrolling, indexOffset) ->
+            if (!isScrolling) {
+                delay(50) // Pequeno delay para garantir que parou
+                val (index, offset) = indexOffset
+                val centerItem = calculateCenterItem(index, offset, itemHeightPx, itemCenterOffset.toFloat())
+                    .coerceIn(0, 23)
+                
+                if (centerItem != selectedHour) {
+                    onHourSelected(centerItem)
+                    // Snap suave para o centro
+                    coroutineScope.launch {
+                        hourListState.animateScrollToItem(centerItem, -itemCenterOffset)
+                    }
                 }
-            }
-
-            if (firstVisible < 23) {
-                val nextItemTop = offset + itemHeightPx
-                val nextItemCenter = nextItemTop + itemCenterOffsetPx
-                val nextDistance = kotlin.math.abs(nextItemCenter - viewportCenterPx)
-                if (nextDistance < minDistance) {
-                    minDistance = nextDistance
-                    closestIndex = firstVisible + 1
-                }
-            }
-
-            val finalSelected = closestIndex.coerceIn(0, 23)
-
-            // Threshold menor para resposta mais sensível
-            if (finalSelected != selectedHour && !isScrollingToHour && minDistance > 3) {
-                isScrollingToHour = true
-                hourListState.animateScrollToItem(
-                    index = finalSelected,
-                    scrollOffset = scrollOffsetPx.toInt()
-                )
-                onHourSelected(finalSelected)
-                delay(150)
-                isScrollingToHour = false
             }
         }
     }
     
+    // Detectar item no centro após parar de rolar (minutos)
     LaunchedEffect(minuteListState.isScrollInProgress) {
-        if (!minuteListState.isScrollInProgress && !isScrollingToMinute) {
-            delay(150) // Delay reduzido para resposta mais rápida
-
-            if (minuteListState.isScrollInProgress || isScrollingToMinute) return@LaunchedEffect
-
-            val firstVisible = minuteListState.firstVisibleItemIndex
-            val offset = minuteListState.firstVisibleItemScrollOffset.toFloat()
-
-            val currentItemTop = offset
-            val currentItemCenter = currentItemTop + itemCenterOffsetPx
-            val distanceFromCenter = kotlin.math.abs(currentItemCenter - viewportCenterPx)
-
-            var closestIndex = firstVisible
-            var minDistance = distanceFromCenter
-
-            if (firstVisible > 0) {
-                val prevItemTop = offset - itemHeightPx
-                val prevItemCenter = prevItemTop + itemCenterOffsetPx
-                val prevDistance = kotlin.math.abs(prevItemCenter - viewportCenterPx)
-                if (prevDistance < minDistance) {
-                    minDistance = prevDistance
-                    closestIndex = firstVisible - 1
+        snapshotFlow { 
+            minuteListState.isScrollInProgress to 
+            (minuteListState.firstVisibleItemIndex to minuteListState.firstVisibleItemScrollOffset)
+        }.collect { (isScrolling, indexOffset) ->
+            if (!isScrolling) {
+                delay(50) // Pequeno delay para garantir que parou
+                val (index, offset) = indexOffset
+                val centerItem = calculateCenterItem(index, offset, itemHeightPx, itemCenterOffset.toFloat())
+                    .coerceIn(0, 59)
+                
+                if (centerItem != selectedMinute) {
+                    onMinuteSelected(centerItem)
+                    // Snap suave para o centro
+                    coroutineScope.launch {
+                        minuteListState.animateScrollToItem(centerItem, -itemCenterOffset)
+                    }
                 }
-            }
-
-            if (firstVisible < 59) {
-                val nextItemTop = offset + itemHeightPx
-                val nextItemCenter = nextItemTop + itemCenterOffsetPx
-                val nextDistance = kotlin.math.abs(nextItemCenter - viewportCenterPx)
-                if (nextDistance < minDistance) {
-                    minDistance = nextDistance
-                    closestIndex = firstVisible + 1
-                }
-            }
-
-            val finalSelected = closestIndex.coerceIn(0, 59)
-
-            // Threshold menor para resposta mais sensível
-            if (finalSelected != selectedMinute && !isScrollingToMinute && minDistance > 3) {
-                isScrollingToMinute = true
-                minuteListState.animateScrollToItem(
-                    index = finalSelected,
-                    scrollOffset = scrollOffsetPx.toInt()
-                )
-                onMinuteSelected(finalSelected)
-                delay(150)
-                isScrollingToMinute = false
             }
         }
     }
@@ -222,87 +136,64 @@ fun ScrollableTimePicker(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(200.dp), // Altura reduzida para proporção melhor
+            .height(192.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Coluna de Horas - Melhor alinhamento
+        // Coluna de Horas
         Box(
             modifier = Modifier
                 .weight(1f)
-                .height(200.dp),
-            contentAlignment = Alignment.Center
+                .fillMaxHeight()
         ) {
             LazyColumn(
                 state = hourListState,
                 horizontalAlignment = Alignment.CenterHorizontally,
-                contentPadding = PaddingValues(vertical = 72.dp), // Ajustado para nova altura
+                contentPadding = PaddingValues(vertical = 72.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(24) { hour ->
-                    val isSelected = hour == selectedHour
-                    val distance = kotlin.math.abs(hour - selectedHour)
-                    val alpha = when {
-                        isSelected -> 1f
-                        distance == 1 -> 0.7f
-                        distance == 2 -> 0.4f
-                        else -> 0.2f
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .height(56.dp) // Altura reduzida para melhor proporção
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp)) // Bordas mais arredondadas
-                            .then(
-                                if (isSelected) {
-                                    Modifier.background(
-                                        MaterialTheme.colorScheme.primaryContainer,
-                                        RoundedCornerShape(16.dp)
-                                    )
-                                } else {
-                                    Modifier
-                                }
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = String.format("%02d", hour),
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = if (isSelected) {
-                                MaterialTheme.colorScheme.onPrimaryContainer
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha)
-                            },
-                            textAlign = TextAlign.Center,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                        )
-                    }
+                    TimePickerItem(
+                        value = hour,
+                        isSelected = hour == selectedHour,
+                        onSelected = { 
+                            onHourSelected(hour)
+                            coroutineScope.launch {
+                                hourListState.animateScrollToItem(hour, -itemCenterOffset)
+                            }
+                        }
+                    )
                 }
             }
-        }
-
-        // Separador ":" - Melhor posicionamento e estilo
-        Box(
-            modifier = Modifier
-                .height(200.dp)
-                .padding(horizontal = 12.dp), // Padding consistente
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = ":",
-                style = MaterialTheme.typography.displayMedium, // Fonte maior para melhor visibilidade
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.Bold
+            
+            // Indicador de seleção no centro
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .height(48.dp)
+                    .align(Alignment.Center)
+                    .border(
+                        width = 2.dp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(12.dp)
+                    )
             )
         }
-
-        // Coluna de Minutos - Mesmo alinhamento
+        
+        // Separador ":"
+        Text(
+            text = ":",
+            style = MaterialTheme.typography.displayMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+        
+        // Coluna de Minutos
         Box(
             modifier = Modifier
                 .weight(1f)
-                .height(200.dp),
-            contentAlignment = Alignment.Center
+                .fillMaxHeight()
         ) {
             LazyColumn(
                 state = minuteListState,
@@ -311,48 +202,90 @@ fun ScrollableTimePicker(
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(60) { minute ->
-                    val isSelected = minute == selectedMinute
-                    val distance = kotlin.math.abs(minute - selectedMinute)
-                    val alpha = when {
-                        isSelected -> 1f
-                        distance == 1 -> 0.7f
-                        distance == 2 -> 0.4f
-                        else -> 0.2f
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .height(56.dp)
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .then(
-                                if (isSelected) {
-                                    Modifier.background(
-                                        MaterialTheme.colorScheme.primaryContainer,
-                                        RoundedCornerShape(16.dp)
-                                    )
-                                } else {
-                                    Modifier
-                                }
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = String.format("%02d", minute),
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = if (isSelected) {
-                                MaterialTheme.colorScheme.onPrimaryContainer
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha)
-                            },
-                            textAlign = TextAlign.Center,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                        )
-                    }
+                    TimePickerItem(
+                        value = minute,
+                        isSelected = minute == selectedMinute,
+                        onSelected = { 
+                            onMinuteSelected(minute)
+                            coroutineScope.launch {
+                                minuteListState.animateScrollToItem(minute, -itemCenterOffset)
+                            }
+                        }
+                    )
                 }
             }
+            
+            // Indicador de seleção no centro
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .height(48.dp)
+                    .align(Alignment.Center)
+                    .border(
+                        width = 2.dp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+            )
         }
     }
+}
+
+/**
+ * Item individual do seletor de horário
+ */
+@Composable
+private fun TimePickerItem(
+    value: Int,
+    isSelected: Boolean,
+    onSelected: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .height(48.dp)
+            .fillMaxWidth()
+            .clickable(onClick = onSelected)
+            .then(
+                if (isSelected) {
+                    Modifier.background(
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                        RoundedCornerShape(12.dp)
+                    )
+                } else {
+                    Modifier
+                }
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = String.format("%02d", value),
+            style = if (isSelected) {
+                MaterialTheme.typography.headlineMedium.copy(
+                    fontWeight = FontWeight.Bold
+                )
+            } else {
+                MaterialTheme.typography.bodyLarge
+            },
+            color = if (isSelected) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+            }
+        )
+    }
+}
+
+/**
+ * Calcula qual item está no centro do viewport
+ */
+private fun calculateCenterItem(
+    firstVisibleIndex: Int,
+    scrollOffset: Int,
+    itemHeight: Float,
+    centerOffset: Float
+): Int {
+    val adjustedOffset = scrollOffset + centerOffset
+    return (firstVisibleIndex + (adjustedOffset / itemHeight).toInt()).coerceAtLeast(0)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

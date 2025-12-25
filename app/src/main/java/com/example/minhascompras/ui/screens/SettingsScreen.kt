@@ -80,101 +80,143 @@ fun ScrollableTimePicker(
     val density = LocalDensity.current
     val itemHeightPx = with(density) { 60.dp.toPx() }
     val containerHeightPx = with(density) { 240.dp.toPx() }
+    val spacerHeightPx = with(density) { 90.dp.toPx() }
     // Offset para centralizar: altura do container / 2 - altura do item / 2 = 120dp - 30dp = 90dp
     val centerOffsetPx = (containerHeightPx / 2) - (itemHeightPx / 2)
     
-    // Sincronizar scroll com seleção quando mudar externamente
+    // Flags para evitar loops infinitos
+    var isScrollingToHour by remember { mutableStateOf(false) }
+    var isScrollingToMinute by remember { mutableStateOf(false) }
+    
+    // Sincronizar scroll com seleção quando mudar externamente (apenas uma vez)
     LaunchedEffect(selectedHour) {
-        if (selectedHour in 0..23) {
-            // Scroll para o item com offset para centralizar
+        if (!isScrollingToHour && selectedHour in 0..23) {
+            isScrollingToHour = true
             hourListState.animateScrollToItem(
                 index = selectedHour,
                 scrollOffset = centerOffsetPx.toInt()
             )
+            delay(300) // Aguardar animação terminar
+            isScrollingToHour = false
         }
     }
     
     LaunchedEffect(selectedMinute) {
-        if (selectedMinute in 0..59) {
-            // Scroll para o item com offset para centralizar
+        if (!isScrollingToMinute && selectedMinute in 0..59) {
+            isScrollingToMinute = true
             minuteListState.animateScrollToItem(
                 index = selectedMinute,
                 scrollOffset = centerOffsetPx.toInt()
             )
+            delay(300) // Aguardar animação terminar
+            isScrollingToMinute = false
         }
     }
     
     // Detectar quando o usuário para de rolar e ajustar para o item mais próximo do centro
     LaunchedEffect(hourListState.isScrollInProgress) {
-        if (!hourListState.isScrollInProgress) {
-            delay(100)
+        if (!hourListState.isScrollInProgress && !isScrollingToHour) {
+            delay(200) // Aumentar delay para evitar detecções prematuras
+            
+            // Verificar se ainda não está rolando (usuário pode ter começado a rolar novamente)
+            if (hourListState.isScrollInProgress || isScrollingToHour) return@LaunchedEffect
+            
             val firstVisible = hourListState.firstVisibleItemIndex
             val offset = hourListState.firstVisibleItemScrollOffset
             
-            // Calcular qual item está mais próximo do centro
-            // O centro está em centerOffsetPx do topo do container
-            // Precisamos verificar se o item atual está próximo do centro
-            val itemTopPosition = offset
+            // Calcular posição real considerando o espaçador superior
+            // O item visível está em: espaçador (90dp) + offset do scroll
+            val itemTopPosition = spacerHeightPx + offset
             val itemCenterPosition = itemTopPosition + (itemHeightPx / 2)
-            val distanceFromCenter = kotlin.math.abs(itemCenterPosition - centerOffsetPx)
+            val centerPosition = spacerHeightPx + centerOffsetPx
+            val distanceFromCenter = kotlin.math.abs(itemCenterPosition - centerPosition)
             
-            // Se o próximo item estiver mais próximo do centro, selecionar ele
+            // Verificar próximo item
             val nextItemTopPosition = itemTopPosition + itemHeightPx
             val nextItemCenterPosition = nextItemTopPosition + (itemHeightPx / 2)
-            val nextDistanceFromCenter = kotlin.math.abs(nextItemCenterPosition - centerOffsetPx)
+            val nextDistanceFromCenter = kotlin.math.abs(nextItemCenterPosition - centerPosition)
             
-            val selected = if (nextDistanceFromCenter < distanceFromCenter && firstVisible < 23) {
-                firstVisible + 1
+            // Verificar item anterior
+            val prevItemTopPosition = itemTopPosition - itemHeightPx
+            val prevItemCenterPosition = prevItemTopPosition + (itemHeightPx / 2)
+            val prevDistanceFromCenter = if (firstVisible > 0) {
+                kotlin.math.abs(prevItemCenterPosition - centerPosition)
             } else {
-                firstVisible
+                Float.MAX_VALUE
+            }
+            
+            // Escolher o item mais próximo do centro
+            val selected = when {
+                prevDistanceFromCenter < distanceFromCenter && prevDistanceFromCenter < nextDistanceFromCenter && firstVisible > 0 -> {
+                    firstVisible - 1
+                }
+                nextDistanceFromCenter < distanceFromCenter && firstVisible < 23 -> {
+                    firstVisible + 1
+                }
+                else -> firstVisible
             }
             
             val finalSelected = selected.coerceIn(0, 23)
             
-            if (finalSelected != selectedHour) {
+            // Só atualizar se realmente mudou E não está no meio de um scroll programático
+            if (finalSelected != selectedHour && !isScrollingToHour) {
+                isScrollingToHour = true
                 onHourSelected(finalSelected)
-            } else {
-                // Garantir que está centralizado mesmo se já é o selecionado
-                hourListState.animateScrollToItem(
-                    index = finalSelected,
-                    scrollOffset = centerOffsetPx.toInt()
-                )
+                delay(300)
+                isScrollingToHour = false
             }
         }
     }
     
     LaunchedEffect(minuteListState.isScrollInProgress) {
-        if (!minuteListState.isScrollInProgress) {
-            delay(100)
+        if (!minuteListState.isScrollInProgress && !isScrollingToMinute) {
+            delay(200) // Aumentar delay para evitar detecções prematuras
+            
+            // Verificar se ainda não está rolando (usuário pode ter começado a rolar novamente)
+            if (minuteListState.isScrollInProgress || isScrollingToMinute) return@LaunchedEffect
+            
             val firstVisible = minuteListState.firstVisibleItemIndex
             val offset = minuteListState.firstVisibleItemScrollOffset
             
-            // Calcular qual item está mais próximo do centro
-            val itemTopPosition = offset
+            // Calcular posição real considerando o espaçador superior
+            val itemTopPosition = spacerHeightPx + offset
             val itemCenterPosition = itemTopPosition + (itemHeightPx / 2)
-            val distanceFromCenter = kotlin.math.abs(itemCenterPosition - centerOffsetPx)
+            val centerPosition = spacerHeightPx + centerOffsetPx
+            val distanceFromCenter = kotlin.math.abs(itemCenterPosition - centerPosition)
             
-            // Se o próximo item estiver mais próximo do centro, selecionar ele
+            // Verificar próximo item
             val nextItemTopPosition = itemTopPosition + itemHeightPx
             val nextItemCenterPosition = nextItemTopPosition + (itemHeightPx / 2)
-            val nextDistanceFromCenter = kotlin.math.abs(nextItemCenterPosition - centerOffsetPx)
+            val nextDistanceFromCenter = kotlin.math.abs(nextItemCenterPosition - centerPosition)
             
-            val selected = if (nextDistanceFromCenter < distanceFromCenter && firstVisible < 59) {
-                firstVisible + 1
+            // Verificar item anterior
+            val prevItemTopPosition = itemTopPosition - itemHeightPx
+            val prevItemCenterPosition = prevItemTopPosition + (itemHeightPx / 2)
+            val prevDistanceFromCenter = if (firstVisible > 0) {
+                kotlin.math.abs(prevItemCenterPosition - centerPosition)
             } else {
-                firstVisible
+                Float.MAX_VALUE
+            }
+            
+            // Escolher o item mais próximo do centro
+            val selected = when {
+                prevDistanceFromCenter < distanceFromCenter && prevDistanceFromCenter < nextDistanceFromCenter && firstVisible > 0 -> {
+                    firstVisible - 1
+                }
+                nextDistanceFromCenter < distanceFromCenter && firstVisible < 59 -> {
+                    firstVisible + 1
+                }
+                else -> firstVisible
             }
             
             val finalSelected = selected.coerceIn(0, 59)
             
-            if (finalSelected != selectedMinute) {
+            // Só atualizar se realmente mudou E não está no meio de um scroll programático
+            if (finalSelected != selectedMinute && !isScrollingToMinute) {
+                isScrollingToMinute = true
                 onMinuteSelected(finalSelected)
-            } else {
-                // Garantir que está centralizado mesmo se já é o selecionado
-                minuteListState.animateScrollToItem(
-                    index = finalSelected,
-                    scrollOffset = centerOffsetPx.toInt()
-                )
+                delay(300)
+                isScrollingToMinute = false
             }
         }
     }

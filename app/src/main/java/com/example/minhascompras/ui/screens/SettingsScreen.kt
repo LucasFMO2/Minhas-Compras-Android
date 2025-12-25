@@ -243,7 +243,7 @@ private fun TimePickerItem(
     Box(
         modifier = Modifier
             .height(48.dp)
-            .fillMaxWidth()
+            .fillMaxWidth(0.8f)
             .clickable(onClick = onSelected)
             .then(
                 if (isSelected) {

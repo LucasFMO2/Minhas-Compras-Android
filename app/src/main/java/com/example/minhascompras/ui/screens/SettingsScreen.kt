@@ -4,13 +4,18 @@ import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DarkMode
@@ -25,10 +30,15 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import com.example.minhascompras.data.ThemeMode
 import com.example.minhascompras.data.NotificationPreferencesManager
 import com.example.minhascompras.notifications.NotificationScheduler
@@ -47,6 +57,199 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.text.SimpleDateFormat
 import java.util.*
+
+/**
+ * Componente de seleção de horário com colunas roláveis para horas e minutos.
+ * Similar ao TimePicker nativo do Android com visual moderno.
+ */
+@Composable
+fun ScrollableTimePicker(
+    selectedHour: Int,
+    selectedMinute: Int,
+    onHourSelected: (Int) -> Unit,
+    onMinuteSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val hourListState = rememberLazyListState(
+        initialFirstVisibleItemIndex = selectedHour.coerceIn(0, 23)
+    )
+    val minuteListState = rememberLazyListState(
+        initialFirstVisibleItemIndex = selectedMinute.coerceIn(0, 59)
+    )
+    
+    val density = LocalDensity.current
+    val itemHeight = with(density) { 60.dp.toPx() }
+    
+    // Sincronizar scroll com seleção quando mudar externamente
+    LaunchedEffect(selectedHour) {
+        if (selectedHour in 0..23) {
+            hourListState.animateScrollToItem(selectedHour)
+        }
+    }
+    
+    LaunchedEffect(selectedMinute) {
+        if (selectedMinute in 0..59) {
+            minuteListState.animateScrollToItem(selectedMinute)
+        }
+    }
+    
+    // Detectar quando o usuário para de rolar e ajustar para o item mais próximo
+    LaunchedEffect(hourListState.isScrollInProgress) {
+        if (!hourListState.isScrollInProgress) {
+            delay(100)
+            val firstVisible = hourListState.firstVisibleItemIndex
+            val offset = hourListState.firstVisibleItemScrollOffset
+            val selected = if (offset > itemHeight / 2) firstVisible + 1 else firstVisible
+            val finalSelected = selected.coerceIn(0, 23)
+            if (finalSelected != selectedHour) {
+                onHourSelected(finalSelected)
+            }
+        }
+    }
+    
+    LaunchedEffect(minuteListState.isScrollInProgress) {
+        if (!minuteListState.isScrollInProgress) {
+            delay(100)
+            val firstVisible = minuteListState.firstVisibleItemIndex
+            val offset = minuteListState.firstVisibleItemScrollOffset
+            val selected = if (offset > itemHeight / 2) firstVisible + 1 else firstVisible
+            val finalSelected = selected.coerceIn(0, 59)
+            if (finalSelected != selectedMinute) {
+                onMinuteSelected(finalSelected)
+            }
+        }
+    }
+    
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(240.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Coluna de Horas
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .height(240.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            LazyColumn(
+                state = hourListState,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                // Espaçador superior para centralizar o item selecionado
+                item {
+                    Spacer(modifier = Modifier.height(90.dp))
+                }
+                
+                items(24) { hour ->
+                    val isSelected = hour == selectedHour
+                    Box(
+                        modifier = Modifier
+                            .height(60.dp)
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .then(
+                                if (isSelected) {
+                                    Modifier.background(
+                                        MaterialTheme.colorScheme.primaryContainer,
+                                        RoundedCornerShape(12.dp)
+                                    )
+                                } else {
+                                    Modifier
+                                }
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = String.format("%02d", hour),
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = if (isSelected) {
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            },
+                            textAlign = TextAlign.Center,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                        )
+                    }
+                }
+                
+                // Espaçador inferior para centralizar o item selecionado
+                item {
+                    Spacer(modifier = Modifier.height(90.dp))
+                }
+            }
+        }
+        
+        // Separador ":"
+        Text(
+            text = ":",
+            style = MaterialTheme.typography.headlineLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(horizontal = 8.dp)
+        )
+        
+        // Coluna de Minutos
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .height(240.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            LazyColumn(
+                state = minuteListState,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                // Espaçador superior para centralizar o item selecionado
+                item {
+                    Spacer(modifier = Modifier.height(90.dp))
+                }
+                
+                items(60) { minute ->
+                    val isSelected = minute == selectedMinute
+                    Box(
+                        modifier = Modifier
+                            .height(60.dp)
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .then(
+                                if (isSelected) {
+                                    Modifier.background(
+                                        MaterialTheme.colorScheme.primaryContainer,
+                                        RoundedCornerShape(12.dp)
+                                    )
+                                } else {
+                                    Modifier
+                                }
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = String.format("%02d", minute),
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = if (isSelected) {
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            },
+                            textAlign = TextAlign.Center,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                        )
+                    }
+                }
+                
+                // Espaçador inferior para centralizar o item selecionado
+                item {
+                    Spacer(modifier = Modifier.height(90.dp))
+                }
+            }
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -920,79 +1123,50 @@ fun SettingsScreen(
                 
                 AlertDialog(
                     onDismissRequest = { showTimePicker = false },
-                    title = { Text("Selecionar Horário") },
+                    title = { 
+                        Text(
+                            "Selecionar Horário",
+                            style = MaterialTheme.typography.titleLarge
+                        ) 
+                    },
                     text = {
                         Column(
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                            horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                            ) {
-                                // Hour picker
-                                Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
-                                    Text("Hora", style = MaterialTheme.typography.labelMedium)
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                                    ) {
-                                        IconButton(onClick = { 
-                                            selectedHour = (selectedHour + 1) % 24 
-                                        }) {
-                                            Text("▲", style = MaterialTheme.typography.titleLarge)
-                                        }
-                                        Text(
-                                            String.format("%02d", selectedHour),
-                                            style = MaterialTheme.typography.displayMedium
-                                        )
-                                        IconButton(onClick = { 
-                                            selectedHour = (selectedHour - 1 + 24) % 24 
-                                        }) {
-                                            Text("▼", style = MaterialTheme.typography.titleLarge)
-                                        }
-                                    }
-                                }
-                                Text(":", style = MaterialTheme.typography.displayMedium)
-                                // Minute picker
-                                Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
-                                    Text("Minuto", style = MaterialTheme.typography.labelMedium)
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                                    ) {
-                                        IconButton(onClick = { 
-                                            selectedMinute = (selectedMinute + 1) % 60 
-                                        }) {
-                                            Text("▲", style = MaterialTheme.typography.titleLarge)
-                                        }
-                                        Text(
-                                            String.format("%02d", selectedMinute),
-                                            style = MaterialTheme.typography.displayMedium
-                                        )
-                                        IconButton(onClick = { 
-                                            selectedMinute = (selectedMinute - 1 + 60) % 60 
-                                        }) {
-                                            Text("▼", style = MaterialTheme.typography.titleLarge)
-                                        }
-                                    }
-                                }
-                            }
+                            ScrollableTimePicker(
+                                selectedHour = selectedHour,
+                                selectedMinute = selectedMinute,
+                                onHourSelected = { selectedHour = it },
+                                onMinuteSelected = { selectedMinute = it },
+                                modifier = Modifier.fillMaxWidth()
+                            )
                         }
                     },
                     confirmButton = {
-                        Button(onClick = {
-                            scope.launch {
-                                notificationPrefsManager.setDailyReminderTime(selectedHour, selectedMinute)
-                                NotificationScheduler.scheduleDailyReminder(
-                                    context,
-                                    selectedHour,
-                                    selectedMinute,
-                                    dailyReminderEnabled
-                                )
-                                showTimePicker = false
-                            }
-                        }) {
+                        FilledTonalButton(
+                            onClick = {
+                                scope.launch {
+                                    notificationPrefsManager.setDailyReminderTime(selectedHour, selectedMinute)
+                                    NotificationScheduler.scheduleDailyReminder(
+                                        context,
+                                        selectedHour,
+                                        selectedMinute,
+                                        dailyReminderEnabled
+                                    )
+                                    showTimePicker = false
+                                }
+                            },
+                            shape = RoundedCornerShape(20.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
                             Text("Confirmar")
                         }
                     },
@@ -1000,7 +1174,9 @@ fun SettingsScreen(
                         TextButton(onClick = { showTimePicker = false }) {
                             Text("Cancelar")
                         }
-                    }
+                    },
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    shape = RoundedCornerShape(24.dp)
                 )
             }
 

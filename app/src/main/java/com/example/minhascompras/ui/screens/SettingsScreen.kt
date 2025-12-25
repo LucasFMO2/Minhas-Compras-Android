@@ -149,7 +149,7 @@ fun ScrollableTimePicker(
             LazyColumn(
                 state = hourListState,
                 horizontalAlignment = Alignment.CenterHorizontally,
-                contentPadding = PaddingValues(vertical = 72.dp),
+                contentPadding = PaddingValues(vertical = 0.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(24) { hour ->
@@ -198,7 +198,7 @@ fun ScrollableTimePicker(
             LazyColumn(
                 state = minuteListState,
                 horizontalAlignment = Alignment.CenterHorizontally,
-                contentPadding = PaddingValues(vertical = 72.dp),
+                contentPadding = PaddingValues(vertical = 0.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(60) { minute ->

@@ -79,24 +79,22 @@ fun ScrollableTimePicker(
     
     val density = LocalDensity.current
     val itemHeightPx = with(density) { 60.dp.toPx() }
-    val containerHeightPx = with(density) { 240.dp.toPx() }
-    val spacerHeightPx = with(density) { 90.dp.toPx() }
-    // Offset para centralizar: altura do container / 2 - altura do item / 2 = 120dp - 30dp = 90dp
-    val centerOffsetPx = (containerHeightPx / 2) - (itemHeightPx / 2)
+    val viewportCenterPx = with(density) { 120.dp.toPx() } // Centro do viewport (240dp / 2)
+    val itemCenterOffsetPx = itemHeightPx / 2 // 30dp
     
     // Flags para evitar loops infinitos
     var isScrollingToHour by remember { mutableStateOf(false) }
     var isScrollingToMinute by remember { mutableStateOf(false) }
     
-    // Sincronizar scroll com seleção quando mudar externamente (apenas uma vez)
+    // Sincronizar scroll com seleção quando mudar externamente
     LaunchedEffect(selectedHour) {
         if (!isScrollingToHour && selectedHour in 0..23) {
             isScrollingToHour = true
             hourListState.animateScrollToItem(
                 index = selectedHour,
-                scrollOffset = centerOffsetPx.toInt()
+                scrollOffset = (viewportCenterPx - itemCenterOffsetPx).toInt() // 90dp
             )
-            delay(300) // Aguardar animação terminar
+            delay(100) // Delay reduzido para melhor responsividade
             isScrollingToHour = false
         }
     }
@@ -106,9 +104,9 @@ fun ScrollableTimePicker(
             isScrollingToMinute = true
             minuteListState.animateScrollToItem(
                 index = selectedMinute,
-                scrollOffset = centerOffsetPx.toInt()
+                scrollOffset = (viewportCenterPx - itemCenterOffsetPx).toInt() // 90dp
             )
-            delay(300) // Aguardar animação terminar
+            delay(100) // Delay reduzido
             isScrollingToMinute = false
         }
     }
@@ -116,53 +114,47 @@ fun ScrollableTimePicker(
     // Detectar quando o usuário para de rolar e ajustar para o item mais próximo do centro
     LaunchedEffect(hourListState.isScrollInProgress) {
         if (!hourListState.isScrollInProgress && !isScrollingToHour) {
-            delay(200) // Aumentar delay para evitar detecções prematuras
-            
-            // Verificar se ainda não está rolando (usuário pode ter começado a rolar novamente)
+            delay(150) // Delay reduzido para detecção mais rápida
+
+            // Verificar se ainda não está rolando
             if (hourListState.isScrollInProgress || isScrollingToHour) return@LaunchedEffect
-            
+
             val firstVisible = hourListState.firstVisibleItemIndex
-            val offset = hourListState.firstVisibleItemScrollOffset
-            
-            // Calcular posição real considerando o espaçador superior
-            // O item visível está em: espaçador (90dp) + offset do scroll
-            val itemTopPosition = spacerHeightPx + offset
-            val itemCenterPosition = itemTopPosition + (itemHeightPx / 2)
-            val centerPosition = spacerHeightPx + centerOffsetPx
-            val distanceFromCenter = kotlin.math.abs(itemCenterPosition - centerPosition)
-            
-            // Verificar próximo item
-            val nextItemTopPosition = itemTopPosition + itemHeightPx
-            val nextItemCenterPosition = nextItemTopPosition + (itemHeightPx / 2)
-            val nextDistanceFromCenter = kotlin.math.abs(nextItemCenterPosition - centerPosition)
-            
+            val offset = hourListState.firstVisibleItemScrollOffset.toFloat()
+
+            // Calcular posição do centro de cada item candidato
+            val currentCenter = offset + itemCenterOffsetPx
+
+            var closestIndex = firstVisible
+            var minDistance = kotlin.math.abs(currentCenter - viewportCenterPx)
+
             // Verificar item anterior
-            val prevItemTopPosition = itemTopPosition - itemHeightPx
-            val prevItemCenterPosition = prevItemTopPosition + (itemHeightPx / 2)
-            val prevDistanceFromCenter = if (firstVisible > 0) {
-                kotlin.math.abs(prevItemCenterPosition - centerPosition)
-            } else {
-                Float.MAX_VALUE
-            }
-            
-            // Escolher o item mais próximo do centro
-            val selected = when {
-                prevDistanceFromCenter < distanceFromCenter && prevDistanceFromCenter < nextDistanceFromCenter && firstVisible > 0 -> {
-                    firstVisible - 1
+            if (firstVisible > 0) {
+                val prevCenter = offset - itemHeightPx + itemCenterOffsetPx
+                val prevDistance = kotlin.math.abs(prevCenter - viewportCenterPx)
+                if (prevDistance < minDistance) {
+                    minDistance = prevDistance
+                    closestIndex = firstVisible - 1
                 }
-                nextDistanceFromCenter < distanceFromCenter && firstVisible < 23 -> {
-                    firstVisible + 1
-                }
-                else -> firstVisible
             }
-            
-            val finalSelected = selected.coerceIn(0, 23)
-            
-            // Só atualizar se realmente mudou E não está no meio de um scroll programático
+
+            // Verificar próximo item
+            if (firstVisible < 23) {
+                val nextCenter = offset + itemHeightPx + itemCenterOffsetPx
+                val nextDistance = kotlin.math.abs(nextCenter - viewportCenterPx)
+                if (nextDistance < minDistance) {
+                    minDistance = nextDistance
+                    closestIndex = firstVisible + 1
+                }
+            }
+
+            val finalSelected = closestIndex.coerceIn(0, 23)
+
+            // Só atualizar se realmente mudou
             if (finalSelected != selectedHour && !isScrollingToHour) {
                 isScrollingToHour = true
                 onHourSelected(finalSelected)
-                delay(300)
+                delay(100)
                 isScrollingToHour = false
             }
         }
@@ -170,52 +162,47 @@ fun ScrollableTimePicker(
     
     LaunchedEffect(minuteListState.isScrollInProgress) {
         if (!minuteListState.isScrollInProgress && !isScrollingToMinute) {
-            delay(200) // Aumentar delay para evitar detecções prematuras
-            
-            // Verificar se ainda não está rolando (usuário pode ter começado a rolar novamente)
+            delay(150) // Delay reduzido
+
+            // Verificar se ainda não está rolando
             if (minuteListState.isScrollInProgress || isScrollingToMinute) return@LaunchedEffect
-            
+
             val firstVisible = minuteListState.firstVisibleItemIndex
-            val offset = minuteListState.firstVisibleItemScrollOffset
-            
-            // Calcular posição real considerando o espaçador superior
-            val itemTopPosition = spacerHeightPx + offset
-            val itemCenterPosition = itemTopPosition + (itemHeightPx / 2)
-            val centerPosition = spacerHeightPx + centerOffsetPx
-            val distanceFromCenter = kotlin.math.abs(itemCenterPosition - centerPosition)
-            
-            // Verificar próximo item
-            val nextItemTopPosition = itemTopPosition + itemHeightPx
-            val nextItemCenterPosition = nextItemTopPosition + (itemHeightPx / 2)
-            val nextDistanceFromCenter = kotlin.math.abs(nextItemCenterPosition - centerPosition)
-            
+            val offset = minuteListState.firstVisibleItemScrollOffset.toFloat()
+
+            // Calcular posição do centro de cada item candidato
+            val currentCenter = offset + itemCenterOffsetPx
+
+            var closestIndex = firstVisible
+            var minDistance = kotlin.math.abs(currentCenter - viewportCenterPx)
+
             // Verificar item anterior
-            val prevItemTopPosition = itemTopPosition - itemHeightPx
-            val prevItemCenterPosition = prevItemTopPosition + (itemHeightPx / 2)
-            val prevDistanceFromCenter = if (firstVisible > 0) {
-                kotlin.math.abs(prevItemCenterPosition - centerPosition)
-            } else {
-                Float.MAX_VALUE
-            }
-            
-            // Escolher o item mais próximo do centro
-            val selected = when {
-                prevDistanceFromCenter < distanceFromCenter && prevDistanceFromCenter < nextDistanceFromCenter && firstVisible > 0 -> {
-                    firstVisible - 1
+            if (firstVisible > 0) {
+                val prevCenter = offset - itemHeightPx + itemCenterOffsetPx
+                val prevDistance = kotlin.math.abs(prevCenter - viewportCenterPx)
+                if (prevDistance < minDistance) {
+                    minDistance = prevDistance
+                    closestIndex = firstVisible - 1
                 }
-                nextDistanceFromCenter < distanceFromCenter && firstVisible < 59 -> {
-                    firstVisible + 1
-                }
-                else -> firstVisible
             }
-            
-            val finalSelected = selected.coerceIn(0, 59)
-            
-            // Só atualizar se realmente mudou E não está no meio de um scroll programático
+
+            // Verificar próximo item
+            if (firstVisible < 59) {
+                val nextCenter = offset + itemHeightPx + itemCenterOffsetPx
+                val nextDistance = kotlin.math.abs(nextCenter - viewportCenterPx)
+                if (nextDistance < minDistance) {
+                    minDistance = nextDistance
+                    closestIndex = firstVisible + 1
+                }
+            }
+
+            val finalSelected = closestIndex.coerceIn(0, 59)
+
+            // Só atualizar se realmente mudou
             if (finalSelected != selectedMinute && !isScrollingToMinute) {
                 isScrollingToMinute = true
                 onMinuteSelected(finalSelected)
-                delay(300)
+                delay(100)
                 isScrollingToMinute = false
             }
         }
@@ -238,13 +225,9 @@ fun ScrollableTimePicker(
             LazyColumn(
                 state = hourListState,
                 horizontalAlignment = Alignment.CenterHorizontally,
+                contentPadding = PaddingValues(vertical = 90.dp), // Substitui os spacers
                 modifier = Modifier.fillMaxSize()
             ) {
-                // Espaçador superior para centralizar o item selecionado
-                item {
-                    Spacer(modifier = Modifier.height(90.dp))
-                }
-                
                 items(24) { hour ->
                     val isSelected = hour == selectedHour
                     Box(
@@ -277,11 +260,6 @@ fun ScrollableTimePicker(
                         )
                     }
                 }
-                
-                // Espaçador inferior para centralizar o item selecionado
-                item {
-                    Spacer(modifier = Modifier.height(90.dp))
-                }
             }
         }
         
@@ -303,13 +281,9 @@ fun ScrollableTimePicker(
             LazyColumn(
                 state = minuteListState,
                 horizontalAlignment = Alignment.CenterHorizontally,
+                contentPadding = PaddingValues(vertical = 90.dp), // Substitui os spacers
                 modifier = Modifier.fillMaxSize()
             ) {
-                // Espaçador superior para centralizar o item selecionado
-                item {
-                    Spacer(modifier = Modifier.height(90.dp))
-                }
-                
                 items(60) { minute ->
                     val isSelected = minute == selectedMinute
                     Box(
@@ -341,11 +315,6 @@ fun ScrollableTimePicker(
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                         )
                     }
-                }
-                
-                // Espaçador inferior para centralizar o item selecionado
-                item {
-                    Spacer(modifier = Modifier.height(90.dp))
                 }
             }
         }

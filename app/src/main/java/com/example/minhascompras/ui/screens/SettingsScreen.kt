@@ -166,7 +166,19 @@ fun ScrollableTimePicker(
                 }
             }
             
-            // Indicador de seleção no centro
+            // Background fixo para item selecionado (horas) - alinhado com os dois pontos
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .height(48.dp)
+                    .align(Alignment.Center)
+                    .background(
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                        RoundedCornerShape(12.dp)
+                    )
+            )
+            
+            // Indicador de seleção no centro (borda)
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.8f)
@@ -215,7 +227,19 @@ fun ScrollableTimePicker(
                 }
             }
             
-            // Indicador de seleção no centro
+            // Background fixo para item selecionado (minutos) - alinhado com os dois pontos
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .height(48.dp)
+                    .align(Alignment.Center)
+                    .background(
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                        RoundedCornerShape(12.dp)
+                    )
+            )
+            
+            // Indicador de seleção no centro (borda)
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.8f)
@@ -244,17 +268,7 @@ private fun TimePickerItem(
         modifier = Modifier
             .height(48.dp)
             .fillMaxWidth(0.8f)
-            .clickable(onClick = onSelected)
-            .then(
-                if (isSelected) {
-                    Modifier.background(
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-                        RoundedCornerShape(12.dp)
-                    )
-                } else {
-                    Modifier
-                }
-            ),
+            .clickable(onClick = onSelected),
         contentAlignment = Alignment.Center
     ) {
         Text(

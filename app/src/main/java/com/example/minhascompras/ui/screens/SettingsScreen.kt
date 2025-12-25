@@ -60,7 +60,7 @@ import java.util.*
 
 /**
  * Componente de seleção de horário com colunas roláveis para horas e minutos.
- * Similar ao TimePicker nativo do Android com visual moderno.
+ * Similar ao TimePicker nativo do Android com visual moderno e amigável.
  */
 @Composable
 fun ScrollableTimePicker(
@@ -76,21 +76,19 @@ fun ScrollableTimePicker(
     val minuteListState = rememberLazyListState(
         initialFirstVisibleItemIndex = selectedMinute.coerceIn(0, 59)
     )
-    
+
     val density = LocalDensity.current
-    val itemHeightPx = with(density) { 60.dp.toPx() }
-    val viewportHeightPx = with(density) { 240.dp.toPx() }
-    val viewportCenterPx = viewportHeightPx / 2 // Centro exato do viewport
-    val itemCenterOffsetPx = itemHeightPx / 2 // Centro do item (30dp)
-    
-    // Calcular o offset correto para centralizar o item no viewport
+    val itemHeightPx = with(density) { 56.dp.toPx() } // Reduzido para melhor proporção
+    val viewportHeightPx = with(density) { 200.dp.toPx() } // Altura reduzida, mais compacta
+    val viewportCenterPx = viewportHeightPx / 2
+    val itemCenterOffsetPx = itemHeightPx / 2
+
     val scrollOffsetPx = viewportCenterPx - itemCenterOffsetPx
-    
-    // Flags para evitar loops infinitos
+
     var isScrollingToHour by remember { mutableStateOf(false) }
     var isScrollingToMinute by remember { mutableStateOf(false) }
-    
-    // Sincronizar scroll com seleção quando mudar externamente
+
+    // Sincronização otimizada com animações mais rápidas
     LaunchedEffect(selectedHour) {
         if (!isScrollingToHour && selectedHour in 0..23) {
             isScrollingToHour = true
@@ -98,11 +96,11 @@ fun ScrollableTimePicker(
                 index = selectedHour,
                 scrollOffset = scrollOffsetPx.toInt()
             )
-            delay(200) // Delay adequado para animação suave
+            delay(150) // Animação mais rápida e responsiva
             isScrollingToHour = false
         }
     }
-    
+
     LaunchedEffect(selectedMinute) {
         if (!isScrollingToMinute && selectedMinute in 0..59) {
             isScrollingToMinute = true
@@ -110,34 +108,29 @@ fun ScrollableTimePicker(
                 index = selectedMinute,
                 scrollOffset = scrollOffsetPx.toInt()
             )
-            delay(200) // Delay adequado para animação suave
+            delay(150) // Animação mais rápida e responsiva
             isScrollingToMinute = false
         }
     }
     
-    // Detectar quando o usuário para de rolar e ajustar suavemente para o item mais próximo do centro
+    // Detecção de scroll otimizada com resposta mais rápida
     LaunchedEffect(hourListState.isScrollInProgress) {
         if (!hourListState.isScrollInProgress && !isScrollingToHour) {
-            // Aguardar um pouco mais para garantir que o scroll realmente parou
-            delay(200)
+            delay(150) // Delay reduzido para resposta mais rápida
 
-            // Verificar se ainda não está rolando
             if (hourListState.isScrollInProgress || isScrollingToHour) return@LaunchedEffect
 
             val firstVisible = hourListState.firstVisibleItemIndex
             val offset = hourListState.firstVisibleItemScrollOffset.toFloat()
 
-            // Calcular posição do topo e centro do item visível atual
             val currentItemTop = offset
             val currentItemCenter = currentItemTop + itemCenterOffsetPx
-            
-            // Calcular distância do centro do viewport
             val distanceFromCenter = kotlin.math.abs(currentItemCenter - viewportCenterPx)
 
             var closestIndex = firstVisible
             var minDistance = distanceFromCenter
 
-            // Verificar item anterior se existir
+            // Verificar itens adjacentes
             if (firstVisible > 0) {
                 val prevItemTop = offset - itemHeightPx
                 val prevItemCenter = prevItemTop + itemCenterOffsetPx
@@ -148,7 +141,6 @@ fun ScrollableTimePicker(
                 }
             }
 
-            // Verificar próximo item se existir
             if (firstVisible < 23) {
                 val nextItemTop = offset + itemHeightPx
                 val nextItemCenter = nextItemTop + itemCenterOffsetPx
@@ -161,15 +153,15 @@ fun ScrollableTimePicker(
 
             val finalSelected = closestIndex.coerceIn(0, 23)
 
-            // Só atualizar se realmente mudou e não está muito próximo do centro (threshold de 5px)
-            if (finalSelected != selectedHour && !isScrollingToHour && minDistance > 5) {
+            // Threshold menor para resposta mais sensível
+            if (finalSelected != selectedHour && !isScrollingToHour && minDistance > 3) {
                 isScrollingToHour = true
                 hourListState.animateScrollToItem(
                     index = finalSelected,
                     scrollOffset = scrollOffsetPx.toInt()
                 )
                 onHourSelected(finalSelected)
-                delay(200)
+                delay(150)
                 isScrollingToHour = false
             }
         }
@@ -177,26 +169,20 @@ fun ScrollableTimePicker(
     
     LaunchedEffect(minuteListState.isScrollInProgress) {
         if (!minuteListState.isScrollInProgress && !isScrollingToMinute) {
-            // Aguardar um pouco mais para garantir que o scroll realmente parou
-            delay(200)
+            delay(150) // Delay reduzido para resposta mais rápida
 
-            // Verificar se ainda não está rolando
             if (minuteListState.isScrollInProgress || isScrollingToMinute) return@LaunchedEffect
 
             val firstVisible = minuteListState.firstVisibleItemIndex
             val offset = minuteListState.firstVisibleItemScrollOffset.toFloat()
 
-            // Calcular posição do topo e centro do item visível atual
             val currentItemTop = offset
             val currentItemCenter = currentItemTop + itemCenterOffsetPx
-            
-            // Calcular distância do centro do viewport
             val distanceFromCenter = kotlin.math.abs(currentItemCenter - viewportCenterPx)
 
             var closestIndex = firstVisible
             var minDistance = distanceFromCenter
 
-            // Verificar item anterior se existir
             if (firstVisible > 0) {
                 val prevItemTop = offset - itemHeightPx
                 val prevItemCenter = prevItemTop + itemCenterOffsetPx
@@ -207,7 +193,6 @@ fun ScrollableTimePicker(
                 }
             }
 
-            // Verificar próximo item se existir
             if (firstVisible < 59) {
                 val nextItemTop = offset + itemHeightPx
                 val nextItemCenter = nextItemTop + itemCenterOffsetPx
@@ -220,15 +205,15 @@ fun ScrollableTimePicker(
 
             val finalSelected = closestIndex.coerceIn(0, 59)
 
-            // Só atualizar se realmente mudou e não está muito próximo do centro (threshold de 5px)
-            if (finalSelected != selectedMinute && !isScrollingToMinute && minDistance > 5) {
+            // Threshold menor para resposta mais sensível
+            if (finalSelected != selectedMinute && !isScrollingToMinute && minDistance > 3) {
                 isScrollingToMinute = true
                 minuteListState.animateScrollToItem(
                     index = finalSelected,
                     scrollOffset = scrollOffsetPx.toInt()
                 )
                 onMinuteSelected(finalSelected)
-                delay(200)
+                delay(150)
                 isScrollingToMinute = false
             }
         }
@@ -237,35 +222,43 @@ fun ScrollableTimePicker(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(240.dp),
+            .height(200.dp), // Altura reduzida para proporção melhor
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Coluna de Horas
+        // Coluna de Horas - Melhor alinhamento
         Box(
             modifier = Modifier
                 .weight(1f)
-                .height(240.dp),
+                .height(200.dp),
             contentAlignment = Alignment.Center
         ) {
             LazyColumn(
                 state = hourListState,
                 horizontalAlignment = Alignment.CenterHorizontally,
-                contentPadding = PaddingValues(vertical = 90.dp),
+                contentPadding = PaddingValues(vertical = 72.dp), // Ajustado para nova altura
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(24) { hour ->
                     val isSelected = hour == selectedHour
+                    val distance = kotlin.math.abs(hour - selectedHour)
+                    val alpha = when {
+                        isSelected -> 1f
+                        distance == 1 -> 0.7f
+                        distance == 2 -> 0.4f
+                        else -> 0.2f
+                    }
+
                     Box(
                         modifier = Modifier
-                            .height(60.dp)
+                            .height(56.dp) // Altura reduzida para melhor proporção
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(RoundedCornerShape(16.dp)) // Bordas mais arredondadas
                             .then(
                                 if (isSelected) {
                                     Modifier.background(
                                         MaterialTheme.colorScheme.primaryContainer,
-                                        RoundedCornerShape(12.dp)
+                                        RoundedCornerShape(16.dp)
                                     )
                                 } else {
                                     Modifier
@@ -279,7 +272,7 @@ fun ScrollableTimePicker(
                             color = if (isSelected) {
                                 MaterialTheme.colorScheme.onPrimaryContainer
                             } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha)
                             },
                             textAlign = TextAlign.Center,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
@@ -288,47 +281,55 @@ fun ScrollableTimePicker(
                 }
             }
         }
-        
-        // Separador ":" - Alinhado verticalmente com o centro do viewport
+
+        // Separador ":" - Melhor posicionamento e estilo
         Box(
             modifier = Modifier
-                .height(240.dp)
-                .wrapContentWidth(),
+                .height(200.dp)
+                .padding(horizontal = 12.dp), // Padding consistente
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = ":",
-                style = MaterialTheme.typography.headlineLarge,
+                style = MaterialTheme.typography.displayMedium, // Fonte maior para melhor visibilidade
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(horizontal = 8.dp)
+                fontWeight = FontWeight.Bold
             )
         }
-        
-        // Coluna de Minutos
+
+        // Coluna de Minutos - Mesmo alinhamento
         Box(
             modifier = Modifier
                 .weight(1f)
-                .height(240.dp),
+                .height(200.dp),
             contentAlignment = Alignment.Center
         ) {
             LazyColumn(
                 state = minuteListState,
                 horizontalAlignment = Alignment.CenterHorizontally,
-                contentPadding = PaddingValues(vertical = 90.dp),
+                contentPadding = PaddingValues(vertical = 72.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(60) { minute ->
                     val isSelected = minute == selectedMinute
+                    val distance = kotlin.math.abs(minute - selectedMinute)
+                    val alpha = when {
+                        isSelected -> 1f
+                        distance == 1 -> 0.7f
+                        distance == 2 -> 0.4f
+                        else -> 0.2f
+                    }
+
                     Box(
                         modifier = Modifier
-                            .height(60.dp)
+                            .height(56.dp)
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(RoundedCornerShape(16.dp))
                             .then(
                                 if (isSelected) {
                                     Modifier.background(
                                         MaterialTheme.colorScheme.primaryContainer,
-                                        RoundedCornerShape(12.dp)
+                                        RoundedCornerShape(16.dp)
                                     )
                                 } else {
                                     Modifier
@@ -342,7 +343,7 @@ fun ScrollableTimePicker(
                             color = if (isSelected) {
                                 MaterialTheme.colorScheme.onPrimaryContainer
                             } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha)
                             },
                             textAlign = TextAlign.Center,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
@@ -1219,26 +1220,45 @@ fun SettingsScreen(
                 }
             }
 
-            // Time Picker Dialog
+            // Time Picker Dialog - Melhorado com preview
             if (showTimePicker) {
                 var selectedHour by remember { mutableStateOf(dailyReminderHour) }
                 var selectedMinute by remember { mutableStateOf(dailyReminderMinute) }
-                
+
                 AlertDialog(
                     onDismissRequest = { showTimePicker = false },
-                    title = { 
+                    title = {
                         Text(
-                            "Selecionar Horário",
-                            style = MaterialTheme.typography.titleLarge
-                        ) 
+                            "Selecionar Horário do Lembrete",
+                            style = MaterialTheme.typography.headlineSmall,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     },
                     text = {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                                .padding(vertical = 8.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
+                            // Preview do horário selecionado
+                            Card(
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                                ),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text(
+                                    text = "Horário selecionado: ${String.format("%02d:%02d", selectedHour, selectedMinute)}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
+                                )
+                            }
+
+                            // Seletor de horário
                             ScrollableTimePicker(
                                 selectedHour = selectedHour,
                                 selectedMinute = selectedMinute,
@@ -1269,7 +1289,7 @@ fun SettingsScreen(
                                 contentDescription = null,
                                 modifier = Modifier.size(20.dp)
                             )
-                            Spacer(modifier = Modifier.width(4.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
                             Text("Confirmar")
                         }
                     },
@@ -1279,7 +1299,8 @@ fun SettingsScreen(
                         }
                     },
                     containerColor = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(24.dp)
+                    tonalElevation = 6.dp,
+                    shape = RoundedCornerShape(28.dp) // Bordas mais arredondadas
                 )
             }
 

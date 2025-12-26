@@ -181,32 +181,40 @@ fun ScrollableTimePicker(
                 }
             }
             
-            // Background fixo para item selecionado (horas) - alinhado com os dois pontos
+            // Indicadores fixos - posição absoluta independente do scroll
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .height(48.dp)
-                    .align(Alignment.Center)
-                    .zIndex(1f)
-                    .background(
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-                        RoundedCornerShape(12.dp)
-                    )
-            )
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        // Posição absoluta fixa no centro do Box
+                        translationY = -itemCenterOffset.toFloat()
+                    }
+            ) {
+                // Background fixo para item selecionado (horas)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .height(48.dp)
+                        .align(Alignment.Center)
+                        .background(
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                            RoundedCornerShape(12.dp)
+                        )
+                )
 
-            // Indicador de seleção no centro (borda)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .height(48.dp)
-                    .align(Alignment.Center)
-                    .zIndex(2f)
-                    .border(
-                        width = 2.dp,
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-            )
+                // Indicador de seleção no centro (borda)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .height(48.dp)
+                        .align(Alignment.Center)
+                        .border(
+                            width = 2.dp,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                )
+            }
         }
         
         // Separador ":"
@@ -245,32 +253,40 @@ fun ScrollableTimePicker(
                 }
             }
             
-            // Background fixo para item selecionado (minutos) - alinhado com os dois pontos
+            // Indicadores fixos - posição absoluta independente do scroll
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .height(48.dp)
-                    .align(Alignment.Center)
-                    .zIndex(1f)
-                    .background(
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-                        RoundedCornerShape(12.dp)
-                    )
-            )
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        // Posição absoluta fixa no centro do Box
+                        translationY = -itemCenterOffset.toFloat()
+                    }
+            ) {
+                // Background fixo para item selecionado (minutos)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .height(48.dp)
+                        .align(Alignment.Center)
+                        .background(
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                            RoundedCornerShape(12.dp)
+                        )
+                )
 
-            // Indicador de seleção no centro (borda)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .height(48.dp)
-                    .align(Alignment.Center)
-                    .zIndex(2f)
-                    .border(
-                        width = 2.dp,
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-            )
+                // Indicador de seleção no centro (borda)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .height(48.dp)
+                        .align(Alignment.Center)
+                        .border(
+                            width = 2.dp,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                )
+            }
         }
     }
 }

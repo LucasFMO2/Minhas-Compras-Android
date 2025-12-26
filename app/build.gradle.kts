@@ -3,19 +3,19 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
-    id("com.google.gms.google-services")
+    alias(libs.plugins.google.services)
 }
 
 android {
     namespace = "com.example.minhascompras"
     compileSdk = 34
 
-    defaultConfig {
-        applicationId = "com.example.minhascompras"
-        minSdk = 24
-        targetSdk = 34
-        versionCode = 88
-        versionName = "2.28.10"
+        defaultConfig {
+            applicationId = "com.example.minhascompras"
+            minSdk = 24
+            targetSdk = 34
+            versionCode = 96
+            versionName = "2.19.10"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -37,25 +37,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            lint {
-                abortOnError = false
-                checkReleaseBuilds = false
-            }
         }
     }
-    
-    // Renomear APK com versão para todas as builds futuras
-    applicationVariants.all {
-        val variant = this
-        val versionName = variant.versionName ?: defaultConfig.versionName
-        val versionCode = variant.versionCode
-        
-        variant.outputs.all {
-            val outputFileName = "MinhasCompras-v${versionName}-code${versionCode}.apk"
-            (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName = outputFileName
-        }
-    }
-    
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -67,7 +50,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.15"
+        kotlinCompilerExtensionVersion = "1.5.14"
     }
 }
 
@@ -80,8 +63,8 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    // Material Icons Extended - versão compatível com Compose BOM 2024.05.00
-    implementation("androidx.compose.material:material-icons-extended:1.5.4")
+    // Material Icons Extended - versão compatível com Compose BOM 2023.10.01
+    implementation("androidx.compose.material:material-icons-extended:1.6.7")
     
     // Room
     implementation(libs.androidx.room.runtime)
@@ -103,17 +86,20 @@ dependencies {
     // DataStore
     implementation(libs.androidx.datastore.preferences)
     
-    // WorkManager
-    implementation(libs.androidx.work.runtime.ktx)
+    // Supabase
+    implementation(libs.supabase.postgrest)
+    implementation(libs.supabase.realtime)
+    implementation(libs.supabase.storage)
+    implementation(libs.supabase.auth)
+    implementation(libs.supabase.functions)
+    implementation(libs.okhttp)
     
     // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
-    implementation("com.google.firebase:firebase-messaging-ktx")
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging.ktx)
     
-    // Charts for Compose
-    implementation("com.patrykandpatrick.vico:compose:1.13.1")
-    implementation("com.patrykandpatrick.vico:compose-m3:1.13.1")
-    implementation("com.patrykandpatrick.vico:core:1.13.1")
+    // WorkManager
+    implementation(libs.androidx.work.runtime.ktx)
     
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

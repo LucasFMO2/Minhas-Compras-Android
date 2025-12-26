@@ -4,35 +4,46 @@ import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.draw.rotate
-import android.app.TimePickerDialog
-import java.util.Calendar
+import kotlinx.coroutines.delay
 import com.example.minhascompras.data.ThemeMode
+import com.example.minhascompras.data.NotificationPreferencesManager
+import com.example.minhascompras.notifications.NotificationScheduler
 import com.example.minhascompras.ui.utils.ResponsiveUtils
 import com.example.minhascompras.ui.viewmodel.ListaComprasViewModel
 import com.example.minhascompras.ui.viewmodel.ThemeViewModel
@@ -49,13 +60,254 @@ import java.io.InputStreamReader
 import java.text.SimpleDateFormat
 import java.util.*
 
+/**
+ * Componente de seleção de horário estilo carrossel com scroll vertical.
+ * Design inspirado no iOS picker com snap automático e indicador visual.
+ */
+@Composable
+fun ScrollableTimePicker(
+    selectedHour: Int,
+    selectedMinute: Int,
+    onHourSelected: (Int) -> Unit,
+    onMinuteSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val hourListState = rememberLazyListState()
+    val minuteListState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+    
+    val density = LocalDensity.current
+    val itemHeightPx = with(density) { 48.dp.toPx() }
+    val viewportHeightPx = with(density) { 192.dp.toPx() }
+    val itemCenterOffset = ((viewportHeightPx - itemHeightPx) / 2).toInt()
+    
+    // Scroll inicial para o horário selecionado
+    LaunchedEffect(Unit) {
+        hourListState.scrollToItem(selectedHour.coerceIn(0, 23), -itemCenterOffset)
+        minuteListState.scrollToItem(selectedMinute.coerceIn(0, 59), -itemCenterOffset)
+    }
+    
+    // Detectar item no centro após parar de rolar (horas)
+    LaunchedEffect(hourListState.isScrollInProgress) {
+        snapshotFlow { 
+            hourListState.isScrollInProgress to 
+            (hourListState.firstVisibleItemIndex to hourListState.firstVisibleItemScrollOffset)
+        }.collect { (isScrolling, indexOffset) ->
+            if (!isScrolling) {
+                delay(50) // Pequeno delay para garantir que parou
+                val (index, offset) = indexOffset
+                val centerItem = calculateCenterItem(index, offset, itemHeightPx, itemCenterOffset.toFloat())
+                    .coerceIn(0, 23)
+                
+                if (centerItem != selectedHour) {
+                    onHourSelected(centerItem)
+                    // Snap suave para o centro
+                    coroutineScope.launch {
+                        hourListState.animateScrollToItem(centerItem, -itemCenterOffset)
+                    }
+                }
+            }
+        }
+    }
+    
+    // Detectar item no centro após parar de rolar (minutos)
+    LaunchedEffect(minuteListState.isScrollInProgress) {
+        snapshotFlow { 
+            minuteListState.isScrollInProgress to 
+            (minuteListState.firstVisibleItemIndex to minuteListState.firstVisibleItemScrollOffset)
+        }.collect { (isScrolling, indexOffset) ->
+            if (!isScrolling) {
+                delay(50) // Pequeno delay para garantir que parou
+                val (index, offset) = indexOffset
+                val centerItem = calculateCenterItem(index, offset, itemHeightPx, itemCenterOffset.toFloat())
+                    .coerceIn(0, 59)
+                
+                if (centerItem != selectedMinute) {
+                    onMinuteSelected(centerItem)
+                    // Snap suave para o centro
+                    coroutineScope.launch {
+                        minuteListState.animateScrollToItem(centerItem, -itemCenterOffset)
+                    }
+                }
+            }
+        }
+    }
+    
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(192.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Coluna de Horas
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+        ) {
+            LazyColumn(
+                state = hourListState,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                contentPadding = PaddingValues(vertical = 0.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(24) { hour ->
+                    TimePickerItem(
+                        value = hour,
+                        isSelected = hour == selectedHour,
+                        onSelected = { 
+                            onHourSelected(hour)
+                            coroutineScope.launch {
+                                hourListState.animateScrollToItem(hour, -itemCenterOffset)
+                            }
+                        }
+                    )
+                }
+            }
+            
+            // Background fixo para item selecionado (horas) - alinhado com os dois pontos
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .height(48.dp)
+                    .align(Alignment.Center)
+                    .background(
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                        RoundedCornerShape(12.dp)
+                    )
+            )
+            
+            // Indicador de seleção no centro (borda)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .height(48.dp)
+                    .align(Alignment.Center)
+                    .border(
+                        width = 2.dp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+            )
+        }
+        
+        // Separador ":"
+        Text(
+            text = ":",
+            style = MaterialTheme.typography.displayMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+        
+        // Coluna de Minutos
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+        ) {
+            LazyColumn(
+                state = minuteListState,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                contentPadding = PaddingValues(vertical = 0.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(60) { minute ->
+                    TimePickerItem(
+                        value = minute,
+                        isSelected = minute == selectedMinute,
+                        onSelected = { 
+                            onMinuteSelected(minute)
+                            coroutineScope.launch {
+                                minuteListState.animateScrollToItem(minute, -itemCenterOffset)
+                            }
+                        }
+                    )
+                }
+            }
+            
+            // Background fixo para item selecionado (minutos) - alinhado com os dois pontos
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .height(48.dp)
+                    .align(Alignment.Center)
+                    .background(
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                        RoundedCornerShape(12.dp)
+                    )
+            )
+            
+            // Indicador de seleção no centro (borda)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .height(48.dp)
+                    .align(Alignment.Center)
+                    .border(
+                        width = 2.dp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+            )
+        }
+    }
+}
+
+/**
+ * Item individual do seletor de horário
+ */
+@Composable
+private fun TimePickerItem(
+    value: Int,
+    isSelected: Boolean,
+    onSelected: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .height(48.dp)
+            .fillMaxWidth(0.8f)
+            .clickable(onClick = onSelected),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = String.format("%02d", value),
+            style = if (isSelected) {
+                MaterialTheme.typography.headlineMedium.copy(
+                    fontWeight = FontWeight.Bold
+                )
+            } else {
+                MaterialTheme.typography.bodyLarge
+            },
+            color = if (isSelected) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+            }
+        )
+    }
+}
+
+/**
+ * Calcula qual item está no centro do viewport
+ */
+private fun calculateCenterItem(
+    firstVisibleIndex: Int,
+    scrollOffset: Int,
+    itemHeight: Float,
+    centerOffset: Float
+): Int {
+    val adjustedOffset = scrollOffset + centerOffset
+    return (firstVisibleIndex + (adjustedOffset / itemHeight).toInt()).coerceAtLeast(0)
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     viewModel: ListaComprasViewModel,
     themeViewModel: ThemeViewModel,
     updateViewModel: UpdateViewModel,
-    notificationViewModel: com.example.minhascompras.ui.viewmodel.NotificationViewModel,
     onNavigateBack: () -> Unit
 ) {
     val context = LocalContext.current
@@ -260,7 +512,7 @@ fun SettingsScreen(
                             imageVector = Icons.Default.Settings,
                             contentDescription = null,
                             modifier = Modifier.size(
-                                if (ResponsiveUtils.isSmallScreen()) 20.dp else 24.dp
+                                if (ResponsiveUtils.isSmallScreen()) 18.dp else 20.dp
                             )
                         )
                         Text(
@@ -276,7 +528,8 @@ fun SettingsScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Voltar"
+                            contentDescription = "Voltar",
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 },
@@ -350,273 +603,6 @@ fun SettingsScreen(
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
-            }
-
-            // Seção de Notificações
-            Text(
-                "Notificações",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontSize = ResponsiveUtils.getTitleFontSize()
-                ),
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(bottom = ResponsiveUtils.getSmallSpacing())
-            )
-
-            val dailyReminderEnabled by notificationViewModel.dailyReminderEnabled.collectAsState()
-            val dailyReminderHour by notificationViewModel.dailyReminderHour.collectAsState()
-            val dailyReminderMinute by notificationViewModel.dailyReminderMinute.collectAsState()
-            val purchaseCompleteEnabled by notificationViewModel.purchaseCompleteEnabled.collectAsState()
-            val pendingItemsEnabled by notificationViewModel.pendingItemsEnabled.collectAsState()
-            val pendingItemsDays by notificationViewModel.pendingItemsDays.collectAsState()
-
-            var showTimePicker by remember { mutableStateOf(false) }
-            var showDaysDialog by remember { mutableStateOf(false) }
-            var daysInput by remember { mutableStateOf(pendingItemsDays.toString()) }
-
-            // Card: Lembrete Diário
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = ResponsiveUtils.getCardElevation()),
-                shape = RoundedCornerShape(ResponsiveUtils.getCardCornerRadius())
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                "Lembrete Diário",
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Text(
-                                "Receba um lembrete diário sobre itens pendentes",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Switch(
-                            checked = dailyReminderEnabled,
-                            onCheckedChange = { notificationViewModel.setDailyReminderEnabled(it) }
-                        )
-                    }
-                    if (dailyReminderEnabled) {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            onClick = { showTimePicker = true },
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(12.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                            ) {
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Schedule,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                    Text(
-                                        "Horário: ${String.format("%02d:%02d", dailyReminderHour, dailyReminderMinute)}",
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                }
-                                Icon(
-                                    imageVector = Icons.Default.ArrowBack,
-                                    contentDescription = "Selecionar horário",
-                                    modifier = Modifier.rotate(180f)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Card: Compra Concluída
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = ResponsiveUtils.getCardElevation()),
-                shape = RoundedCornerShape(ResponsiveUtils.getCardCornerRadius())
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            "Compra Concluída",
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Text(
-                            "Notificação quando todos os itens são comprados",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Switch(
-                        checked = purchaseCompleteEnabled,
-                        onCheckedChange = { notificationViewModel.setPurchaseCompleteEnabled(it) }
-                    )
-                }
-            }
-
-            // Card: Itens Pendentes
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = ResponsiveUtils.getCardElevation()),
-                shape = RoundedCornerShape(ResponsiveUtils.getCardCornerRadius())
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                "Itens Pendentes",
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Text(
-                                "Notificação para itens pendentes há muito tempo",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Switch(
-                            checked = pendingItemsEnabled,
-                            onCheckedChange = { notificationViewModel.setPendingItemsEnabled(it) }
-                        )
-                    }
-                    if (pendingItemsEnabled) {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            onClick = { 
-                                daysInput = pendingItemsDays.toString()
-                                showDaysDialog = true 
-                            },
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(12.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    "Dias: $pendingItemsDays",
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                                Icon(
-                                    imageVector = Icons.Default.ArrowBack,
-                                    contentDescription = "Alterar dias",
-                                    modifier = Modifier.rotate(180f)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            // TimePickerDialog
-            if (showTimePicker) {
-                DisposableEffect(Unit) {
-                    val calendar = Calendar.getInstance()
-                    calendar.set(Calendar.HOUR_OF_DAY, dailyReminderHour)
-                    calendar.set(Calendar.MINUTE, dailyReminderMinute)
-                    
-                    val dialog = TimePickerDialog(
-                        context,
-                        { _, hourOfDay, minute ->
-                            notificationViewModel.setDailyReminderTime(hourOfDay, minute)
-                            showTimePicker = false
-                        },
-                        dailyReminderHour,
-                        dailyReminderMinute,
-                        true
-                    )
-                    dialog.show()
-                    
-                    onDispose {
-                        if (dialog.isShowing) {
-                            dialog.dismiss()
-                        }
-                    }
-                }
-            }
-
-            // Dialog para alterar dias
-            if (showDaysDialog) {
-                AlertDialog(
-                    onDismissRequest = { showDaysDialog = false },
-                    title = { Text("Dias para Itens Pendentes") },
-                    text = {
-                        OutlinedTextField(
-                            value = daysInput,
-                            onValueChange = { daysInput = it },
-                            label = { Text("Número de dias") },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    },
-                    confirmButton = {
-                        Button(
-                            onClick = {
-                                val days = daysInput.toIntOrNull()?.takeIf { it > 0 }
-                                if (days != null) {
-                                    notificationViewModel.setPendingItemsDays(days)
-                                    showDaysDialog = false
-                                }
-                            },
-                            enabled = daysInput.toIntOrNull()?.takeIf { it > 0 } != null
-                        ) {
-                            Text("Salvar")
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { showDaysDialog = false }) {
-                            Text("Cancelar")
-                        }
-                    }
-                )
             }
 
             // Seção de Atualizações
@@ -950,6 +936,371 @@ fun SettingsScreen(
                         }
                     }
                 }
+            }
+
+            // Seção de Notificações
+            Text(
+                "Notificações",
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontSize = ResponsiveUtils.getTitleFontSize()
+                ),
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = ResponsiveUtils.getSmallSpacing())
+            )
+
+            val notificationPrefsManager = remember { NotificationPreferencesManager(context) }
+            val dailyReminderEnabled by notificationPrefsManager.isDailyReminderEnabled().collectAsState(initial = false)
+            val dailyReminderHour by notificationPrefsManager.getDailyReminderHour().collectAsState(initial = 9)
+            val dailyReminderMinute by notificationPrefsManager.getDailyReminderMinute().collectAsState(initial = 0)
+            val completionEnabled by notificationPrefsManager.isCompletionNotificationEnabled().collectAsState(initial = true)
+            val pendingItemsEnabled by notificationPrefsManager.isPendingItemsNotificationEnabled().collectAsState(initial = true)
+            val pendingItemsDays by notificationPrefsManager.getPendingItemsDaysThreshold().collectAsState(initial = 7)
+            
+            var showTimePicker by remember { mutableStateOf(false) }
+            var showDaysPicker by remember { mutableStateOf(false) }
+
+            // Lembrete Diário
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = ResponsiveUtils.getCardElevation()),
+                shape = RoundedCornerShape(ResponsiveUtils.getCardCornerRadius())
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                "Lembrete Diário",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                "Receba um lembrete diário sobre suas compras",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = dailyReminderEnabled,
+                            onCheckedChange = { enabled ->
+                                scope.launch {
+                                    notificationPrefsManager.setDailyReminderEnabled(enabled)
+                                    if (enabled) {
+                                        NotificationScheduler.scheduleDailyReminder(
+                                            context,
+                                            dailyReminderHour,
+                                            dailyReminderMinute,
+                                            true
+                                        )
+                                    } else {
+                                        NotificationScheduler.scheduleDailyReminder(
+                                            context,
+                                            0,
+                                            0,
+                                            false
+                                        )
+                                    }
+                                }
+                            }
+                        )
+                    }
+                    if (dailyReminderEnabled) {
+                        Card(
+                            onClick = { showTimePicker = true },
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                            ) {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Schedule,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                    Text(
+                                        "Horário: ${String.format("%02d:%02d", dailyReminderHour, dailyReminderMinute)}",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                                Icon(
+                                    imageVector = Icons.Default.Settings,
+                                    contentDescription = "Alterar horário",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Notificação de Conclusão
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    scope.launch {
+                        val newValue = !completionEnabled
+                        notificationPrefsManager.setCompletionNotificationEnabled(newValue)
+                    }
+                },
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = ResponsiveUtils.getCardElevation()),
+                shape = RoundedCornerShape(ResponsiveUtils.getCardCornerRadius())
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            "Notificação de Conclusão",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            "Notificar quando você completar uma lista",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = completionEnabled,
+                        onCheckedChange = {
+                            scope.launch {
+                                notificationPrefsManager.setCompletionNotificationEnabled(it)
+                            }
+                        }
+                    )
+                }
+            }
+
+            // Notificação de Itens Pendentes
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = ResponsiveUtils.getCardElevation()),
+                shape = RoundedCornerShape(ResponsiveUtils.getCardCornerRadius())
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                "Itens Pendentes",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                "Alertar sobre itens pendentes há vários dias",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = pendingItemsEnabled,
+                            onCheckedChange = { enabled ->
+                                scope.launch {
+                                    notificationPrefsManager.setPendingItemsNotificationEnabled(enabled)
+                                    NotificationScheduler.schedulePendingItemsCheck(context, enabled)
+                                }
+                            }
+                        )
+                    }
+                    if (pendingItemsEnabled) {
+                        Card(
+                            onClick = { showDaysPicker = true },
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    "Alertar após: $pendingItemsDays dias",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Icon(
+                                    imageVector = Icons.Default.Settings,
+                                    contentDescription = "Alterar dias",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Time Picker Dialog - Melhorado com preview
+            if (showTimePicker) {
+                var selectedHour by remember { mutableStateOf(dailyReminderHour) }
+                var selectedMinute by remember { mutableStateOf(dailyReminderMinute) }
+
+                AlertDialog(
+                    onDismissRequest = { showTimePicker = false },
+                    title = {
+                        Text(
+                            "Selecionar Horário do Lembrete",
+                            style = MaterialTheme.typography.headlineSmall,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    },
+                    text = {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            // Preview do horário selecionado
+                            Card(
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                                ),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text(
+                                    text = "Horário selecionado: ${String.format("%02d:%02d", selectedHour, selectedMinute)}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
+                                )
+                            }
+
+                            // Seletor de horário
+                            ScrollableTimePicker(
+                                selectedHour = selectedHour,
+                                selectedMinute = selectedMinute,
+                                onHourSelected = { selectedHour = it },
+                                onMinuteSelected = { selectedMinute = it },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        FilledTonalButton(
+                            onClick = {
+                                scope.launch {
+                                    notificationPrefsManager.setDailyReminderTime(selectedHour, selectedMinute)
+                                    NotificationScheduler.scheduleDailyReminder(
+                                        context,
+                                        selectedHour,
+                                        selectedMinute,
+                                        dailyReminderEnabled
+                                    )
+                                    showTimePicker = false
+                                }
+                            },
+                            shape = RoundedCornerShape(20.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Confirmar")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showTimePicker = false }) {
+                            Text("Cancelar")
+                        }
+                    },
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 6.dp,
+                    shape = RoundedCornerShape(28.dp) // Bordas mais arredondadas
+                )
+            }
+
+            // Days Picker Dialog
+            if (showDaysPicker) {
+                var selectedDays by remember { mutableStateOf(pendingItemsDays) }
+                
+                AlertDialog(
+                    onDismissRequest = { showDaysPicker = false },
+                    title = { Text("Dias para Alerta") },
+                    text = {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+                        ) {
+                            Text("Alertar sobre itens pendentes há mais de:")
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                            ) {
+                                IconButton(onClick = { 
+                                    if (selectedDays > 1) selectedDays-- 
+                                }) {
+                                    Text("−", style = MaterialTheme.typography.displayLarge)
+                                }
+                                Text(
+                                    "$selectedDays dias",
+                                    style = MaterialTheme.typography.displayMedium
+                                )
+                                IconButton(onClick = { 
+                                    if (selectedDays < 30) selectedDays++ 
+                                }) {
+                                    Text("+", style = MaterialTheme.typography.displayLarge)
+                                }
+                            }
+                        }
+                    },
+                    confirmButton = {
+                        Button(onClick = {
+                            scope.launch {
+                                notificationPrefsManager.setPendingItemsDaysThreshold(selectedDays)
+                                showDaysPicker = false
+                            }
+                        }) {
+                            Text("Confirmar")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDaysPicker = false }) {
+                            Text("Cancelar")
+                        }
+                    }
+                )
             }
 
             Text(

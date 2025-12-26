@@ -187,18 +187,20 @@ fun ScrollableTimePicker(
                     .fillMaxWidth(0.8f)
                     .height(48.dp)
                     .align(Alignment.Center)
+                    .zIndex(1f)
                     .background(
                         MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
                         RoundedCornerShape(12.dp)
                     )
             )
-            
+
             // Indicador de seleção no centro (borda)
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.8f)
                     .height(48.dp)
                     .align(Alignment.Center)
+                    .zIndex(2f)
                     .border(
                         width = 2.dp,
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
@@ -249,18 +251,20 @@ fun ScrollableTimePicker(
                     .fillMaxWidth(0.8f)
                     .height(48.dp)
                     .align(Alignment.Center)
+                    .zIndex(1f)
                     .background(
                         MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
                         RoundedCornerShape(12.dp)
                     )
             )
-            
+
             // Indicador de seleção no centro (borda)
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.8f)
                     .height(48.dp)
                     .align(Alignment.Center)
+                    .zIndex(2f)
                     .border(
                         width = 2.dp,
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
@@ -312,10 +316,11 @@ private fun calculateCenterItem(
     firstVisibleIndex: Int,
     scrollOffset: Int,
     itemHeight: Float,
-    centerOffset: Float
+    viewportHeight: Float
 ): Int {
-    val adjustedOffset = scrollOffset + centerOffset
-    return (firstVisibleIndex + (adjustedOffset / itemHeight).toInt()).coerceAtLeast(0)
+    val centerPosition = viewportHeight / 2f
+    val offsetFromFirstItem = centerPosition - scrollOffset
+    return firstVisibleIndex + (offsetFromFirstItem / itemHeight).toInt()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

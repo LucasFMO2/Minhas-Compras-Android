@@ -83,14 +83,14 @@ fun ScrollableTimePicker(
     
     // Scroll inicial para o horário selecionado
     LaunchedEffect(Unit) {
-        hourListState.scrollToItem(selectedHour.coerceIn(0, 23), -itemCenterOffset)
-        minuteListState.scrollToItem(selectedMinute.coerceIn(0, 59), -itemCenterOffset)
+        hourListState.animateScrollToItem(selectedHour.coerceIn(0, 23), -itemCenterOffset)
+        minuteListState.animateScrollToItem(selectedMinute.coerceIn(0, 59), -itemCenterOffset)
     }
     
     // Detectar item no centro após parar de rolar (horas)
     LaunchedEffect(hourListState.isScrollInProgress) {
-        snapshotFlow { 
-            hourListState.isScrollInProgress to 
+        snapshotFlow {
+            hourListState.isScrollInProgress to
             (hourListState.firstVisibleItemIndex to hourListState.firstVisibleItemScrollOffset)
         }.collect { (isScrolling, indexOffset) ->
             if (!isScrolling) {
@@ -99,7 +99,8 @@ fun ScrollableTimePicker(
                 val centerItem = calculateCenterItem(index, offset, itemHeightPx, itemCenterOffset.toFloat())
                     .coerceIn(0, 23)
                 
-                if (centerItem != selectedHour) {
+                // Só atualizar se for diferente E se não estiver muito próximo do valor atual
+                if (centerItem != selectedHour && Math.abs(centerItem - selectedHour) > 0) {
                     onHourSelected(centerItem)
                     // Snap suave para o centro
                     coroutineScope.launch {
@@ -112,8 +113,8 @@ fun ScrollableTimePicker(
     
     // Detectar item no centro após parar de rolar (minutos)
     LaunchedEffect(minuteListState.isScrollInProgress) {
-        snapshotFlow { 
-            minuteListState.isScrollInProgress to 
+        snapshotFlow {
+            minuteListState.isScrollInProgress to
             (minuteListState.firstVisibleItemIndex to minuteListState.firstVisibleItemScrollOffset)
         }.collect { (isScrolling, indexOffset) ->
             if (!isScrolling) {
@@ -122,7 +123,8 @@ fun ScrollableTimePicker(
                 val centerItem = calculateCenterItem(index, offset, itemHeightPx, itemCenterOffset.toFloat())
                     .coerceIn(0, 59)
                 
-                if (centerItem != selectedMinute) {
+                // Só atualizar se for diferente E se não estiver muito próximo do valor atual
+                if (centerItem != selectedMinute && Math.abs(centerItem - selectedMinute) > 0) {
                     onMinuteSelected(centerItem)
                     // Snap suave para o centro
                     coroutineScope.launch {
@@ -299,7 +301,8 @@ private fun calculateCenterItem(
     centerOffset: Float
 ): Int {
     val adjustedOffset = scrollOffset + centerOffset
-    return (firstVisibleIndex + (adjustedOffset / itemHeight).toInt()).coerceAtLeast(0)
+    // Usar Math.round() para arredondamento correto em vez de truncamento
+    return (firstVisibleIndex + Math.round(adjustedOffset / itemHeight)).coerceAtLeast(0)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
